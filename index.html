@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#47aba9">
+  <title>Cripta · Cenários</title>
+  <link rel="stylesheet" href="styles/game.css">
+  <script src="src/world/map-generator.js" defer></script>
+  <script src="src/world/collisions.js" defer></script>
+  <script src="src/input/controls.js" defer></script>
+  <script src="src/actors/pawn-animation.js" defer></script>
+  <script src="src/actors/pawn.js" defer></script>
+  <script src="src/actors/sheep.js" defer></script>
+  <script src="src/assets.js" defer></script>
+  <script src="src/render/scene.js" defer></script>
+  <script src="src/ui/adventure-dialog.js" defer></script>
+  <script src="src/world/adventure.js" defer></script>
+  <script src="src/world/encounter.js" defer></script>
+  <script src="src/main.js" defer></script>
+</head>
+<body>
+  <main>
+    <canvas id="world" width="1088" height="1088" aria-label="Cenário de 50 por 50 casas. Use WASD ou o controle de toque para explorar. Segure Shift ou toque no botão para ativar ou desativar a corrida."></canvas>
+    <div id="loading" role="status">Preparando o cenário…</div>
+    <div id="character-banner" role="status" hidden>
+      <img alt=""><span></span>
+      <div class="vitals"><small id="home-level">Nível 1</small><div id="life" hidden><div class="health-bar" role="progressbar" aria-label="Vida" aria-valuemin="0"><i></i></div><b></b></div></div>
+    </div>
+    <aside id="resources" aria-label="Recursos">
+      <span title="Moedas"><img src="assets/ui/gold-coin.png" alt="Moedas de ouro"><b id="wallet">0</b></span>
+      <span id="remaining" title="Inimigos restantes" hidden><img src="assets/ui/swords.png" alt="Inimigos restantes"><b>0</b></span>
+      <button id="settings" aria-label="Configurações"><img src="assets/ui/settings-gear.png" alt=""></button>
+    </aside>
+    <div id="battle-buttons" hidden>
+      <button id="guard" title="Segure para bloquear (Espaço)" aria-label="Segurar escudo">🛡</button>
+    </div>
+    <p id="battle-notice" role="status" hidden></p>
+    <dialog id="preferences"><form method="dialog"><h2>Configurações</h2>
+      <section class="adventure-panel">
+      <label><input type="checkbox" id="quiet-world"> Reduzir animações do cenário</label>
+      <button class="preferences-close icon-button" aria-label="Voltar ao jogo"><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt=""></button></section>
+    </form></dialog>
+    <dialog id="game-over" aria-labelledby="game-over-title">
+      <h2 id="game-over-title">Fim de Jogo</h2>
+      <section class="adventure-panel">
+        <button id="retry" class="icon-button">
+          <img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_07.png" alt="">
+          <span>Tentar novamente</span>
+        </button>
+      </section>
+    </dialog>
+    <div id="joystick" role="group" aria-label="Joystick de movimento. Use WASD ou arraste em uma das quatro direções.">
+      <span aria-hidden="true" class="north">▴</span><span aria-hidden="true" class="south">▾</span>
+      <span aria-hidden="true" class="west">◂</span><span aria-hidden="true" class="east">▸</span>
+      <i aria-hidden="true"></i>
+    </div>
+    <button id="sprint" type="button" aria-label="Ativar corrida" aria-pressed="false">
+      <svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="21" cy="6" r="3" fill="currentColor" stroke="none"/>
+        <path d="m8 15 4-5 6 1 4 6 5-1 M18 11l-5 9 6 3-2 6 M13 20l-4 5H3"/>
+      </svg>
+    </button>
+    <p class="sr-only" id="announcement" aria-live="polite"></p>
+    <dialog id="adventure-dialog" tabindex="-1" aria-labelledby="adventure-title">
+      <h1 id="adventure-title"></h1>
+      <section class="adventure-panel">
+        <button class="dialog-cancel icon-button" aria-label="Cancelar">
+          <img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt="">
+        </button>
+        <div class="character-options" hidden></div>
+        <div class="dialog-actions">
+          <button class="dialog-play icon-button" aria-label="Confirmar">
+            <img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_07.png" alt="">
+          </button>
+          <button class="dialog-no icon-button" aria-label="Cancelar">
+            <img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt="">
+          </button>
+        </div>
+      </section>
+    </dialog>
+  </main>
+</body>
+</html>
