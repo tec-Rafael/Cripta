@@ -254,3 +254,6 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   height:24px;
   transform:translate(-50%,-50%);
 }
+
+#guard { display:grid;place-items:center;padding:4px; }
+#guard img { width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none; }
