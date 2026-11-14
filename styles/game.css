@@ -189,8 +189,8 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   width:min(510px,94vw);
   padding:6px 6px 3px;
   border:solid transparent;
-  border-width:12px 18px 16px;
-  border-image:url('../assets/ui/inventory-wood.png') 24 fill / 12px 18px 16px / 0 stretch;
+  border-width:24px 24px 36px;
+  border-image:url('../assets/ui/inventory-wood.png') 48 48 72 48 fill / 24px 24px 36px / 0 stretch;
   image-rendering:pixelated;
 }
 #home-inventory[hidden] { display:none; }
@@ -210,9 +210,9 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   #joystick { width:clamp(92px,18vmin,134px); }
   #home-inventory {
     left:max(8px,env(safe-area-inset-left));right:auto;top:26%;bottom:23%;
-    transform:none;width:clamp(100px,26vw,116px);max-height:none;
-    padding:4px;border-width:10px;
-    border-image-width:10px;overflow:visible;
+    transform:none;width:clamp(116px,30vw,132px);max-height:none;
+    padding:4px;border-width:20px 18px 28px;
+    border-image-width:20px 18px 28px;overflow:visible;
     display:flex;flex-direction:column;
   }
   .inventory-slots {
@@ -222,16 +222,17 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   .inventory-slots button { min-height:64px;flex-shrink:0;padding:2px; }
   .inventory-slots img { transform:scale(1.15); }
   .inventory-toggle {
-    position:absolute;display:block;left:-6px;bottom:calc(100% + 12px);
+    position:absolute;display:block;left:-12px;bottom:calc(100% + 22px);
     padding:0;width:46px;height:46px;border:0;background:transparent;
     cursor:pointer;touch-action:manipulation;
   }
   .inventory-toggle img { width:100%;height:100%;transform:rotate(0deg);transition:transform .18s ease; }
   #home-inventory.collapsed {
-    width:18px;padding:0;border-width:10px 7px;
-    border-image-width:10px 7px;
+    left:0;
+    transform:translateX(calc(-100% + 18px));
   }
-  #home-inventory.collapsed .inventory-slots { display:none; }
+  #home-inventory.collapsed .inventory-slots { visibility:hidden;pointer-events:none; }
+  #home-inventory.collapsed .inventory-toggle { left:auto;right:-46px; }
   #home-inventory.collapsed .inventory-toggle img { transform:rotate(180deg); }
 }
 @media (hover:hover) and (pointer:fine) {
