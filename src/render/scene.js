@@ -182,7 +182,7 @@ function createScene(canvas, images, reducedMotion) {
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
         }else if(item.kind==='goldDrop'){
-          ctx.drawImage(images.goldDrop,-32,-48,64,64);
+          ctx.drawImage(images.goldDrop,-29,-39,58,58);
         }else if(item.kind==='wood'){
           ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){

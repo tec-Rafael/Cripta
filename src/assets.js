@@ -5,7 +5,7 @@ async function loadImages() {
     pawnMine:'Units/Blue Units/Pawn/Pawn_Interact Pickaxe.png',
     goldStone5:'Terrain/Resources/Gold/Gold Stones/Gold Stone 5.png',
     goldStone6:'Terrain/Resources/Gold/Gold Stones/Gold Stone 6.png',
-    goldDrop:'../ui/gold-medium.png',
+    goldDrop:'Terrain/Resources/Gold/Gold Resource/Gold_Resource.png',
     pawnChop:'Units/Blue Units/Pawn/Pawn_Interact Axe.png',
     wood:'Terrain/Resources/Wood/Wood Resource/Wood Resource.png',
     dust:'Particle FX/Dust_01.png',
