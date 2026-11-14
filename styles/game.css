@@ -210,7 +210,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   #joystick { width:clamp(92px,18vmin,134px); }
   #home-inventory {
     left:max(8px,env(safe-area-inset-left));right:auto;top:26%;bottom:23%;
-    transform:none;width:clamp(116px,30vw,132px);max-height:none;
+    transform:none;width:clamp(108px,28vw,124px);max-height:none;
     padding:4px;border-width:18px 16px 16px 18px;
     border-image-width:18px 16px 16px 18px;overflow:visible;
     display:flex;flex-direction:column;
