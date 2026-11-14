@@ -64,6 +64,7 @@ function canStand(map, player, px, py) {
   const onHill = map.heights[Math.floor(py)][Math.floor(px)];
   if (!onHill && map.sheep.some(s => touchesSheep(px, py, s.x, s.y))) return false;
   return !map.decorations.some(item => {
+    if(item.felled) return false;
     if ((item.hill || 0) !== onHill) return false;
     if (item.kind === 'house' || item.kind === 'tower')
       return px + feet.x > item.x + .34 && px - feet.x < item.x + 1.69 &&

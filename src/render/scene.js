@@ -122,7 +122,8 @@ function createScene(canvas, images, reducedMotion) {
       }
     }
     const encounter=map.encounter;
-    const fighters=encounter?[...encounter.coins,...encounter.enemies,...encounter.effects]:[];
+    const fighters=encounter?[...encounter.coins,...encounter.enemies,...encounter.effects]:
+      [...(map.homeInventory?.drops || []).map(drop=>({...drop,kind:'wood'})),...(map.homeEffects || [])];
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
     const base = item => item === pawn || fighters.includes(item) ? item.y :
@@ -180,6 +181,8 @@ function createScene(canvas, images, reducedMotion) {
           ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
+        }else if(item.kind==='wood'){
+          ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
           const pop=Math.min(1,item.age/.3);
           ctx.translate(0,-Math.sin(pop*Math.PI)*20);
@@ -199,7 +202,8 @@ function createScene(canvas, images, reducedMotion) {
         ctx.restore();return;
       }
       const x = MARGIN + item.x * TILE, y = MARGIN + item.y * TILE - (item.hill || 0)*TILE;
-      if (item.kind === 'tree') drawSprite('tree'+item.variant, (tick+item.phase)%8, images['tree'+item.variant].width/8, images['tree'+item.variant].height, x-40,y-112,144,192);
+      if (item.kind === 'tree' && item.felled) ctx.drawImage(images['stump'+item.variant],x-40,y-112,144,192);
+      if (item.kind === 'tree' && !item.felled) drawSprite('tree'+item.variant, (tick+item.phase)%8, images['tree'+item.variant].width/8, images['tree'+item.variant].height, x-40,y-112,144,192);
       if (item.kind === 'bush') drawSprite('bush'+item.variant, (tick+item.phase)%8, 128,128,x-16,y-32,96,96);
       if (item.kind === 'sheep') {
         ctx.save(); ctx.translate(x+32,y); ctx.scale(item.facing,1);

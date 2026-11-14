@@ -4,6 +4,7 @@ const SIZE = MapGenerator.size;
 let drawScene;
 let map;
 const pawn = createPawn(createControls(canvas));
+const homeInventory = createHomeInventory(canvas, pawn);
 let iteration = 0;
 let previousFrame = 0;
 const el=id=>document.getElementById(id);
@@ -73,7 +74,7 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Space'){e.preventDefault();map.encounter.setGuard(true);}
 });
 window.addEventListener('keyup',e=>{if(e.code==='Space')releaseGuard();});
-el('settings').onclick=()=>{pawn.pause();releaseGuard();el('preferences').showModal();};
+el('settings').onclick=()=>{homeInventory.stop();pawn.pause();releaseGuard();el('preferences').showModal();};
 function changeWorld(next) {
   selectedEnemy=null;
   attackPointer=null;
@@ -81,6 +82,7 @@ function changeWorld(next) {
   map.dry = map.land.map((row,y) => row.map((cell,x) => cell && !map.pools[y][x]));
   pawn.spawn(map);
   map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin):null;
+  homeInventory.attach(map);
   el('battle-notice').hidden=true;syncBattle();
   iteration++;
   document.querySelector('#announcement').textContent = `${map.name}. Cenário de ${SIZE} por ${SIZE} casas.`;
@@ -102,6 +104,7 @@ function render(time) {
   if (!map || time - previousFrame < 1000 / 40) return;
   const dt = Math.min(.05, (time - previousFrame) / 1000);
   if (!adventure.paused && !el('preferences').open && !el('game-over').open) {
+    homeInventory.update(dt);
     if(map.encounter?.hp!==0)pawn.update(map, dt);
     moveSheep(map, pawn, dt);
     if(map.encounter){
@@ -115,6 +118,7 @@ function render(time) {
     }
     if(map.encounter?.hp!==0)adventure.update(map);
   }
+  if(document.querySelector('dialog[open]'))homeInventory.stop();
   previousFrame = time;
   drawScene(map, pawn, time);
 }

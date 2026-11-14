@@ -2,6 +2,8 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
+    pawnChop:'Units/Blue Units/Pawn/Pawn_Interact Axe.png',
+    wood:'Terrain/Resources/Wood/Wood Resource/Wood Resource.png',
     dust:'Particle FX/Dust_01.png',
     coin:'../ui/gold-coin.png',
     gnomeIdle:'../gnome/Idle.png',
@@ -41,6 +43,7 @@ async function loadImages() {
     sources[name+'Run'] = 'Units/Blue Units/'+folder+'Run.png';
   }
   for (let variant = 1; variant <= 4; variant++) {
+    sources['stump'+variant] = 'Terrain/Resources/Wood/Trees/Stump '+variant+'.png';
     sources['tree'+variant] = `Terrain/Resources/Wood/Trees/Tree${variant}.png`;
     sources['bush'+variant] = `Terrain/Decorations/Bushes/Bushe${variant}.png`;
   }

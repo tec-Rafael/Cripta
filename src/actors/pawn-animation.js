@@ -4,18 +4,20 @@ const pawnAnimations = {
   run:  {sprite:'pawnRun', fps:15},
 };
 
-function drawPawn(ctx, images, player, lift, margin, tile, encounter) {
+function drawPawn(ctx, images, player, lift, margin, tile, encounter, inventory) {
   const clip = pawnAnimations[player.motion];
   const suffix = player.motion === 'idle' ? 'Idle' : 'Run';
-  const swing=encounter?.swing;
+  const chopping=inventory?.swing;
+  const swing=chopping || encounter?.swing;
   let action=suffix;
   if(encounter?.guarding) action='Guard';
-  if(swing) action=player.character==='lancer' && Math.abs(swing.dy)>Math.abs(swing.dx)
+  if(chopping) action='Chop';
+  else if(swing) action=player.character==='lancer' && Math.abs(swing.dy)>Math.abs(swing.dx)
     ? (swing.dy<0?'Up':'Down') : 'Attack';
   const image = images[(player.character || 'pawn') + action];
   const size = image.height;
   const frames=image.width/size;
-  const frame = swing ? Math.min(frames-1,Math.floor(swing.time/encounter.stats.interval*frames)) :
+  const frame = swing ? Math.min(frames-1,Math.floor(swing.time/(chopping ? inventory.duration : encounter.stats.interval)*frames)) :
     Math.floor(player.elapsed * clip.fps) % frames;
   ctx.save();
   ctx.translate(Math.round(margin + player.x * tile), Math.round(margin + player.y * tile - lift));

@@ -3,6 +3,9 @@ function createPawn(controls) {
   let heading = {x:1,y:0};
   function update(map, dt) {
     const encounter=map.encounter;
+    if(map.homeInventory?.swing){
+      player.motion='idle';player.elapsed=0;return;
+    }
     if(encounter?.swing && ['knight','lancer'].includes(encounter.id)){
       player.motion='idle';
       player.elapsed=0;
@@ -42,7 +45,7 @@ function createPawn(controls) {
 
   return {
     update,
-    draw(ctx, images, map, margin, tile) { drawPawn(ctx, images, player, elevation(map), margin, tile,map.encounter); },
+    draw(ctx, images, map, margin, tile) { drawPawn(ctx, images, player, elevation(map), margin, tile,map.encounter,map.homeInventory); },
     get character(){return player.character;},
     get heading(){return heading;},
     setCharacter(character) { player.character = character; },

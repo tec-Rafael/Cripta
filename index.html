@@ -17,6 +17,7 @@
   <script src="src/ui/adventure-dialog.js" defer></script>
   <script src="src/world/adventure.js" defer></script>
   <script src="src/world/encounter.js" defer></script>
+  <script src="src/world/home-inventory.js" defer></script>
   <script src="src/main.js" defer></script>
 </head>
 <body>
@@ -35,6 +36,10 @@
     <div id="battle-buttons" hidden>
       <button id="guard" title="Segure para bloquear (Espaço)" aria-label="Segurar escudo">🛡</button>
     </div>
+    <aside id="home-inventory" aria-label="Inventário do Lar" hidden>
+      <button class="inventory-toggle" type="button" aria-label="Recolher inventário" aria-expanded="true" aria-controls="inventory-slots"><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_08.png" alt=""></button>
+      <div class="inventory-slots" id="inventory-slots" role="group" aria-label="Ferramentas e recursos"></div>
+    </aside>
     <p id="battle-notice" role="status" hidden></p>
     <dialog id="preferences"><form method="dialog"><h2>Configurações</h2>
       <section class="adventure-panel">
