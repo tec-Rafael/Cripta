@@ -71,6 +71,9 @@ function createHomeInventory(canvas, pawn) {
     toggle.setAttribute('aria-expanded', String(!collapsed));
     toggle.setAttribute('aria-label', collapsed ? 'Abrir inventário' : 'Recolher inventário');
   });
+  panel.classList.add('collapsed');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', 'Abrir invent�rio');
   drawSlots();
 
   function refresh() {
@@ -194,6 +197,8 @@ function createHomeInventory(canvas, pawn) {
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
   const api = {attach, update, stop, get swing(){return swing;}, get duration(){return swingDuration;},
-    get drops(){return state.drops;}};
+    get equipped(){
+      return ['Hammer','Axe','Knife','Pickaxe'][selected] || (selected === 4 && state.wood > 0 ? 'Wood' : '');
+    }, get drops(){return state.drops;}};
   return api;
 }

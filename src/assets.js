@@ -42,6 +42,10 @@ async function loadImages() {
     sources[name+'Idle'] = 'Units/Blue Units/'+folder+'Idle.png';
     sources[name+'Run'] = 'Units/Blue Units/'+folder+'Run.png';
   }
+  for (const tool of ['Hammer','Axe','Knife','Pickaxe','Wood']) {
+    sources['pawnIdle'+tool] = 'Units/Blue Units/Pawn/Pawn_Idle '+tool+'.png';
+    sources['pawnRun'+tool] = 'Units/Blue Units/Pawn/Pawn_Run '+tool+'.png';
+  }
   for (let variant = 1; variant <= 4; variant++) {
     sources['stump'+variant] = 'Terrain/Resources/Wood/Trees/Stump '+variant+'.png';
     sources['tree'+variant] = `Terrain/Resources/Wood/Trees/Tree${variant}.png`;
