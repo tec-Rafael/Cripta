@@ -197,7 +197,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 .inventory-slots { display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px; }
 .inventory-slots button {
   position:relative;aspect-ratio:1;min-width:0;padding:4px;border:2px solid transparent;
-  background:url('../assets/tiny-swords/UI Elements/UI Elements/Wood Table/WoodTable_Slots.png') center/100% 100% no-repeat;
+  background:url('../assets/ui/inventory-slot-dark.png') center/100% 100% no-repeat;
   border-radius:0;cursor:pointer;touch-action:manipulation;
 }
 .inventory-slots button.selected { filter:brightness(1.2); }
