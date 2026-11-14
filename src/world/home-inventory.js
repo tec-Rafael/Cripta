@@ -8,7 +8,7 @@ function createHomeInventory(canvas, pawn) {
   const toggle = panel.querySelector('.inventory-toggle');
   const resourcePath = 'assets/tiny-swords/Terrain/Resources/';
   const tools = ['Martelo', 'Machado', 'Faca', 'Picareta'];
-  let state = {trees: {}, drops: [], wood: 0, gold: 0, order: []};
+  let state = {trees: {}, drops: [], wood: 0, gold: 0, order: [], goldPositions: {}};
   let map = null;
   let selected = 0;
   let target = null;
@@ -24,6 +24,12 @@ function createHomeInventory(canvas, pawn) {
       state.gold = Number.isSafeInteger(saved.gold) && saved.gold >= 0 ? saved.gold : 0;
       state.order = [...new Set((Array.isArray(saved.order) ? saved.order : []).filter(kind => ['wood','gold'].includes(kind)))];
       for (const kind of ['wood','gold']) if (state[kind] > 0 && !state.order.includes(kind)) state.order.push(kind);
+      state.goldPositions = {};
+      for (const [id, point] of Object.entries(saved.goldPositions || {})) {
+        if (/^gold:\d+,\d+$/.test(id) && Number.isInteger(point?.x) && Number.isInteger(point?.y) &&
+            point.x > 0 && point.y > 0 && point.x < 49 && point.y < 49)
+          state.goldPositions[id] = {x:point.x,y:point.y};
+      }
       state.trees = {};
       for (const [id, tree] of Object.entries(saved.trees || {})) {
         if (/^(gold:)?\d+,\d+$/.test(id) && Number.isInteger(tree?.hits) && tree.hits >= 1 && tree.hits <= 5 &&
@@ -39,7 +45,7 @@ function createHomeInventory(canvas, pawn) {
   function save() {
     try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch {}
   }
-  function treeId(tree) { return (tree.kind === 'gold' ? 'gold:' : '') + tree.x + ',' + tree.y; }
+  function treeId(tree) { return tree.resourceId || (tree.kind === 'gold' ? 'gold:' : '') + tree.x + ',' + tree.y; }
   function trunk(tree) {
     return {x: tree.x + .5, y: tree.y + (tree.kind === 'gold' ? .55 : tree.variant <= 2 ? .92 : .71)};
   }
@@ -83,12 +89,36 @@ function createHomeInventory(canvas, pawn) {
   toggle.setAttribute('aria-label', 'Abrir inventário');
   drawSlots();
 
+  function relocateGold(node) {
+    const candidates = [];
+    for (let y=1; y<map.surface.length-1; y++) for (let x=1; x<map.surface[y].length-1; x++) {
+      if (x===node.x && y===node.y || Math.hypot(pawn.x-x-.5,pawn.y-y-.55)<2) continue;
+      // Leave flat approaches open and avoid paths, doors and other resources.
+      let clear = true;
+      for (let dy=-1; dy<=1 && clear; dy++) for (let dx=-1; dx<=1; dx++) {
+        if (!map.surface[y+dy]?.[x+dx] || map.heights[y+dy][x+dx]!==0 ||
+            map.paths[y]?.[x] || map.stairs.some(s=>s.x===x+dx && s.y===y+dy)) {
+          clear=false; break;
+        }
+      }
+      if (!clear || map.decorations.some(item=>item!==node && item.kind!=='bush' && Math.abs(item.x-x)<(['house','tower'].includes(item.kind)?3:1.5) && Math.abs(item.y-y)<(['house','tower'].includes(item.kind)?3:1.5))) continue;
+      if (state.drops.some(drop=>Math.hypot(drop.x-x-.5,drop.y-y-.5)<1.5)) continue;
+      const point={x:x+.5,y:y+.55};
+      if (canStand(map,point,point.x,point.y)) candidates.push({x,y});
+    }
+    if (!candidates.length) return false;
+    const position=candidates[Math.floor(Math.random()*candidates.length)];
+    state.goldPositions[treeId(node)]=position;
+    Object.assign(node,position,{hill:0});
+    return true;
+  }
   function refresh() {
     const now = Date.now();
     let changed = false;
     for (const tree of map.decorations.filter(item => ['tree','gold'].includes(item.kind))) {
       const id = treeId(tree), record = state.trees[id];
       if (record?.cutAt && now - record.cutAt >= regrowAfter) {
+        if (tree.kind === 'gold' && !relocateGold(tree)) continue;
         delete state.trees[id];
         changed = true;
       }
@@ -103,6 +133,12 @@ function createHomeInventory(canvas, pawn) {
     next.homeInventory = map ? api : null;
     if (map) {
       map.homeEffects = [];
+      for (const node of map.decorations.filter(item=>item.kind==='gold')) {
+        node.resourceId=treeId(node);
+        const position=state.goldPositions[node.resourceId];
+        if (position) Object.assign(node,position,{hill:0});
+        node.felled=Boolean(state.trees[node.resourceId]?.cutAt);
+      }
       refresh();
       drawSlots();
     }
