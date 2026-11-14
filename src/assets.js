@@ -3,7 +3,8 @@ async function loadImages() {
   const images = {};
   const sources = {
     pawnMine:'Units/Blue Units/Pawn/Pawn_Interact Pickaxe.png',
-    goldStone:'Terrain/Resources/Gold/Gold Stones/Gold Stone 1.png',
+    goldStone5:'Terrain/Resources/Gold/Gold Stones/Gold Stone 5.png',
+    goldStone6:'Terrain/Resources/Gold/Gold Stones/Gold Stone 6.png',
     goldDrop:'Terrain/Resources/Gold/Gold Resource/Gold_Resource.png',
     pawnChop:'Units/Blue Units/Pawn/Pawn_Interact Axe.png',
     wood:'Terrain/Resources/Wood/Wood Resource/Wood Resource.png',

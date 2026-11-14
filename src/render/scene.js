@@ -212,7 +212,10 @@ function createScene(canvas, images, reducedMotion) {
       }
       if (item.kind === 'tower') ctx.drawImage(images.tower,x,y-192,128,256);
       if (item.kind === 'house') ctx.drawImage(images.house,x,y-128,128,192);
-      if (item.kind === 'gold' && !item.felled) ctx.drawImage(images.goldStone,x,y,64,64);
+      if (item.kind === 'gold' && !item.felled) {
+        const variant = item.variant % 2 === 0 ? 6 : 5;
+        ctx.drawImage(images['goldStone'+variant],x-24,y-51,112,112);
+      }
       if (item.kind === 'rock') ctx.drawImage(images.rock,x,y,64,64);
       if (item.kind === 'waterRock') drawSprite('waterRock',(tick+item.phase)%16,64,64,x,y,64,64);
     }
