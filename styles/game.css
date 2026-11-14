@@ -189,43 +189,58 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   width:min(510px,94vw);
   padding:6px 6px 3px;
   border:solid transparent;
-  border-width:12px 24px 20px;
-  border-image:url('../assets/ui/inventory-panel.png') 16 32 24 32 fill / 12px 24px 20px / 0 stretch;
+  border-width:12px 18px 16px;
+  border-image:url('../assets/ui/inventory-wood.png') 24 fill / 12px 18px 16px / 0 stretch;
   image-rendering:pixelated;
 }
 #home-inventory[hidden] { display:none; }
 .inventory-slots { display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px; }
 .inventory-slots button {
   position:relative;aspect-ratio:1;min-width:0;padding:4px;border:2px solid transparent;
-  background:url('../assets/ui/inventory-slot.png') center/100% 100% no-repeat;
+  background:url('../assets/tiny-swords/UI Elements/UI Elements/Wood Table/WoodTable_Slots.png') center/100% 100% no-repeat;
   border-radius:0;cursor:pointer;touch-action:manipulation;
 }
-.inventory-slots button.selected { border-color:#765334; }
+.inventory-slots button.selected { border-color:#eed59a; }
 .inventory-slots button:focus-visible { outline:3px solid #fff3bb;outline-offset:2px; }
 .inventory-slots img { width:100%;height:100%;object-fit:contain;pointer-events:none; }
 .inventory-slots img[hidden] { display:none; }
 .inventory-slots b { position:absolute;right:4px;bottom:2px;color:#fff8d7;text-shadow:1px 1px #493923;font:bold 16px Georgia,serif;pointer-events:none; }
 .inventory-toggle { display:none; }
-@media (hover:none) and (pointer:coarse) {
+@media (hover:none) and (pointer:coarse), (max-width:600px) {
   #joystick { width:clamp(92px,18vmin,134px); }
   #home-inventory {
-    left:max(8px,env(safe-area-inset-left));right:auto;top:50%;bottom:auto;
-    transform:translateY(-50%);width:clamp(70px,16vw,94px);max-height:65dvh;
-    padding:5px 2px;border-width:12px 14px 20px;
-    border-image-width:12px 14px 20px;overflow:visible;
+    left:max(8px,env(safe-area-inset-left));right:auto;top:26%;bottom:23%;
+    transform:none;width:clamp(100px,26vw,116px);max-height:none;
+    padding:4px;border-width:10px;
+    border-image-width:10px;overflow:visible;
+    display:flex;flex-direction:column;
   }
-  .inventory-slots { grid-template-columns:1fr;gap:4px;max-height:58dvh;overflow-y:auto; }
-  .inventory-slots button { min-height:38px; }
+  .inventory-slots {
+    grid-template-columns:1fr;gap:5px;min-height:0;overflow-y:auto;overflow-x:hidden;
+    overscroll-behavior:contain;scrollbar-width:thin;
+  }
+  .inventory-slots button { min-height:64px;flex-shrink:0;padding:2px; }
+  .inventory-slots img { transform:scale(1.15); }
   .inventory-toggle {
-    position:absolute;display:block;left:0;bottom:calc(100% + 12px);padding:0;width:38px;height:38px;
-    border:0;background:transparent;cursor:pointer;touch-action:manipulation;
+    position:absolute;display:block;left:-6px;bottom:calc(100% + 12px);
+    padding:0;width:46px;height:46px;border:0;background:transparent;
+    cursor:pointer;touch-action:manipulation;
   }
-  .inventory-toggle img { width:100%;height:100%; }
+  .inventory-toggle img { width:100%;height:100%;transform:rotate(0deg);transition:transform .18s ease; }
   #home-inventory.collapsed {
-    width:22px;min-height:80px;height:38dvh;padding:0;border-width:12px 8px 20px;
-    border-image-width:12px 8px 20px;
+    width:18px;padding:0;border-width:10px 7px;
+    border-image-width:10px 7px;
   }
   #home-inventory.collapsed .inventory-slots { display:none; }
-  #home-inventory .inventory-toggle img { transform:rotate(90deg); }
-  #home-inventory.collapsed .inventory-toggle img { transform:rotate(-90deg); }
+  #home-inventory.collapsed .inventory-toggle img { transform:rotate(180deg); }
+}
+@media (hover:hover) and (pointer:fine) {
+  html,body,canvas { cursor:url('../assets/ui/cursor-01.png') 1 1,default; }
+  button,.icon-button,.character-choice,.inventory-slots button,#resources button,#battle-buttons button {
+    cursor:url('../assets/ui/cursor-02.png') 10 1,pointer;
+  }
+  button:disabled { cursor:url('../assets/ui/cursor-03.png') 16 16,not-allowed; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .inventory-toggle img { transition:none; }
 }
