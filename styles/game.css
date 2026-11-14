@@ -245,3 +245,12 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 @media (prefers-reduced-motion:reduce) {
   .inventory-toggle img { transition:none; }
 }
+
+#home-inventory .inventory-slots img.gold-item {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:24px;
+  height:24px;
+  transform:translate(-50%,-50%);
+}
