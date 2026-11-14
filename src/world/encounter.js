@@ -28,7 +28,7 @@ function encounterRoutes(map) {
   const staticMap={...map,sheep:[],decorations:[]};
   const byCell=new Map();
   for (const item of map.decorations) {
-    if (!['house','tower','rock','tree'].includes(item.kind)) continue;
+    if (!['house','tower','rock','tree','gold'].includes(item.kind)) continue;
     for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=2;dx++) {
       const k=key(item.x+dx,item.y+dy);
       if(!byCell.has(k)) byCell.set(k,[]);

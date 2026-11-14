@@ -69,7 +69,7 @@ function canStand(map, player, px, py) {
     if (item.kind === 'house' || item.kind === 'tower')
       return px + feet.x > item.x + .34 && px - feet.x < item.x + 1.69 &&
              py + feet.y > item.y + .06 && py - feet.y < item.y + .57;
-    if (item.kind !== 'tree' && item.kind !== 'rock') return false;
+    if (item.kind !== 'tree' && item.kind !== 'rock' && item.kind !== 'gold') return false;
     const tree = item.kind === 'tree';
     const base = tree ? (item.variant <= 2 ? .92 : .71) : .55;
     const halfWidth = tree ? [.17,.15,.11,.09][item.variant-1] : .28;

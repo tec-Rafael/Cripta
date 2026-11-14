@@ -2,6 +2,9 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
+    pawnMine:'Units/Blue Units/Pawn/Pawn_Interact Pickaxe.png',
+    goldStone:'Terrain/Resources/Gold/Gold Stones/Gold Stone 1.png',
+    goldDrop:'Terrain/Resources/Gold/Gold Resource/Gold_Resource.png',
     pawnChop:'Units/Blue Units/Pawn/Pawn_Interact Axe.png',
     wood:'Terrain/Resources/Wood/Wood Resource/Wood Resource.png',
     dust:'Particle FX/Dust_01.png',
@@ -42,7 +45,7 @@ async function loadImages() {
     sources[name+'Idle'] = 'Units/Blue Units/'+folder+'Idle.png';
     sources[name+'Run'] = 'Units/Blue Units/'+folder+'Run.png';
   }
-  for (const tool of ['Hammer','Axe','Knife','Pickaxe','Wood']) {
+  for (const tool of ['Hammer','Axe','Knife','Pickaxe','Wood','Gold']) {
     sources['pawnIdle'+tool] = 'Units/Blue Units/Pawn/Pawn_Idle '+tool+'.png';
     sources['pawnRun'+tool] = 'Units/Blue Units/Pawn/Pawn_Run '+tool+'.png';
   }

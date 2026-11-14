@@ -225,6 +225,10 @@ const MapGenerator = (() => {
       return true;
     });
     for (const item of scenery) if (item.hill) item.hill = heights[item.y][item.x];
+    // Convert existing clear rock sites without changing the stable home's seed.
+    for (const item of scenery) {
+      if (item.kind === 'rock' && (item.x*17+item.y*31)%5 === 0) item.kind = 'gold';
+    }
     return { land, wet, raised, heights, layers, pools, paths, surface, stairs, decorations:scenery, sheep, spawn, house, tower, theme };
   }
   function generateHome() {
