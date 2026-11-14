@@ -4,7 +4,7 @@ const combatClasses = {
   monk: {hp:9, damage:7, range:4, interval:1.3, impact:.65},
   archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
 };
-const hammerGnome = {hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.45, rest:.75};
+const hammerGnome = {hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
 function visible(map,a,b) {
@@ -155,12 +155,18 @@ function createEncounter(map,pawn,id,reward){
       }
       e.clock+=dt;e.timer-=dt;e.moving=false;
       if(e.phase==='strike'){
+        // Track during anticipation, then commit to the final hammer swing.
+        if(e.clock-dt < hammerGnome.windup){
+          const distance=gap(e,pawn);
+          if(distance>0){e.dx=(pawn.x-e.x)/distance;e.dy=(pawn.y-e.y)/distance;}
+          e.facing=Math.sign(e.dx)||e.facing;
+        }
         if(e.timer<=0){
           const x=pawn.x-e.x,y=pawn.y-e.y;
           const blocked=guard && x*pawn.heading.x+y*pawn.heading.y<=0;
-          if(!blocked&&gap(e,pawn)<=hammerGnome.reach+.05&&x*e.dx+y*e.dy>=0&&visible(map,e,pawn))
+          if(!blocked&&gap(e,pawn)<=hammerGnome.reach+hammerGnome.tolerance&&x*e.dx+y*e.dy>=0&&visible(map,e,pawn))
             hp=Math.max(0,hp-hammerGnome.damage);
-          e.phase='recover';e.timer=hammerGnome.rest;
+          e.phase='recover';e.timer=hammerGnome.rest;e.clock=0;
         }
         continue;
       }
@@ -168,7 +174,7 @@ function createEncounter(map,pawn,id,reward){
       const dist=gap(e,pawn), sees=dist<=hammerGnome.sight&&visible(map,e,pawn);
       if(sees&&dist<=hammerGnome.reach){
         e.dx=(pawn.x-e.x)/(dist||1);e.dy=(pawn.y-e.y)/(dist||1);
-        e.facing=Math.sign(e.dx)||e.facing;e.phase='strike';e.timer=hammerGnome.windup;e.clock=0;continue;
+        e.facing=Math.sign(e.dx)||e.facing;e.phase='strike';e.timer=hammerGnome.windup+hammerGnome.impact;e.clock=0;e.waypoint=null;continue;
       }
       if(sees)e.goal=routes.key(pawn.x,pawn.y);
       const current=routes.key(e.x,e.y);
