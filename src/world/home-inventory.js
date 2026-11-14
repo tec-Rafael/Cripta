@@ -57,7 +57,7 @@ function createHomeInventory(canvas, pawn) {
       button.setAttribute('aria-label', tools[index] || (count ? (resource === 'gold' ? 'Ouro, ' : 'Madeira, ') + count : 'Espaço vazio'));
       const image = button.querySelector('img');
       image.hidden = index >= 4 && !count;
-      if (count) image.src = resourcePath + (resource === 'gold' ? 'Gold/Gold Resource/Gold_Resource.png' : 'Wood/Wood Resource/Wood Resource.png');
+      if (count) image.src = resource === 'gold' ? 'assets/ui/gold-medium.png' : resourcePath + 'Wood/Wood Resource/Wood Resource.png';
       button.querySelector('b').textContent = count || '';
     }
   }

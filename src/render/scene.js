@@ -181,8 +181,10 @@ function createScene(canvas, images, reducedMotion) {
           ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
-        }else if(item.kind==='wood'||item.kind==='goldDrop'){
-          ctx.drawImage(images[item.kind==='goldDrop'?'goldDrop':'wood'],-24,-32,48,48);
+        }else if(item.kind==='goldDrop'){
+          ctx.drawImage(images.goldDrop,-32,-48,64,64);
+        }else if(item.kind==='wood'){
+          ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
           const pop=Math.min(1,item.age/.3);
           ctx.translate(0,-Math.sin(pop*Math.PI)*20);
@@ -214,7 +216,10 @@ function createScene(canvas, images, reducedMotion) {
       if (item.kind === 'house') ctx.drawImage(images.house,x,y-128,128,192);
       if (item.kind === 'gold' && !item.felled) {
         const variant = item.variant % 2 === 0 ? 6 : 5;
-        ctx.drawImage(images['goldStone'+variant],x-24,y-51,112,112);
+        const crop = variant === 6 ? {x:17,y:17,width:92,height:81} : {x:28,y:20,width:74,height:80};
+        const width = Math.round(crop.width*.875), height = Math.round(crop.height*.875);
+        ctx.drawImage(images['goldStone'+variant],crop.x,crop.y,crop.width,crop.height,
+          x+32-width/2,y+35-height,width,height);
       }
       if (item.kind === 'rock') ctx.drawImage(images.rock,x,y,64,64);
       if (item.kind === 'waterRock') drawSprite('waterRock',(tick+item.phase)%16,64,64,x,y,64,64);
