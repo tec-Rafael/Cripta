@@ -4,9 +4,9 @@ async function loadImages() {
   const sources = {
     dust:'Particle FX/Dust_01.png',
     coin:'../ui/gold-coin.png',
-    gnomeIdle:'Units/Red Units/Pawn/Pawn_Idle Hammer.png',
-    gnomeRun:'Units/Red Units/Pawn/Pawn_Run Hammer.png',
-    gnomeStrike:'Units/Red Units/Pawn/Pawn_Interact Hammer.png',
+    gnomeIdle:'../gnome/Idle.png',
+    gnomeRun:'../gnome/Run.png',
+    gnomeStrike:'../gnome/Strike.png',
     knightAttack:'Units/Blue Units/Warrior/Warrior_Attack1.png',
     knightGuard:'Units/Blue Units/Warrior/Warrior_Guard.png',
     lancerAttack:'Units/Blue Units/Lancer/Lancer_Right_Attack.png',
