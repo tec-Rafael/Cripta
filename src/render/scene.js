@@ -126,8 +126,9 @@ function createScene(canvas, images, reducedMotion) {
       [...(map.homeInventory?.drops || []).map(drop=>({...drop,kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
+    // Gold occludes actors only behind its footprint (.55 center - .24 depth).
     const base = item => item === pawn || fighters.includes(item) ? item.y :
-      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05}[item.kind] ?? .55);
+      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31}[item.kind] ?? .55);
     const level = item => item === pawn || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
