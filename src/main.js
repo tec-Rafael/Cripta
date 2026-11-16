@@ -87,6 +87,7 @@ function changeWorld(next) {
   map.dry = map.land.map((row,y) => row.map((cell,x) => cell && !map.pools[y][x]));
   pawn.spawn(map);
   map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin):null;
+  homeConstruction.attach(map);
   homeInventory.attach(map);
   el('battle-notice').hidden=true;syncBattle();
   iteration++;
@@ -95,6 +96,15 @@ function changeWorld(next) {
   canvas.animate([{ opacity: .3, transform: 'translateY(5px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: reducedMotion.matches ? 0 : 450, easing: 'ease-out' });
 }
 
+const homeConstruction = createHomeConstruction(homeInventory, pawn, {
+  get coins(){return wallet;},
+  spend(amount){
+    if(wallet<amount)return false;
+    wallet-=amount;el('wallet').textContent=wallet;
+    try{localStorage.setItem('cripta.coins',String(wallet));}catch{}
+    return true;
+  }
+});
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
 el('retry').onclick=()=>{
@@ -108,7 +118,7 @@ function render(time) {
   requestAnimationFrame(render);
   if (!map || time - previousFrame < 1000 / 40) return;
   const dt = Math.min(.05, (time - previousFrame) / 1000);
-  if (!adventure.paused && !el('preferences').open && !el('game-over').open) {
+  if (!adventure.paused && !el('preferences').open && !el('game-over').open && !homeConstruction.opened) {
     homeInventory.update(dt);
     if(map.encounter?.hp!==0)pawn.update(map, dt);
     moveSheep(map, pawn, dt);

@@ -271,3 +271,32 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #controls-help ul { padding-left:20px;margin:0; }
 #controls-help li { margin:6px 0; }
 #controls-help p { margin:6px 0; }
+
+#home-menu { width:min(880px,96vw);max-height:94dvh;padding:6px;border:0;background:transparent;color:#493c2c;font:600 17px/1.4 Georgia,serif;overflow:auto; }
+#home-menu::backdrop { background:#102b3699;backdrop-filter:blur(3px); }
+.construction-table { position:relative;padding:12px;border:solid transparent;border-width:22px;border-image:url('../assets/ui/inventory-wood.png') 36 32 32 36 fill /22px/0 stretch;image-rendering:pixelated; }
+.construction-ribbon { border:solid transparent;border-width:10px 30px;border-image:url('../assets/ui/ribbon-blue.png') 20 96 12 96 fill /10px 30px/0 stretch;color:#fff6d8;text-shadow:1px 2px #294b57; }
+#home-menu-title { text-align:center;margin:0 36px 16px;font-size:clamp(23px,5vw,32px); }
+.home-menu-close { position:absolute;right:-12px;top:-12px;z-index:1; }
+.home-menu-close img { width:44px;height:44px; }
+.construction-cloth { padding:18px 12px;border:solid transparent;border-width:16px;border-image:url('../assets/ui/construction-cloth.png') 32 fill /16px/0 stretch;text-align:center; }
+#home-menu-root { min-height:150px;display:grid;place-items:center; }
+#home-menu-root[hidden],#construction-catalog[hidden] { display:none; }
+#house-options { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 18px; }
+.house-plan h3 { margin:0;font-size:18px; }
+.house-preview { width:128px;height:192px;object-fit:contain;image-rendering:pixelated; }
+.construction-cost { display:flex;justify-content:center;gap:10px;align-items:center;margin:-10px -8px 10px; }
+.construction-cost span { display:flex;align-items:center;gap:3px; }
+.construction-cost img { width:30px;height:30px;object-fit:contain; }
+.wood-action { padding:9px 18px;background:#754a32;color:#fff4d5;border:2px solid #ab8050;border-radius:4px;font:inherit; }
+.wood-action:hover:not(:disabled),.wood-action:focus-visible { background:#915f3b; }
+.wood-action:disabled { opacity:.5;cursor:not-allowed; }
+#construction-status { margin:20px 0;font-size:15px; }
+@media (max-width:540px) {
+  #home-menu { padding:4px; }
+  .construction-table { padding:6px;border-width:16px; }
+  .construction-cloth { padding:12px 3px;border-width:10px; }
+  #house-options { grid-template-columns:1fr; }
+  .house-preview { width:112px;height:168px; }
+  .construction-cost { max-width:280px;margin:-6px auto 12px; }
+}

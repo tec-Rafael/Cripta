@@ -23,7 +23,7 @@ function createAdventure(pawn, changeWorld) {
   function start() { enter(home, false); }
   function update(map) {
     if (ui.open) return;
-    const doors = adventuring ? [map.house, map.tower] : [map.tower];
+    const doors = [map.house, map.tower];
     const distance = item => Math.hypot(pawn.x-item.x-1, pawn.y-item.y-.72);
     if (blockedDoor && distance(blockedDoor) > .95) blockedDoor = null;
     const door = doors.find(item => item !== blockedDoor &&
@@ -36,7 +36,9 @@ function createAdventure(pawn, changeWorld) {
       notifyBattle(`Derrote ${n===1?'o último inimigo':`os ${n} inimigos restantes`} para ${door.kind==='house'?'voltar ao Lar':'avançar'}.`);
       return;
     }
-    if (door.kind === 'house') {
+    if (!adventuring && door.kind === 'house') {
+      homeConstruction.open(map);
+    } else if (door.kind === 'house') {
       ui.show('Retornar ao seu lar?', false, () => {
         close();
         enter(home, false);

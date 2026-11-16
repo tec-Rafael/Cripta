@@ -219,7 +219,7 @@ function createScene(canvas, images, reducedMotion) {
         ctx.restore();
       }
       if (item.kind === 'tower') ctx.drawImage(images.tower,x,y-192,128,256);
-      if (item.kind === 'house') ctx.drawImage(images.house,x,y-128,128,192);
+      if (item.kind === 'house') ctx.drawImage(images[item.color?'house'+item.color:map.name==='Lar'?'houseBlack':'house'],x,y-128,128,192);
       if (item.kind === 'gold' && !item.felled) {
         const variant = item.variant % 2 === 0 ? 6 : 5;
         const crop = variant === 6 ? {x:17,y:17,width:92,height:81} : {x:28,y:20,width:74,height:80};

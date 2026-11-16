@@ -262,7 +262,12 @@ function createHomeInventory(canvas, pawn) {
     });
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
-  const api = {attach, update, stop, get swing(){return swing;}, get duration(){return swingDuration;},
+  const api = {attach, update, stop,
+    get resources(){return {wood:state.wood,gold:state.gold};},
+    spend(cost){
+      if (!map || state.wood<cost.wood || state.gold<cost.gold) return false;
+      state.wood-=cost.wood;state.gold-=cost.gold;save();drawSlots();return true;
+    }, get swing(){return swing;}, get duration(){return swingDuration;},
     get equipped(){
       return ['Hammer','Axe','Knife','Pickaxe'][selected] || (state.order[selected-4] === 'gold' && state.gold > 0 ? 'Gold' : state.order[selected-4] === 'wood' && state.wood > 0 ? 'Wood' : '');
     }, get drops(){return state.drops;}};

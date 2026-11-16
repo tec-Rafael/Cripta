@@ -38,8 +38,10 @@ async function loadImages() {
     sheepMove: 'Terrain/Resources/Meat/Sheep/Sheep_Move.png',
     tower: 'Buildings/Black Buildings/Tower.png',
     house: 'Buildings/Blue Buildings/House1.png',
+    houseBlack: 'Buildings/Black Buildings/House1.png',
     cloud: 'Terrain/Decorations/Clouds/Clouds_01.png',
   };
+  for (const color of ['Blue','Red','Purple','Yellow']) sources['house'+color]='Buildings/'+color+' Buildings/House1.png';
   for (const [name, folder] of Object.entries({
     knight:'Warrior/Warrior_', archer:'Archer/Archer_', monk:'Monk/', lancer:'Lancer/Lancer_',
   })) {
