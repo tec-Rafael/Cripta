@@ -19,3 +19,9 @@ Prompt: Redraw the existing 4x4 fence sheet to harmonize with the reference game
 `wooden-fence-sheet-v3.png` was edited with the built-in image tool from version 2 and the user's close-up fence reference. It is newly generated artwork, not an official artist asset. Applied to the construction worksite, including the open front gate.
 
 Prompt: Recreate the supplied reference's irregular squared timber posts, roughly chopped slanted tops, pale cream caps, beige wood fronts, muted ochre/khaki sides and dark blue-black pixel outlines. Keep narrow light rectangular rails with brown undersides, flat small shadow facets and chipped edges. Preserve the 4x4 modular fence layout of version 2, including straight pieces, corners, junctions and open/closed gates. Match the low-resolution pixel clusters of the close-up; avoid rounded caps, glossy orange wood, fine grain, gradients, glow or invented ornaments. Keep transparent padding and actual transparent alpha with no scenery, text or grid.
+
+## Version 4 — reference isolation study
+
+`fence-reference-isolated-v4.png` is an isolated L-shaped fence generated with the built-in image editor using only the user's reference crop. It is not yet a modular sheet and is not connected to the game. AI editing can change individual pixels; this is not a pixel-exact extraction of the artist's original.
+
+Prompt: Extract only the wooden fence from the provided reference, remove the background and unrelated character, preserve its exact L-shaped arrangement, crooked rectangular posts, top facets, beige wood, jagged dark outlines, khaki shadows, two low thin rails, chips and asymmetry. Do not redesign, add grain, round the posts, broaden rails, add caps or invent additional fences. Output the same L-shaped fence isolated on transparent alpha, enlarged with hard square pixels without smoothing. No sprite sheet, gates, text or additional objects.
