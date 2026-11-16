@@ -87,6 +87,7 @@ function createScene(canvas, images, reducedMotion) {
       const x=Math.floor(point.x),y=Math.floor(point.y);
       return {x:MARGIN+point.x*TILE-cameraX,y:MARGIN+(point.y-mountainHeight(map,x,y,point.x-x))*TILE-cameraY};
     };
+    canvas.screenToWorld=point=>({x:(point.x+cameraX-MARGIN)/TILE,y:(point.y+cameraY-MARGIN)/TILE});
     ctx.translate(-cameraX, -cameraY);
     // Include sprites rooted outside the viewport (canopies, roofs and foam).
     const view = {
@@ -229,6 +230,24 @@ function createScene(canvas, images, reducedMotion) {
       }
       if (item.kind === 'rock') ctx.drawImage(images.rock,x,y,64,64);
       if (item.kind === 'waterRock') drawSprite('waterRock',(tick+item.phase)%16,64,64,x,y,64,64);
+    }
+    const construction=map.construction;
+    if(construction?.job){
+      const job=construction.job,site=job.site||construction.preview;
+      if(site){
+        const x=MARGIN+site.x*TILE,y=MARGIN+(site.y-2)*TILE;
+        if(job.phase==='placing'){
+          ctx.save();ctx.globalAlpha=.8;
+          ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';ctx.fillRect(x,y,128,192);
+          ctx.drawImage(images.constructionMarker,x,y,128,192);ctx.restore();
+        }else if(job.phase==='building'){
+          const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
+          for(let i=0;i<4;i++){
+            const frame=Math.floor((job.elapsed*12+i*3)%frames);
+            ctx.drawImage(sheet,frame*size,0,size,size,x-16+(i%2)*48,y+48+Math.floor(i/2)*48,128,128);
+          }
+        }
+      }
     }
     ctx.globalAlpha = .8;
     for (let i = 0; i < 3; i++) {

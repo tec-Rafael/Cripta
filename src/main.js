@@ -55,6 +55,7 @@ canvas.addEventListener('pointerdown',event=>{
   if(event.button===0)attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false};
 });
 canvas.addEventListener('pointermove',event=>{
+  homeConstruction.aim(event,canvas);
   if(event.pointerType==='mouse')hoverPointer={clientX:event.clientX,clientY:event.clientY};
   if(attackPointer?.id===event.pointerId&&Math.hypot(event.clientX-attackPointer.x,event.clientY-attackPointer.y)>8)
     attackPointer.moved=true;
@@ -64,6 +65,7 @@ canvas.addEventListener('pointerup',event=>{
   const tap=attackPointer;
   attackPointer=null;
   if(!tap||tap.id!==event.pointerId||tap.moved)return;
+  if(homeConstruction.select(event,canvas))return;
   if(adventure.interact(map,canvas,event))return;
   if(!canFight()||!canvas.worldToScreen)return;
   const rect=canvas.getBoundingClientRect();
@@ -134,6 +136,7 @@ function render(time) {
   if (!map || time - previousFrame < 1000 / 40) return;
   const dt = Math.min(.05, (time - previousFrame) / 1000);
   if (!adventure.paused && !el('preferences').open && !el('game-over').open && !homeConstruction.opened) {
+    homeConstruction.update(dt);
     homeInventory.update(dt);
     if(map.encounter?.hp!==0)pawn.update(map, dt);
     moveSheep(map, pawn, dt);

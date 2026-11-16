@@ -93,6 +93,8 @@ function createHomeInventory(canvas, pawn) {
     const candidates = [];
     for (let y=1; y<map.surface.length-1; y++) for (let x=1; x<map.surface[y].length-1; x++) {
       if (x===node.x && y===node.y || Math.hypot(pawn.x-x-.5,pawn.y-y-.55)<2) continue;
+      const site=map.construction?.job?.site;
+      if(site&&Math.abs(site.x-x)<4&&Math.abs(site.y-y)<4)continue;
       // Leave flat approaches open and avoid paths, doors and other resources.
       let clear = true;
       for (let dy=-1; dy<=1 && clear; dy++) for (let dx=-1; dx<=1; dx++) {
@@ -144,7 +146,7 @@ function createHomeInventory(canvas, pawn) {
     }
   }
   function available(tree) {
-    if (!map || !tree || tree.felled || (tree.kind === 'gold' ? selected !== 3 : selected !== 1 || map.name !== 'Lar')) return false;
+    if (!map || map.construction?.job || !tree || tree.felled || (tree.kind === 'gold' ? selected !== 3 : selected !== 1 || map.name !== 'Lar')) return false;
     const base = trunk(tree);
     const col = Math.floor(pawn.x), row = Math.floor(pawn.y);
     return Math.hypot(pawn.x-base.x, pawn.y-base.y) <= 1 &&
@@ -152,7 +154,7 @@ function createHomeInventory(canvas, pawn) {
       map.heights[row]?.[col] === (tree.hill || 0) && visible(map, pawn, base);
   }
   function pickTree(event) {
-    if (!map || ![1,3].includes(selected) || !canvas.worldToScreen || document.querySelector('dialog[open]')) return null;
+    if (!map || map.construction?.job || ![1,3].includes(selected) || !canvas.worldToScreen || document.querySelector('dialog[open]')) return null;
     // Touch harvesting targets the nearest reachable resource, wherever the screen is pressed.
     if (event.pointerType === 'touch') {
       return map.decorations.filter(available)

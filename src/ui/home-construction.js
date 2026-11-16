@@ -28,36 +28,92 @@ function createHomeConstruction(inventory, pawn, wallet) {
     }
     status.textContent='';
   }
-  function findSite(){
-    const sites=[];
-    for(let y=3;y<46;y++)for(let x=3;x<46;x++){
-      let free=true;
-      // Reserve the roof, footprint and a clear approach to the front door.
-      for(let dy=-1;dy<=1 && free;dy++)for(let dx=0;dx<=1;dx++){
-        if(!map.surface[y+dy]?.[x+dx] || map.heights[y+dy][x+dx]!==0 || map.paths[y+dy]?.[x+dx] ||
-          map.stairs.some(s=>s.x===x+dx&&s.y===y+dy)){free=false;break;}
-      }
-      if(!free || Math.hypot(pawn.x-x-1,pawn.y-y-.72)<2)continue;
-      if(map.decorations.some(item=>item.kind!=='bush' && item.x>=x-1&&item.x<=x+2&&item.y>=y-2&&item.y<=y+2))continue;
-      if(inventory.drops.some(item=>item.x>=x-1&&item.x<=x+2&&item.y>=y-2&&item.y<=y+2))continue;
-      sites.push({x,y});
+  const jobKey='cripta.home.construction-job.v1';
+  let job=null,hover=null,routes=null,saveIn=0,repathIn=0,lastPosition=null;
+  try {
+    const saved=JSON.parse(localStorage.getItem(jobKey));
+    if(saved&&colors[saved.color]){
+      const site=saved.site;
+      job={color:saved.color,phase:'placing',elapsed:Number.isFinite(saved.elapsed)?Math.max(0,Math.min(15,saved.elapsed)):0};
+      if(site&&Number.isInteger(site.x)&&Number.isInteger(site.y)&&site.x>=2&&site.x<=46&&site.y>=3&&site.y<=46)
+        Object.assign(job,{site:{x:site.x,y:site.y},phase:'walking'});
     }
-    sites.sort((a,b)=>Math.hypot(a.x-map.house.x,a.y-map.house.y)-Math.hypot(b.x-map.house.x,b.y-map.house.y));
-    return sites[0];
+  } catch {}
+  function saveJob(){try{localStorage.setItem(jobKey,JSON.stringify(job));}catch{}}
+  function freeSite(site){
+    if(!map||!site)return false;
+    const {x,y}=site;
+    if(x<2||y<3||x>46||y>46)return false;
+    for(let dy=-2;dy<=1;dy++)for(let dx=0;dx<=1;dx++){
+      if(!map.surface[y+dy]?.[x+dx]||map.heights[y+dy][x+dx]!==0||
+        map.stairs.some(s=>s.x===x+dx&&s.y===y+dy))return false;
+    }
+    if(map.decorations.some(item=>item.x>=x-1&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1))return false;
+    if(map.sheep.some(item=>item.x>=x-.5&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1))return false;
+    return !inventory.drops.some(item=>item.x>=x&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1);
+  }
+  function routeTo(site){
+    const goal=routes.key(site.x+.5,site.y+1.5);
+    if(!routes.graph.has(goal))return null;
+    let current=routes.nearest(pawn),path=[routes.point(current)];
+    for(let i=0;i<routes.graph.size&&current!==goal;i++){
+      const next=routes.nextStep(current,goal);
+      if(next===current)return null;
+      current=next;path.push(routes.point(current));
+    }
+    return path;
   }
   function build(color){
-    if(!map || map.name!=='Lar')return;
+    if(!map||job)return;
     refresh();
-    const resources=inventory.resources;
-    if(wallet.coins<cost.coins||resources.wood<cost.wood||resources.gold<cost.gold)return;
-    const site=findSite();
-    if(!site){status.textContent='Não há espaço livre suficiente para outra casa.';return;}
+    if(wallet.coins<cost.coins||inventory.resources.wood<cost.wood||inventory.resources.gold<cost.gold)return;
     if(!inventory.spend(cost))return;
     wallet.spend(cost.coins);
-    const house={kind:'house',...site,color,hill:0};
-    map.decorations=map.decorations.filter(item=>item.kind!=='bush'||item.x<site.x||item.x>site.x+1||item.y<site.y-1||item.y>site.y+1);
-    buildings.push(house);map.decorations.push(house);save();refresh();
-    status.textContent=`Casa ${colors[color].toLowerCase()} construída! Os recursos foram descontados.`;
+    job={color,phase:'placing',elapsed:0};hover=null;saveJob();
+    routes=encounterRoutes(map);inventory.stop();pawn.pause();dialog.close();
+    const site={x:Math.max(2,Math.min(46,Math.floor(pawn.x)+2)),y:Math.max(3,Math.min(46,Math.floor(pawn.y)))};
+    hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
+  }
+  function point(event,canvas){
+    const rect=canvas.getBoundingClientRect();
+    const world=canvas.screenToWorld({x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height});
+    return {x:Math.floor(world.x)-1,y:Math.floor(world.y)};
+  }
+  function aim(event,canvas){
+    if(job?.phase!=='placing'||!canvas.screenToWorld)return;
+    const site=point(event,canvas);hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
+  }
+  function select(event,canvas){
+    if(!job)return false;
+    if(job.phase!=='placing')return true;
+    aim(event,canvas);
+    if(!hover?.valid)return true;
+    job.site={x:hover.x,y:hover.y};job.phase='walking';saveJob();
+    pawn.follow(routeTo(job.site));lastPosition={x:pawn.x,y:pawn.y};repathIn=1;return true;
+  }
+  function update(dt){
+    if(!job||!map)return;
+    inventory.stop();
+    if(job.phase==='walking'){
+      const target={x:job.site.x+.5,y:job.site.y+1.5};
+      if(Math.hypot(pawn.x-target.x,pawn.y-target.y)<.08){
+        pawn.follow(null);pawn.pause();job.phase='building';saveJob();
+      } else {
+        repathIn-=dt;
+        if(repathIn<=0){
+          if(!lastPosition||Math.hypot(pawn.x-lastPosition.x,pawn.y-lastPosition.y)<.05)pawn.follow(routeTo(job.site));
+          lastPosition={x:pawn.x,y:pawn.y};repathIn=1;
+        }
+      }
+    } else if(job.phase==='building'){
+      job.elapsed+=dt;saveIn-=dt;
+      if(saveIn<=0){saveJob();saveIn=1;}
+      if(job.elapsed>=15){
+        const house={kind:'house',...job.site,color:job.color,hill:0};
+        buildings.push(house);map.decorations.push(house);save();
+        job=null;hover=null;saveJob();pawn.pause();
+      }
+    }
   }
   for(const [color,label] of Object.entries(colors)){
     const card=document.createElement('article');card.className='house-plan';
@@ -72,15 +128,19 @@ function createHomeConstruction(inventory, pawn, wallet) {
   document.getElementById('open-construction').onclick=()=>showCatalog(true);
   document.getElementById('construction-back').onclick=()=>showCatalog(false);
   dialog.querySelector('.home-menu-close').onclick=()=>dialog.close();
-  return {
+  const api={
+    update,aim,select,freeSite,
+    get job(){return job;},get preview(){return hover;},
     attach(next){
       map=next.name==='Lar'?next:null;
+      if(map){map.construction=api;routes=encounterRoutes(map);if(job?.site){job.phase='walking';pawn.follow(routeTo(job.site));}}
       if(map)for(const b of buildings){
         map.decorations=map.decorations.filter(item=>item.kind!=='bush'||item.x<b.x||item.x>b.x+1||item.y<b.y-1||item.y>b.y+1);
         if(!map.decorations.includes(b))map.decorations.push(b);
       }
     },
-    open(next){if(next!==map)return;pawn.pause();inventory.stop();showCatalog(false);dialog.showModal();},
+    open(next){if(next!==map||job)return;pawn.pause();inventory.stop();showCatalog(false);dialog.showModal();},
     get opened(){return dialog.open;}
   };
+  return api;
 }
