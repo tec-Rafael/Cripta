@@ -10,6 +10,17 @@ let previousFrame = 0;
 const el=id=>document.getElementById(id);
 let wallet=0, noticeTimer;
 try {wallet=Math.max(0,parseInt(localStorage.getItem('cripta.coins'),10)||0);}catch{}
+// One-time local construction test credit; never applied on the published site.
+try {
+  const creditKey='cripta.local.construction-credit.2026-11-15';
+  if (['file:','http:'].includes(location.protocol) &&
+      (location.protocol==='file:' || ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) &&
+      !localStorage.getItem(creditKey)) {
+    wallet+=20;
+    localStorage.setItem('cripta.coins',String(wallet));
+    localStorage.setItem(creditKey,'20');
+  }
+} catch {}
 function collectCoin(){
   wallet++;el('wallet').textContent=wallet;
   try{localStorage.setItem('cripta.coins',String(wallet));}catch{}
