@@ -320,16 +320,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #home-menu.catalog-open .construction-table {
   border-width:36px 32px 32px 36px;
   border-image:none;
-  background-image:
-    url('../assets/ui/construction-edge-tl.png'),url('../assets/ui/construction-edge-tr.png'),
-    url('../assets/ui/construction-edge-bl.png'),url('../assets/ui/construction-edge-br.png'),
-    url('../assets/ui/construction-edge-top.png'),url('../assets/ui/construction-edge-bottom.png'),
-    url('../assets/ui/construction-edge-left.png'),url('../assets/ui/construction-edge-right.png'),
-    url('../assets/ui/construction-wood-tile.png');
-  background-position:left top,right top,left bottom,right bottom,36px top,36px bottom,left 36px,right 36px,36px 36px;
-  background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,repeat-x,repeat-x,repeat-y,repeat-y,repeat;
-  background-origin:border-box;
-  background-clip:border-box;
+  background:url('../assets/ui/construction-wood-tile.png') left top/64px 64px repeat padding-box;
   padding:14px 10px;
 }
 #home-menu.catalog-open .construction-cloth { border:0;padding:8px;background:none; }
@@ -337,3 +328,21 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   #home-menu.catalog-open .construction-table { padding:10px 0; }
   #home-menu.catalog-open .construction-cloth { padding:4px 0; }
 }
+
+#home-menu { outline:none;overflow:hidden; }
+.construction-frame { display:none; }
+#home-menu.catalog-open .construction-frame { display:grid;position:absolute;inset:-36px -32px -32px -36px;grid-template-columns:36px minmax(0,1fr) 32px;grid-template-rows:36px minmax(0,1fr) 32px;grid-template-areas:'tl top tr' 'left . right' 'bl bottom br';pointer-events:none; }
+.construction-frame i { display:block;background-repeat:no-repeat; }
+.construction-frame .tl { grid-area:tl;background-image:url('../assets/ui/construction-edge-tl.png'); }
+.construction-frame .top { grid-area:top;background-image:url('../assets/ui/construction-edge-top.png');background-repeat:repeat-x; }
+.construction-frame .tr { grid-area:tr;background-image:url('../assets/ui/construction-edge-tr.png'); }
+.construction-frame .left { grid-area:left;background-image:url('../assets/ui/construction-edge-left.png');background-repeat:repeat-y; }
+.construction-frame .right { grid-area:right;background-image:url('../assets/ui/construction-edge-right.png');background-repeat:repeat-y; }
+.construction-frame .bl { grid-area:bl;background-image:url('../assets/ui/construction-edge-bl.png'); }
+.construction-frame .bottom { grid-area:bottom;background-image:url('../assets/ui/construction-edge-bottom.png');background-repeat:repeat-x; }
+.construction-frame .br { grid-area:br;background-image:url('../assets/ui/construction-edge-br.png'); }
+#home-menu.catalog-open .construction-cloth { max-height:calc(94dvh - 190px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#438f98 #704a35; }
+#home-menu .construction-cloth::-webkit-scrollbar { width:8px; }
+#home-menu .construction-cloth::-webkit-scrollbar-track { background:#704a35;border-radius:4px; }
+#home-menu .construction-cloth::-webkit-scrollbar-thumb { background:#438f98;border:1px solid #b8d1b6;border-radius:4px; }
+#home-menu .construction-cloth::-webkit-scrollbar-button { display:none; }
