@@ -12,3 +12,10 @@ Use case: stylized-concept. Asset type: modular wooden fence sprite sheet for th
 `wooden-fence-sheet-v2.png` replaces the first generation in the game. Generated with the built-in image tool, editing version 1 with House1.png and Archery.png as visual references. This is newly generated artwork, not an official asset. The game samples the horizontal and vertical pieces directly from this sheet.
 
 Prompt: Redraw the existing 4x4 fence sheet to harmonize with the reference game's low-resolution buildings. Preserve the fence layout and modular silhouettes, replacing orange glossy wood and large caps with thinner rustic posts, desaturated beige and olive-tan wood, pale top highlights, brown shadows, dark blue-gray pixel outlines, subtle grain and chipped tips. Use a limited palette, hard pixels, no smooth gradients, no glow, no scenery or text, and true transparent alpha. Keep the first two cells as horizontal and vertical rails for integration with the game's source crops. House1.png and Archery.png are style references; the original generated fence sheet is the edit target.
+
+
+## Version 3 (active)
+
+`wooden-fence-sheet-v3.png` was edited with the built-in image tool from version 2 and the user's close-up fence reference. It is newly generated artwork, not an official artist asset. Applied to the construction worksite, including the open front gate.
+
+Prompt: Recreate the supplied reference's irregular squared timber posts, roughly chopped slanted tops, pale cream caps, beige wood fronts, muted ochre/khaki sides and dark blue-black pixel outlines. Keep narrow light rectangular rails with brown undersides, flat small shadow facets and chipped edges. Preserve the 4x4 modular fence layout of version 2, including straight pieces, corners, junctions and open/closed gates. Match the low-resolution pixel clusters of the close-up; avoid rounded caps, glossy orange wood, fine grain, gradients, glow or invented ornaments. Keep transparent padding and actual transparent alpha with no scenery, text or grid.
