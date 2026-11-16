@@ -66,7 +66,17 @@ function encounterRoutes(map) {
     }
     return start;
   }
-  return {key,point,graph,nextStep};
+  function nearest(pointToReach){
+    const cell=key(pointToReach.x,pointToReach.y);
+    if(graph.has(cell))return cell;
+    let nearestCell=null, distance=Infinity;
+    for(const candidate of graph.keys()){
+      const d=gap(point(candidate),pointToReach);
+      if(d<distance){distance=d;nearestCell=candidate;}
+    }
+    return nearestCell;
+  }
+  return {key,point,graph,nextStep,nearest};
 }
 
 function createEncounter(map,pawn,id,reward){
@@ -171,21 +181,27 @@ function createEncounter(map,pawn,id,reward){
         continue;
       }
       if(e.phase==='recover'&&e.timer>0)continue;
-      const dist=gap(e,pawn), sees=dist<=hammerGnome.sight&&visible(map,e,pawn);
-      if(sees&&dist<=hammerGnome.reach){
+      const dist=gap(e,pawn);
+      // Once alerted, track the player throughout the detection radius even behind obstacles.
+      const sees=dist<=hammerGnome.sight&&(e.alerted||visible(map,e,pawn));
+      if(sees)e.alerted=true;
+      if(sees&&dist<=hammerGnome.reach&&visible(map,e,pawn)){
         e.dx=(pawn.x-e.x)/(dist||1);e.dy=(pawn.y-e.y)/(dist||1);
         e.facing=Math.sign(e.dx)||e.facing;e.phase='strike';e.timer=hammerGnome.windup+hammerGnome.impact;e.clock=0;e.waypoint=null;continue;
       }
-      if(sees)e.goal=routes.key(pawn.x,pawn.y);
+      if(sees)e.goal=routes.nearest(pawn);
       const current=routes.key(e.x,e.y);
-      if(e.goal===current&&!sees)e.goal=null;
+      if(e.goal===current&&!sees){e.goal=null;e.alerted=false;}
       e.phase=sees||e.goal!=null?'chase':'patrol';
       if(!e.waypoint){
         const neighbors=routes.graph.get(current)||[];
         if(e.phase==='patrol'&&e.timer>0)continue;
         const step=e.goal!=null?routes.nextStep(current,e.goal):neighbors[Math.floor(Math.random()*neighbors.length)];
         if(step===undefined)continue;
-        e.waypoint=sees&&current===e.goal?{x:pawn.x,y:pawn.y}:routes.point(step);
+        const center=routes.point(current);
+        // Return to the route center before turning, avoiding diagonal corner collisions.
+        e.waypoint=gap(e,center)>.05?center:
+          sees&&current===e.goal?{x:pawn.x,y:pawn.y}:routes.point(step);
         if(step===current&&!sees)e.goal=null;
       }
       const d=gap(e,e.waypoint), travel=Math.min(d,dt*(e.phase==='chase'?hammerGnome.speed:1));

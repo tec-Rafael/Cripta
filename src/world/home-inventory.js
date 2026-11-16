@@ -1,3 +1,17 @@
+// Persisted timestamps let airborne resources settle naturally across page reloads.
+function resourceDropMotion(drop, now) {
+  const still={x:drop.x,y:drop.y,hop:0,tilt:0,pop:1,settled:true};
+  if(!Number.isFinite(drop.fromX)||!Number.isFinite(drop.fromY)||!Number.isFinite(drop.bornAt))return still;
+  const t=Math.max(0,Math.min(1,(now-drop.bornAt-(drop.delay||0))/800));
+  if(t>=1)return still;
+  const launch=Math.min(1,t/.68),travel=1-(1-launch)**2;
+  const bounce=Math.max(0,(t-.68)/.32);
+  return {x:drop.fromX+(drop.x-drop.fromX)*travel,y:drop.fromY+(drop.y-drop.fromY)*travel,
+    hop:t<.68?4*launch*(1-launch)*28:Math.abs(Math.sin(bounce*Math.PI*2))*(1-bounce)*9,
+    tilt:Math.sin(launch*Math.PI)*.22*Math.sign(drop.x-drop.fromX||1),
+    pop:Math.min(1,.35+launch*2),settled:false};
+}
+
 function createHomeInventory(canvas, pawn) {
   const storageKey = 'cripta.home.inventory.v1';
   const regrowAfter = 60 * 60 * 1000;
@@ -47,6 +61,7 @@ function createHomeInventory(canvas, pawn) {
   }
   function treeId(tree) { return tree.resourceId || (tree.kind === 'gold' ? 'gold:' : '') + tree.x + ',' + tree.y; }
   function trunk(tree) {
+    if(tree.kind==='house')return {x:tree.x+1,y:tree.y+.72};
     return {x: tree.x + .5, y: tree.y + (tree.kind === 'gold' ? .55 : tree.variant <= 2 ? .92 : .71)};
   }
   function stop() {
@@ -93,6 +108,8 @@ function createHomeInventory(canvas, pawn) {
     const candidates = [];
     for (let y=1; y<map.surface.length-1; y++) for (let x=1; x<map.surface[y].length-1; x++) {
       if (x===node.x && y===node.y || Math.hypot(pawn.x-x-.5,pawn.y-y-.55)<2) continue;
+      const site=map.construction?.job?.site;
+      if(site&&Math.abs(site.x-x)<4&&Math.abs(site.y-y)<4)continue;
       // Leave flat approaches open and avoid paths, doors and other resources.
       let clear = true;
       for (let dy=-1; dy<=1 && clear; dy++) for (let dx=-1; dx<=1; dx++) {
@@ -144,7 +161,8 @@ function createHomeInventory(canvas, pawn) {
     }
   }
   function available(tree) {
-    if (!map || !tree || tree.felled || (tree.kind === 'gold' ? selected !== 3 : selected !== 1 || map.name !== 'Lar')) return false;
+    if(!tree||!(['tree','gold'].includes(tree.kind)||tree.kind==='house'&&tree.color))return false;
+    if (!map || map.construction?.job || !tree || tree.felled || (tree.kind === 'gold' ? selected !== 3 : selected !== 1 || map.name !== 'Lar')) return false;
     const base = trunk(tree);
     const col = Math.floor(pawn.x), row = Math.floor(pawn.y);
     return Math.hypot(pawn.x-base.x, pawn.y-base.y) <= 1 &&
@@ -152,11 +170,17 @@ function createHomeInventory(canvas, pawn) {
       map.heights[row]?.[col] === (tree.hill || 0) && visible(map, pawn, base);
   }
   function pickTree(event) {
-    if (!map || ![1,3].includes(selected) || !canvas.worldToScreen || document.querySelector('dialog[open]')) return null;
+    if (!map || map.construction?.job || ![1,3].includes(selected) || !canvas.worldToScreen || document.querySelector('dialog[open]')) return null;
+    // Touch harvesting targets the nearest reachable resource, wherever the screen is pressed.
+    if (event.pointerType === 'touch') {
+      return map.decorations.filter(available)
+        .sort((a,b) => Math.hypot(trunk(a).x-pawn.x,trunk(a).y-pawn.y) -
+          Math.hypot(trunk(b).x-pawn.x,trunk(b).y-pawn.y))[0] || null;
+    }
     const bounds = canvas.getBoundingClientRect();
     const x = (event.clientX-bounds.left)*canvas.width/bounds.width;
     const y = (event.clientY-bounds.top)*canvas.height/bounds.height;
-    return map.decorations.filter(item => item.kind === (selected === 3 ? 'gold' : 'tree') && !item.felled)
+    return map.decorations.filter(item => (selected === 3 ? item.kind==='gold' : item.kind==='tree'||item.kind==='house'&&item.color) && !item.felled)
       .map(tree => {
         const point = canvas.worldToScreen(trunk(tree));
         return {tree, distance: Math.hypot(x-point.x, (y-point.y+(tree.kind === 'gold' ? 12 : 48))*.6)};
@@ -186,7 +210,7 @@ function createHomeInventory(canvas, pawn) {
       stop(); drawSlots();
     }
     if (event.code !== 'KeyJ' || event.repeat) return;
-    const tree = map.decorations.filter(item => ['tree','gold'].includes(item.kind) && available(item))
+    const tree = map.decorations.filter(item => ['tree','gold','house'].includes(item.kind) && available(item))
       .filter(item => {
         const base = trunk(item);
         return (base.x-pawn.x)*pawn.heading.x + (base.y-pawn.y)*pawn.heading.y >= 0;
@@ -199,14 +223,16 @@ function createHomeInventory(canvas, pawn) {
 
   function adjacentDrop(node) {
     const level = node.hill || 0;
-    const cells = [[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy]) => ({x:node.x+dx+.5,y:node.y+dy+.5}));
+    const base = trunk(node);
+    const cells = [[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy]) => ({x:base.x+dx*.75,y:base.y+dy*.75}));
     const free = cells.filter(cell => {
       const x=Math.floor(cell.x), y=Math.floor(cell.y);
       return map.surface[y]?.[x] && map.heights[y][x] === level &&
         !map.stairs.some(stair => stair.x === x && stair.y === y) &&
         canStand(map,cell,cell.x,cell.y) && visible(map,trunk(node),cell);
     });
-    return free[Math.floor(Math.random()*free.length)];
+    // Prefer the side opposite the player while keeping the drop close to the resource.
+    return free.sort((a,b) => Math.hypot(b.x-pawn.x,b.y-pawn.y) - Math.hypot(a.x-pawn.x,a.y-pawn.y))[0];
   }
   function update(dt) {
     if (!map) return;
@@ -218,25 +244,29 @@ function createHomeInventory(canvas, pawn) {
     }
     if (target && !available(target)) stop();
     if (target) {
-      if (!swing) swing = {time:0, hit:false, kind:target.kind, dx:Math.sign(trunk(target).x-pawn.x) || pawn.heading.x || 1};
+      if (!swing) swing = {time:0, hit:false, kind:target.kind, target, dx:Math.sign(trunk(target).x-pawn.x) || pawn.heading.x || 1};
       swing.time += dt;
       if (!swing.hit && swing.time >= impactTime) {
         swing.hit = true;
-        const id = treeId(target);
-        const record = state.trees[id] || {hits:0, cutAt:0};
-        const landing = record.hits === 4 ? adjacentDrop(target) : null;
-        if (record.hits === 4 && !landing) { stop(); return; }
-        record.hits++;
-        state.trees[id] = record;
-        if (record.hits === 5) {
-          record.cutAt = Date.now();
-          target.felled = true;
-          const base = trunk(target);
-          state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', hill:target.hill || 0, bornAt:record.cutAt});
-          map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
-          target = null;
+        if(target.kind==='house'){
+          if(map.construction.hitHouse(target))target=null;
+        }else{
+          const id = treeId(target);
+          const record = state.trees[id] || {hits:0, cutAt:0};
+          const landing = record.hits === 4 ? adjacentDrop(target) : null;
+          if (record.hits === 4 && !landing) { stop(); return; }
+          record.hits++;
+          state.trees[id] = record;
+          if (record.hits === 5) {
+            record.cutAt = Date.now();
+            target.felled = true;
+            const base = trunk(target);
+            state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', fromX:base.x,fromY:base.y, hill:target.hill || 0, bornAt:record.cutAt});
+            map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
+            target = null;
+          }
+          save();
         }
-        save();
       }
       if (swing.time >= swingDuration) swing = null;
     } else if (swing) {
@@ -245,6 +275,7 @@ function createHomeInventory(canvas, pawn) {
     }
     const before = state.drops.length;
     state.drops = state.drops.filter(drop => {
+      if(!resourceDropMotion(drop,Date.now()).settled)return true;
       if (Date.now()-drop.bornAt < 500 || Math.hypot(pawn.x-drop.x,pawn.y-drop.y) > .65 ||
           map.heights[Math.floor(pawn.y)]?.[Math.floor(pawn.x)] !== (drop.hill || 0) || !visible(map,pawn,drop)) return true;
       const kind = drop.kind === 'goldDrop' ? 'gold' : 'wood';
@@ -254,7 +285,33 @@ function createHomeInventory(canvas, pawn) {
     });
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
-  const api = {attach, update, stop, get swing(){return swing;}, get duration(){return swingDuration;},
+  const api = {attach, update, stop,
+    dropWood(node,amount){
+      if(!map||!Number.isSafeInteger(amount)||amount<=0)return;
+      const base=trunk(node),level=node.hill||0,bornAt=Date.now();
+      const candidates=[];
+      for(const radius of [.75,1.1,1.5])for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const point={x:base.x+dx*radius,y:base.y+dy*radius};
+        const x=Math.floor(point.x),y=Math.floor(point.y);
+        if(map.surface[y]?.[x]&&map.heights[y][x]===level&&
+          !map.stairs.some(stair=>stair.x===x&&stair.y===y)&&
+          canStand(map,point,point.x,point.y)&&visible(map,base,point))candidates.push(point);
+      }
+      candidates.sort((a,b)=>Math.hypot(a.x-base.x,a.y-base.y)-Math.hypot(b.x-base.x,b.y-base.y)||
+        Math.hypot(b.x-pawn.x,b.y-pawn.y)-Math.hypot(a.x-pawn.x,a.y-pawn.y));
+      const chosen=[];
+      for(const point of candidates)if(chosen.every(other=>Math.hypot(point.x-other.x,point.y-other.y)>.4))chosen.push(point);
+      for(let i=0;i<amount;i++){
+        const point=chosen[i%chosen.length]||{x:pawn.x,y:pawn.y};
+        state.drops.push({id:'house-wood:'+node.x+','+node.y+':'+bornAt+':'+i,...point,kind:'wood',hill:level,bornAt,fromX:base.x,fromY:base.y,delay:i*70});
+      }
+      save();
+    },
+    get resources(){return {wood:state.wood,gold:state.gold};},
+    spend(cost){
+      if (!map || state.wood<cost.wood || state.gold<cost.gold) return false;
+      state.wood-=cost.wood;state.gold-=cost.gold;save();drawSlots();return true;
+    }, get swing(){return swing;}, get duration(){return swingDuration;},
     get equipped(){
       return ['Hammer','Axe','Knife','Pickaxe'][selected] || (state.order[selected-4] === 'gold' && state.gold > 0 ? 'Gold' : state.order[selected-4] === 'wood' && state.wood > 0 ? 'Wood' : '');
     }, get drops(){return state.drops;}};

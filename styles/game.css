@@ -257,3 +257,102 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 
 #guard { display:grid;place-items:center;padding:4px; }
 #guard img { width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none; }
+
+#guard[hidden] { display:none; }
+
+@media (hover:none) and (pointer:coarse), (max-width:600px) {
+  #guard { display:none; }
+}
+#controls-toggle { margin:14px 0;padding:9px 24px;border:2px solid #537a78;border-radius:6px;background:#397e87;color:#fff6d8;font:inherit; }
+#controls-toggle:hover,#controls-toggle:focus-visible { background:#286573; }
+#controls-help { width:100%;font-size:16px;line-height:1.5; }
+#controls-help[hidden] { display:none; }
+#controls-help h3 { margin:16px 0 6px;font-size:18px; }
+#controls-help ul { padding-left:20px;margin:0; }
+#controls-help li { margin:6px 0; }
+#controls-help p { margin:6px 0; }
+
+#home-menu { width:min(880px,96vw);max-height:94dvh;padding:6px;border:0;background:transparent;color:#493c2c;font:600 17px/1.4 Georgia,serif;overflow:auto; }
+#home-menu::backdrop { background:#102b3699;backdrop-filter:blur(3px); }
+.construction-table { position:relative;padding:12px;border:solid transparent;border-width:22px;border-image:url('../assets/ui/inventory-wood.png') 36 32 32 36 fill /22px/0 stretch;image-rendering:pixelated; }
+.construction-ribbon { border:solid transparent;border-width:10px 30px;border-image:url('../assets/ui/ribbon-blue.png') 20 96 12 96 fill /10px 30px/0 stretch;color:#fff6d8;text-shadow:1px 2px #294b57; }
+#home-menu-title { text-align:center;margin:0 36px 16px;font-size:clamp(23px,5vw,32px); }
+.home-menu-close { position:absolute;right:-12px;top:-12px;z-index:1; }
+.home-menu-close img { width:44px;height:44px; }
+.construction-cloth { padding:18px 12px;border:solid transparent;border-width:16px;border-image:url('../assets/ui/construction-cloth.png') 32 fill /16px/0 stretch;text-align:center; }
+#home-menu-root { min-height:150px;display:grid;place-items:center; }
+#home-menu-root[hidden],#construction-catalog[hidden] { display:none; }
+#house-options { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 18px; }
+.house-plan h3 { margin:0;font-size:18px; }
+.house-preview { width:128px;height:192px;object-fit:contain;image-rendering:pixelated; }
+.construction-cost { display:flex;justify-content:center;gap:10px;align-items:center;margin:-10px -8px 10px; }
+.construction-cost span { display:flex;align-items:center;gap:3px; }
+.construction-cost img { width:30px;height:30px;object-fit:contain; }
+.wood-action { padding:9px 18px;background:#754a32;color:#fff4d5;border:2px solid #ab8050;border-radius:4px;font:inherit; }
+.wood-action:hover:not(:disabled),.wood-action:focus-visible { background:#915f3b; }
+.wood-action:disabled { opacity:.5;cursor:url('../assets/ui/cursor-03.png') 14 14,not-allowed; }
+#construction-status { margin:20px 0;font-size:15px; }
+@media (max-width:540px) {
+  #home-menu { padding:4px; }
+  .construction-table { padding:6px;border-width:16px; }
+  .construction-cloth { padding:12px 3px;border-width:10px; }
+  #house-options { grid-template-columns:1fr; }
+  .house-preview { width:112px;height:168px; }
+  .construction-cost { max-width:280px;margin:-6px auto 12px; }
+}
+
+/* Original SmallBlueSquareButton sprites preserve the package borders. */
+.wood-action { padding:10px 22px;border:solid transparent;border-width:10px;border-image:url('../assets/tiny-swords/UI Elements/UI Elements/Buttons/SmallBlueSquareButton_Regular.png') 32 fill /16px/0 stretch;border-radius:0;background:transparent;color:#fff6d8;text-shadow:1px 2px #294b57;image-rendering:pixelated;transition:filter .15s,transform .1s; }
+.wood-action:hover:not(:disabled),.wood-action:focus-visible { background:transparent;filter:brightness(1.12); }
+.wood-action:active:not(:disabled) { border-image-source:url('../assets/tiny-swords/UI Elements/UI Elements/Buttons/SmallBlueSquareButton_Pressed.png');transform:translateY(2px); }
+.wood-action:focus-visible { outline:2px solid #fff6d8;outline-offset:3px; }
+#construction-status:empty { display:none; }
+#construction-back { margin-top:20px; }
+#home-menu:not(.catalog-open) { width:min(440px,94vw); }
+/* Complete nine-patch assembled exclusively from Banners/Banner.png. */
+#home-menu .construction-table { border-width:28px 32px 40px;border-image:url('../assets/ui/home-banner.png') 64 fill /28px 32px 40px/0 stretch;padding:18px 8px; }
+#home-menu .construction-cloth { border:0;padding:8px;background:none; }
+#home-menu:not(.catalog-open) .construction-cloth { border:0;padding:0; }
+#home-menu:not(.catalog-open) #home-menu-title { border:0;margin:0;color:#493c2c;text-shadow:none; }
+#home-menu:not(.catalog-open) #home-menu-root { min-height:160px; }
+
+/* Native-size corners and repeated planks avoid stretching the pixel texture. */
+#home-menu.catalog-open .construction-table {
+  border-width:36px 32px 32px 36px;
+  border-image:none;
+  background:url('../assets/ui/construction-wood-tile.png') left top/64px 64px repeat padding-box;
+  padding:14px 10px;
+}
+#home-menu.catalog-open .construction-cloth { border:0;padding:8px;background:none; }
+@media (max-width:540px) {
+  #home-menu.catalog-open .construction-table { padding:10px 0; }
+  #home-menu.catalog-open .construction-cloth { padding:4px 0; }
+}
+
+#home-menu { outline:none;overflow:hidden; }
+.construction-frame { display:none; }
+#home-menu.catalog-open .construction-frame { display:grid;position:absolute;inset:-36px -32px -32px -36px;grid-template-columns:36px minmax(0,1fr) 32px;grid-template-rows:36px minmax(0,1fr) 32px;grid-template-areas:'tl top tr' 'left . right' 'bl bottom br';pointer-events:none; }
+.construction-frame i { display:block;background-repeat:no-repeat; }
+.construction-frame .tl { grid-area:tl;background-image:url('../assets/ui/construction-edge-tl.png'); }
+.construction-frame .top { grid-area:top;background-image:url('../assets/ui/construction-edge-top.png');background-repeat:repeat-x; }
+.construction-frame .tr { grid-area:tr;background-image:url('../assets/ui/construction-edge-tr.png'); }
+.construction-frame .left { grid-area:left;background-image:url('../assets/ui/construction-edge-left.png');background-repeat:repeat-y; }
+.construction-frame .right { grid-area:right;background-image:url('../assets/ui/construction-edge-right.png');background-repeat:repeat-y; }
+.construction-frame .bl { grid-area:bl;background-image:url('../assets/ui/construction-edge-bl.png'); }
+.construction-frame .bottom { grid-area:bottom;background-image:url('../assets/ui/construction-edge-bottom.png');background-repeat:repeat-x; }
+.construction-frame .br { grid-area:br;background-image:url('../assets/ui/construction-edge-br.png'); }
+#home-menu.catalog-open .construction-cloth { max-height:max(100px,calc(88dvh - 200px));overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b18158 #704a35; }
+#home-menu .construction-cloth::-webkit-scrollbar { width:8px; }
+#home-menu .construction-cloth::-webkit-scrollbar-track { background:#704a35;border-radius:4px; }
+#home-menu .construction-cloth::-webkit-scrollbar-thumb { background:#b18158;border:1px solid #d3aa78;border-radius:4px; }
+#home-menu .construction-cloth::-webkit-scrollbar-button { display:none; }
+
+#home-menu.catalog-open { width:min(820px,94vw);max-height:90dvh;box-sizing:border-box; }
+
+@media (hover:hover) and (pointer:fine) {
+  #world.building-clickable { cursor:url('../assets/ui/cursor-02.png') 9 1,pointer; }
+}
+
+@media (hover:hover) and (pointer:fine) {
+  #world.building-unavailable { cursor:url('../assets/ui/cursor-03.png') 14 14,not-allowed; }
+}

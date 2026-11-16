@@ -87,6 +87,7 @@ function createScene(canvas, images, reducedMotion) {
       const x=Math.floor(point.x),y=Math.floor(point.y);
       return {x:MARGIN+point.x*TILE-cameraX,y:MARGIN+(point.y-mountainHeight(map,x,y,point.x-x))*TILE-cameraY};
     };
+    canvas.screenToWorld=point=>({x:(point.x+cameraX-MARGIN)/TILE,y:(point.y+cameraY-MARGIN)/TILE});
     ctx.translate(-cameraX, -cameraY);
     // Include sprites rooted outside the viewport (canopies, roofs and foam).
     const view = {
@@ -123,12 +124,19 @@ function createScene(canvas, images, reducedMotion) {
     }
     const encounter=map.encounter;
     const fighters=encounter?[...encounter.coins,...encounter.enemies,...encounter.effects]:
-      [...(map.homeInventory?.drops || []).map(drop=>({...drop,kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
+      [...(map.homeInventory?.drops || []).map(drop=>({...drop,...resourceDropMotion(drop,Date.now()),kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
     // Gold occludes actors only behind its footprint (.55 center - .24 depth).
-    const base = item => item === pawn || fighters.includes(item) ? item.y :
-      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31}[item.kind] ?? .55);
+    const work=map.construction?.job;
+    if(work?.site&&['walking','building'].includes(work.phase))
+      actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site});
+    // Draw the axe swing after its house so the worker stays visible on every side.
+    const demolition=map.homeInventory?.swing;
+    const demolitionBase=demolition?.kind==='house'?demolition.target.y+.8:null;
+    const base = item => item===pawn&&demolitionBase!==null?demolitionBase:
+      item === pawn || fighters.includes(item) ? item.y :
+      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
@@ -165,7 +173,39 @@ function createScene(canvas, images, reducedMotion) {
         drawResidents(index+1);
       }
     }
+    function drawWorksiteFence(site){
+      const x=MARGIN+site.x*TILE,y=MARGIN+site.y*TILE;
+      // Enclose the house's ground footprint, not the tall roof sprite.
+      const width=2*TILE,depth=TILE,margin=12;
+      const left=x-margin,right=x+width+margin,back=y-margin,front=y+depth+margin;
+      const entrance=x+width/2,opening=48;
+      const horizontal=(from,to,base)=>{
+        const length=to-from,segments=Math.max(1,Math.ceil(length/48));
+        for(let i=0;i<segments;i++){
+          const start=Math.round(from+i*length/segments),end=Math.round(from+(i+1)*length/segments);
+          // Keep all rail pieces the same height and join them at their posts.
+          ctx.drawImage(images.fenceHorizontal,start-8,base-44,end-start+16,44);
+        }
+      };
+      const vertical=(px,from,to)=>{
+        const segments=Math.max(1,Math.ceil((to-from)/48));
+        for(let i=0;i<segments;i++){
+          const start=Math.round(from+i*(to-from)/segments),end=Math.round(from+(i+1)*(to-from)/segments);
+          ctx.drawImage(images.fenceVertical,px-8,start-24,16,end-start+24);
+        }
+      };
+      horizontal(left,right,back);
+      vertical(left,back,front);vertical(right,back,front);
+      horizontal(left,entrance-opening/2,front);
+      horizontal(entrance+opening/2,right,front);
+      // Open leaves fold inward, leaving the approach at the center of the house clear.
+      vertical(entrance-opening/2,front-28,front);
+      vertical(entrance+opening/2,front-28,front);
+      for(const px of [left,entrance-opening/2,entrance+opening/2,right])
+        ctx.drawImage(images.fencePost,px-8,front-31,16,31);
+    }
     function drawActor(item) {
+      if(item.kind==='worksiteFence'){drawWorksiteFence(item.site);return;}
       if (item === pawn) { pawn.draw(ctx, images, map, MARGIN, TILE); return; }
       if(fighters.includes(item)){
         const col=Math.floor(item.x),row=Math.floor(item.y);
@@ -187,10 +227,11 @@ function createScene(canvas, images, reducedMotion) {
           ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
-        }else if(item.kind==='goldDrop'){
-          ctx.drawImage(images.goldDrop,-12,-18,24,24);
-        }else if(item.kind==='wood'){
-          ctx.drawImage(images.wood,-24,-32,48,48);
+        }else if(item.kind==='goldDrop'||item.kind==='wood'){
+          ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
+          ctx.scale(item.pop??1,item.pop??1);
+          if(item.kind==='goldDrop')ctx.drawImage(images.goldDrop,-12,-18,24,24);
+          else ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
           const pop=Math.min(1,item.age/.3);
           ctx.translate(0,-Math.sin(pop*Math.PI)*20);
@@ -219,7 +260,7 @@ function createScene(canvas, images, reducedMotion) {
         ctx.restore();
       }
       if (item.kind === 'tower') ctx.drawImage(images.tower,x,y-192,128,256);
-      if (item.kind === 'house') ctx.drawImage(images.house,x,y-128,128,192);
+      if (item.kind === 'house') ctx.drawImage(images[item.color?'house'+item.color:map.name==='Lar'?'houseBlack':'house'],x,y-128,128,192);
       if (item.kind === 'gold' && !item.felled) {
         const variant = item.variant % 2 === 0 ? 6 : 5;
         const crop = variant === 6 ? {x:17,y:17,width:92,height:81} : {x:28,y:20,width:74,height:80};
@@ -229,6 +270,25 @@ function createScene(canvas, images, reducedMotion) {
       }
       if (item.kind === 'rock') ctx.drawImage(images.rock,x,y,64,64);
       if (item.kind === 'waterRock') drawSprite('waterRock',(tick+item.phase)%16,64,64,x,y,64,64);
+    }
+    const construction=map.construction;
+    if(construction?.job){
+      const job=construction.job,site=job.site||construction.preview;
+      if(site){
+        const x=MARGIN+site.x*TILE,y=MARGIN+(site.y-2)*TILE;
+        if(job.phase==='placing'){
+          ctx.save();ctx.globalAlpha=.8;
+          ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';ctx.fillRect(x,y,128,192);
+          ctx.drawImage(images.constructionMarker,x,y,128,192);ctx.restore();
+        }else if(job.phase==='building'){
+          const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
+          for(let i=0;i<4;i++){
+            const frame=Math.floor((job.elapsed*12+i*3)%frames);
+            ctx.drawImage(sheet,frame*size,0,size,size,x-16+(i%2)*48,y+48+Math.floor(i/2)*48,128,128);
+          }
+        }
+
+      }
     }
     ctx.globalAlpha = .8;
     for (let i = 0; i < 3; i++) {

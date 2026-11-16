@@ -4,21 +4,22 @@ const pawnAnimations = {
   run:  {sprite:'pawnRun', fps:15},
 };
 
-function drawPawn(ctx, images, player, lift, margin, tile, encounter, inventory) {
+function drawPawn(ctx, images, player, lift, margin, tile, encounter, inventory, construction) {
   const clip = pawnAnimations[player.motion];
   const suffix = player.motion === 'idle' ? 'Idle' : 'Run';
-  const chopping=inventory?.swing;
+  const building=construction?.job?.phase==='building';
+  const chopping=building?{kind:'building',time:construction.job.elapsed % .6,dx:player.facing}:inventory?.swing;
   const swing=chopping || encounter?.swing;
   let action=suffix;
   if(encounter?.guarding) action='Guard';
-  if(chopping) action=chopping.kind === 'gold' ? 'Mine' : 'Chop';
+  if(chopping) action=building?'Build':chopping.kind === 'gold' ? 'Mine' : 'Chop';
   else if(swing) action=player.character==='lancer' && Math.abs(swing.dy)>Math.abs(swing.dx)
     ? (swing.dy<0?'Up':'Down') : 'Attack';
   const equipped = inventory && !swing ? inventory.equipped : '';
   const image = images[(player.character || 'pawn') + action + equipped];
   const size = image.height;
   const frames=image.width/size;
-  const frame = swing ? Math.min(frames-1,Math.floor(swing.time/(chopping ? inventory.duration : encounter.stats.interval)*frames)) :
+  const frame = swing ? Math.min(frames-1,Math.floor(swing.time/(chopping ? (building ? .6 : inventory.duration) : encounter.stats.interval)*frames)) :
     Math.floor(player.elapsed * clip.fps) % frames;
   ctx.save();
   ctx.translate(Math.round(margin + player.x * tile), Math.round(margin + player.y * tile - lift));
