@@ -290,7 +290,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 .construction-cost img { width:30px;height:30px;object-fit:contain; }
 .wood-action { padding:9px 18px;background:#754a32;color:#fff4d5;border:2px solid #ab8050;border-radius:4px;font:inherit; }
 .wood-action:hover:not(:disabled),.wood-action:focus-visible { background:#915f3b; }
-.wood-action:disabled { opacity:.5;cursor:not-allowed; }
+.wood-action:disabled { opacity:.5;cursor:url('../assets/ui/cursor-03.png') 14 14,not-allowed; }
 #construction-status { margin:20px 0;font-size:15px; }
 @media (max-width:540px) {
   #home-menu { padding:4px; }
@@ -351,4 +351,8 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 
 @media (hover:hover) and (pointer:fine) {
   #world.building-clickable { cursor:url('../assets/ui/cursor-02.png') 9 1,pointer; }
+}
+
+@media (hover:hover) and (pointer:fine) {
+  #world.building-unavailable { cursor:url('../assets/ui/cursor-03.png') 14 14,not-allowed; }
 }

@@ -39,7 +39,7 @@ function attackSelected(){
 }
 let attackPointer=null;
 let hoverPointer=null;
-canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable');});
+canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable','building-unavailable');});
 canvas.addEventListener('pointerdown',event=>{
   if(event.button===0)attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false};
 });
@@ -139,7 +139,9 @@ function render(time) {
   if(document.querySelector('dialog[open]'))homeInventory.stop();
   previousFrame = time;
   drawScene(map, pawn, time);
-  canvas.classList.toggle('building-clickable',Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer)));
+  const buildingReady=Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer));
+  canvas.classList.toggle('building-clickable',buildingReady);
+  canvas.classList.toggle('building-unavailable',Boolean(!buildingReady&&hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer,false)));
 }
 
 async function start() {

@@ -19,7 +19,7 @@ function createAdventure(pawn, changeWorld) {
     enter(MapGenerator.generate(), true);
   }
   function start() { enter(home, false); }
-  function clickableBuilding(map, canvas, event) {
+  function clickableBuilding(map, canvas, event, requireReach = true) {
     if (!map || ui.open || document.querySelector('dialog[open]') || !canvas.worldToScreen || map.encounter?.hp===0) return null;
     const rect=canvas.getBoundingClientRect();
     const x=(event.clientX-rect.left)*canvas.width/rect.width;
@@ -29,7 +29,7 @@ function createAdventure(pawn, changeWorld) {
       const point=canvas.worldToScreen(base);
       const height=item.kind==='tower'?3:2;
       return Math.abs(x-point.x)<=64 && y>=point.y-(height+.72)*64 && y<=point.y+.28*64 &&
-        Math.hypot(pawn.x-base.x,pawn.y-base.y)<=2 && visible(map,pawn,base);
+        (!requireReach || Math.hypot(pawn.x-base.x,pawn.y-base.y)<=2 && visible(map,pawn,base));
     }).sort((a,b)=>b.y-a.y)[0];
   }
   function interact(map, canvas, event) {
