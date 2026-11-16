@@ -341,8 +341,8 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 .construction-frame .bl { grid-area:bl;background-image:url('../assets/ui/construction-edge-bl.png'); }
 .construction-frame .bottom { grid-area:bottom;background-image:url('../assets/ui/construction-edge-bottom.png');background-repeat:repeat-x; }
 .construction-frame .br { grid-area:br;background-image:url('../assets/ui/construction-edge-br.png'); }
-#home-menu.catalog-open .construction-cloth { max-height:calc(94dvh - 190px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#438f98 #704a35; }
+#home-menu.catalog-open .construction-cloth { max-height:calc(94dvh - 190px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b18158 #704a35; }
 #home-menu .construction-cloth::-webkit-scrollbar { width:8px; }
 #home-menu .construction-cloth::-webkit-scrollbar-track { background:#704a35;border-radius:4px; }
-#home-menu .construction-cloth::-webkit-scrollbar-thumb { background:#438f98;border:1px solid #b8d1b6;border-radius:4px; }
+#home-menu .construction-cloth::-webkit-scrollbar-thumb { background:#b18158;border:1px solid #d3aa78;border-radius:4px; }
 #home-menu .construction-cloth::-webkit-scrollbar-button { display:none; }
