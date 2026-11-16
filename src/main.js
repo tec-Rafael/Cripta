@@ -4,7 +4,6 @@ const SIZE = MapGenerator.size;
 let drawScene;
 let map;
 const pawn = createPawn(createControls(canvas));
-const homeInventory = createHomeInventory(canvas, pawn);
 let iteration = 0;
 let previousFrame = 0;
 const el=id=>document.getElementById(id);
@@ -21,6 +20,21 @@ try {
     localStorage.setItem(creditKey,'20');
   }
 } catch {}
+// Additional one-time local supplies for placement and construction tests.
+try {
+  const creditKey='cripta.local.construction-supplies.2026-11-15';
+  if ((location.protocol==='file:' || location.protocol==='http:'&&
+      ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) && !localStorage.getItem(creditKey)) {
+    const key='cripta.home.inventory.v1';
+    const saved=JSON.parse(localStorage.getItem(key))||{};
+    for(const kind of ['wood','gold'])saved[kind]=(Number.isSafeInteger(saved[kind])&&saved[kind]>=0?saved[kind]:0)+100;
+    saved.order=[...new Set([...(Array.isArray(saved.order)?saved.order:[]),'wood','gold'])];
+    localStorage.setItem(key,JSON.stringify(saved));
+    wallet+=100;localStorage.setItem('cripta.coins',String(wallet));
+    localStorage.setItem(creditKey,'100');
+  }
+} catch {}
+const homeInventory = createHomeInventory(canvas, pawn);
 function collectCoin(){
   wallet++;el('wallet').textContent=wallet;
   try{localStorage.setItem('cripta.coins',String(wallet));}catch{}
