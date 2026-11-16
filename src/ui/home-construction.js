@@ -53,7 +53,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
     return !inventory.drops.some(item=>item.x>=x&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1);
   }
   function routeTo(site){
-    const goal=routes.key(site.x+.5,site.y+1.5);
+    const goal=routes.key(site.x+1,site.y+1.5);
     if(!routes.graph.has(goal))return null;
     let current=routes.nearest(pawn),path=[routes.point(current)];
     for(let i=0;i<routes.graph.size&&current!==goal;i++){
@@ -61,6 +61,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
       if(next===current)return null;
       current=next;path.push(routes.point(current));
     }
+    path.push({x:site.x+1,y:site.y+1.5});
     return path;
   }
   function build(color){
@@ -95,7 +96,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
     if(!job||!map)return;
     inventory.stop();
     if(job.phase==='walking'){
-      const target={x:job.site.x+.5,y:job.site.y+1.5};
+      const target={x:job.site.x+1,y:job.site.y+1.5};
       if(Math.hypot(pawn.x-target.x,pawn.y-target.y)<.08){
         pawn.follow(null);pawn.pause();job.phase='building';saveJob();
       } else {

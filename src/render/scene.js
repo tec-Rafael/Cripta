@@ -128,8 +128,11 @@ function createScene(canvas, images, reducedMotion) {
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
     // Gold occludes actors only behind its footprint (.55 center - .24 depth).
+    const work=map.construction?.job;
+    if(work?.site&&['walking','building'].includes(work.phase))
+      actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site});
     const base = item => item === pawn || fighters.includes(item) ? item.y :
-      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31}[item.kind] ?? .55);
+      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
@@ -166,7 +169,24 @@ function createScene(canvas, images, reducedMotion) {
         drawResidents(index+1);
       }
     }
+    function drawWorksiteFence(site){
+      const fence=images.constructionFence;
+      const x=MARGIN+site.x*TILE,y=MARGIN+site.y*TILE;
+      const left=x-8,right=x+136,back=y-104,front=y+80;
+      const rail=(px,py,width=64)=>{
+        const height=Math.round(width*164/248);
+        ctx.drawImage(fence,32,106,248,164,px-8,py-height+5,width,height);
+      };
+      const side=(px,py)=>ctx.drawImage(fence,433,30,74,276,px-6,py-44,12,48);
+      for(let i=0;i<3;i++)rail(left+i*48,back);
+      for(let py=back+44;py<front;py+=44){side(left,py);side(right,py);}
+      side(left,front);side(right,front);
+      rail(left,front,40);rail(x+112,front,40);
+      // Open gate from the fourth row, second cell of the generated sprite sheet.
+      ctx.drawImage(fence,328,1018,276,182,x+22,front-50,84,55);
+    }
     function drawActor(item) {
+      if(item.kind==='worksiteFence'){drawWorksiteFence(item.site);return;}
       if (item === pawn) { pawn.draw(ctx, images, map, MARGIN, TILE); return; }
       if(fighters.includes(item)){
         const col=Math.floor(item.x),row=Math.floor(item.y);
@@ -247,16 +267,7 @@ function createScene(canvas, images, reducedMotion) {
             ctx.drawImage(sheet,frame*size,0,size,size,x-16+(i%2)*48,y+48+Math.floor(i/2)*48,128,128);
           }
         }
-        if(job.site && ['walking','building'].includes(job.phase)){
-          // Sample the generated rails directly; repeat small pieces around the worksite.
-          const fence=images.constructionFence;
-          const left=x-8,right=x+136,back=y+24,front=y+208;
-          const rail=(px,py)=>ctx.drawImage(fence,32,106,248,164,px-8,py-37,64,42);
-          const side=(px,py)=>ctx.drawImage(fence,433,30,74,276,px-6,py-44,12,48);
-          for(let i=0;i<3;i++){rail(left+i*48,back);rail(left+i*48,front);}
-          for(let py=back+44;py<front;py+=44){side(left,py);side(right,py);}
-          side(left,front);side(right,front);
-        }
+
       }
     }
     ctx.globalAlpha = .8;
