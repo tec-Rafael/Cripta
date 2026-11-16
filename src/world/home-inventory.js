@@ -153,6 +153,12 @@ function createHomeInventory(canvas, pawn) {
   }
   function pickTree(event) {
     if (!map || ![1,3].includes(selected) || !canvas.worldToScreen || document.querySelector('dialog[open]')) return null;
+    // Touch harvesting targets the nearest reachable resource, wherever the screen is pressed.
+    if (event.pointerType === 'touch') {
+      return map.decorations.filter(available)
+        .sort((a,b) => Math.hypot(trunk(a).x-pawn.x,trunk(a).y-pawn.y) -
+          Math.hypot(trunk(b).x-pawn.x,trunk(b).y-pawn.y))[0] || null;
+    }
     const bounds = canvas.getBoundingClientRect();
     const x = (event.clientX-bounds.left)*canvas.width/bounds.width;
     const y = (event.clientY-bounds.top)*canvas.height/bounds.height;
