@@ -124,7 +124,7 @@ function createScene(canvas, images, reducedMotion) {
     }
     const encounter=map.encounter;
     const fighters=encounter?[...encounter.coins,...encounter.enemies,...encounter.effects]:
-      [...(map.homeInventory?.drops || []).map(drop=>({...drop,...(drop.kind==='wood'?woodDropMotion(drop,Date.now()):{}),kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
+      [...(map.homeInventory?.drops || []).map(drop=>({...drop,...resourceDropMotion(drop,Date.now()),kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
     // Gold occludes actors only behind its footprint (.55 center - .24 depth).
@@ -212,12 +212,11 @@ function createScene(canvas, images, reducedMotion) {
           ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
-        }else if(item.kind==='goldDrop'){
-          ctx.drawImage(images.goldDrop,-12,-18,24,24);
-        }else if(item.kind==='wood'){
+        }else if(item.kind==='goldDrop'||item.kind==='wood'){
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
           ctx.scale(item.pop??1,item.pop??1);
-          ctx.drawImage(images.wood,-24,-32,48,48);
+          if(item.kind==='goldDrop')ctx.drawImage(images.goldDrop,-12,-18,24,24);
+          else ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
           const pop=Math.min(1,item.age/.3);
           ctx.translate(0,-Math.sin(pop*Math.PI)*20);

@@ -1,5 +1,5 @@
-// Persisted timestamps let airborne wood settle naturally across page reloads.
-function woodDropMotion(drop, now) {
+// Persisted timestamps let airborne resources settle naturally across page reloads.
+function resourceDropMotion(drop, now) {
   const still={x:drop.x,y:drop.y,hop:0,tilt:0,pop:1,settled:true};
   if(!Number.isFinite(drop.fromX)||!Number.isFinite(drop.fromY)||!Number.isFinite(drop.bornAt))return still;
   const t=Math.max(0,Math.min(1,(now-drop.bornAt-(drop.delay||0))/800));
@@ -261,7 +261,7 @@ function createHomeInventory(canvas, pawn) {
             record.cutAt = Date.now();
             target.felled = true;
             const base = trunk(target);
-            state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', ...(target.kind==='tree'?{fromX:base.x,fromY:base.y}:{}), hill:target.hill || 0, bornAt:record.cutAt});
+            state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', fromX:base.x,fromY:base.y, hill:target.hill || 0, bornAt:record.cutAt});
             map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
             target = null;
           }
@@ -275,7 +275,7 @@ function createHomeInventory(canvas, pawn) {
     }
     const before = state.drops.length;
     state.drops = state.drops.filter(drop => {
-      if(drop.kind==='wood'&&!woodDropMotion(drop,Date.now()).settled)return true;
+      if(!resourceDropMotion(drop,Date.now()).settled)return true;
       if (Date.now()-drop.bornAt < 500 || Math.hypot(pawn.x-drop.x,pawn.y-drop.y) > .65 ||
           map.heights[Math.floor(pawn.y)]?.[Math.floor(pawn.x)] !== (drop.hill || 0) || !visible(map,pawn,drop)) return true;
       const kind = drop.kind === 'goldDrop' ? 'gold' : 'wood';
