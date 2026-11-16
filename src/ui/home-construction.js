@@ -138,7 +138,10 @@ function createHomeConstruction(inventory, pawn, wallet) {
       buildings=buildings.filter(item=>item!==house);
       map.decorations=map.decorations.filter(item=>item!==house);
       map.homeEffects.push({kind:'dust',x:house.x+1,y:house.y+.72,left:.8,duration:.8});
-      inventory.addWood(Math.floor(cost.wood/3));save();
+      const recovered=Math.floor(cost.wood/3);
+      inventory.addWood(recovered);
+      map.homeEffects.push({kind:'woodGain',x:house.x+1,y:house.y+.72,amount:recovered,left:1.5,duration:1.5});
+      save();
       return true;
     },
     get job(){return job;},get preview(){return hover;},

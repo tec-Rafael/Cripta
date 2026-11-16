@@ -131,7 +131,11 @@ function createScene(canvas, images, reducedMotion) {
     const work=map.construction?.job;
     if(work?.site&&['walking','building'].includes(work.phase))
       actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site});
-    const base = item => item === pawn || fighters.includes(item) ? item.y :
+    // Draw the axe swing after its house so the worker stays visible on every side.
+    const demolition=map.homeInventory?.swing;
+    const demolitionBase=demolition?.kind==='house'?demolition.target.y+.8:null;
+    const base = item => item===pawn&&demolitionBase!==null?demolitionBase:
+      item === pawn || fighters.includes(item) ? item.y :
       item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
@@ -210,6 +214,15 @@ function createScene(canvas, images, reducedMotion) {
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
         }else if(item.kind==='goldDrop'){
           ctx.drawImage(images.goldDrop,-12,-18,24,24);
+        }else if(item.kind==='woodGain'){
+          const age=item.duration-item.left;
+          ctx.globalAlpha=Math.min(1,item.left/.3);
+          ctx.translate(0,-50-age*25);
+          ctx.drawImage(images.wood,-30,-14,28,28);
+          ctx.font='bold 16px Georgia';ctx.textAlign='left';ctx.lineWidth=3;
+          const label='+'+item.amount+(item.amount===1?' madeira':' madeiras');
+          ctx.strokeStyle='#263c40';ctx.strokeText(label,1,5);
+          ctx.fillStyle='#fff2cb';ctx.fillText(label,1,5);
         }else if(item.kind==='wood'){
           ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){

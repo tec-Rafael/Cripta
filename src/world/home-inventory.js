@@ -230,7 +230,7 @@ function createHomeInventory(canvas, pawn) {
     }
     if (target && !available(target)) stop();
     if (target) {
-      if (!swing) swing = {time:0, hit:false, kind:target.kind, dx:Math.sign(trunk(target).x-pawn.x) || pawn.heading.x || 1};
+      if (!swing) swing = {time:0, hit:false, kind:target.kind, target, dx:Math.sign(trunk(target).x-pawn.x) || pawn.heading.x || 1};
       swing.time += dt;
       if (!swing.hit && swing.time >= impactTime) {
         swing.hit = true;
@@ -249,6 +249,7 @@ function createHomeInventory(canvas, pawn) {
             const base = trunk(target);
             state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', hill:target.hill || 0, bornAt:record.cutAt});
             map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
+            if(target.kind==='tree')map.homeEffects.push({kind:'woodGain',...base,amount:1,left:1.5,duration:1.5});
             target = null;
           }
           save();
