@@ -319,10 +319,17 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 /* Native-size corners and repeated planks avoid stretching the pixel texture. */
 #home-menu.catalog-open .construction-table {
   border-width:36px 32px 32px 36px;
-  border-image:url('../assets/ui/construction-wood.png') 36 32 32 36 /36px 32px 32px 36px/0 repeat;
-  background:url('../assets/ui/construction-wood-tile.png') left top/64px 64px repeat;
-  background-origin:padding-box;
-  background-clip:padding-box;
+  border-image:none;
+  background-image:
+    url('../assets/ui/construction-edge-tl.png'),url('../assets/ui/construction-edge-tr.png'),
+    url('../assets/ui/construction-edge-bl.png'),url('../assets/ui/construction-edge-br.png'),
+    url('../assets/ui/construction-edge-top.png'),url('../assets/ui/construction-edge-bottom.png'),
+    url('../assets/ui/construction-edge-left.png'),url('../assets/ui/construction-edge-right.png'),
+    url('../assets/ui/construction-wood-tile.png');
+  background-position:left top,right top,left bottom,right bottom,36px top,36px bottom,left 36px,right 36px,36px 36px;
+  background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,repeat-x,repeat-x,repeat-y,repeat-y,repeat;
+  background-origin:border-box;
+  background-clip:border-box;
   padding:14px 10px;
 }
 #home-menu.catalog-open .construction-cloth { border:0;padding:8px;background:none; }
