@@ -3,11 +3,9 @@ function createAdventure(pawn, changeWorld) {
   const home = MapGenerator.generateHome();
   let adventuring = false;
   let character = 'pawn';
-  let blockedDoor = null;
 
   function enter(map, isAdventure) {
     adventuring = isAdventure;
-    blockedDoor = null;
     const activeCharacter = isAdventure ? character : 'pawn';
     pawn.setCharacter(activeCharacter);
     showCharacterBanner(activeCharacter);
@@ -21,20 +19,24 @@ function createAdventure(pawn, changeWorld) {
     enter(MapGenerator.generate(), true);
   }
   function start() { enter(home, false); }
-  function update(map) {
-    if (ui.open) return;
-    const doors = [map.house, map.tower];
-    const distance = item => Math.hypot(pawn.x-item.x-1, pawn.y-item.y-.72);
-    if (blockedDoor && distance(blockedDoor) > .95) blockedDoor = null;
-    const door = doors.find(item => item !== blockedDoor &&
-      Math.abs(pawn.x-item.x-1) < .34 && Math.abs(pawn.y-item.y-.72) < .23);
-    if (!door) return;
-    blockedDoor = door;
+  function interact(map, canvas, event) {
+    if (ui.open || document.querySelector('dialog[open]') || !canvas.worldToScreen || map.encounter?.hp===0) return false;
+    const rect=canvas.getBoundingClientRect();
+    const x=(event.clientX-rect.left)*canvas.width/rect.width;
+    const y=(event.clientY-rect.top)*canvas.height/rect.height;
+    const door=[map.house,map.tower].filter(item=>{
+      const base={x:item.x+1,y:item.y+.72};
+      const point=canvas.worldToScreen(base);
+      const height=item.kind==='tower'?3:2;
+      return Math.abs(x-point.x)<=64 && y>=point.y-(height+.72)*64 && y<=point.y+.28*64 &&
+        Math.hypot(pawn.x-base.x,pawn.y-base.y)<=2 && visible(map,pawn,base);
+    }).sort((a,b)=>b.y-a.y)[0];
+    if (!door) return false;
     pawn.pause();
     if(map.encounter?.enemies.length){
       const n=map.encounter.enemies.length;
       notifyBattle(`Derrote ${n===1?'o último inimigo':`os ${n} inimigos restantes`} para ${door.kind==='house'?'voltar ao Lar':'avançar'}.`);
-      return;
+      return true;
     }
     if (!adventuring && door.kind === 'house') {
       homeConstruction.open(map);
@@ -53,6 +55,7 @@ function createAdventure(pawn, changeWorld) {
         ui.show('Escolha seu personagem', true, startAdventure, () => {});
       }, () => {});
     }
+    return true;
   }
-  return {start, update, get paused() { return ui.open; }};
+  return {start, interact, get paused() { return ui.open; }};
 }

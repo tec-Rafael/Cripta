@@ -50,6 +50,7 @@ canvas.addEventListener('pointerup',event=>{
   const tap=attackPointer;
   attackPointer=null;
   if(!tap||tap.id!==event.pointerId||tap.moved)return;
+  if(adventure.interact(map,canvas,event))return;
   if(!canFight()||!canvas.worldToScreen)return;
   const rect=canvas.getBoundingClientRect();
   const x=(event.clientX-rect.left)*canvas.width/rect.width;
@@ -131,7 +132,6 @@ function render(time) {
         el('game-over').showModal();
       }
     }
-    if(map.encounter?.hp!==0)adventure.update(map);
   }
   if(document.querySelector('dialog[open]'))homeInventory.stop();
   previousFrame = time;
