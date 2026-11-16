@@ -301,15 +301,17 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   .construction-cost { max-width:280px;margin:-6px auto 12px; }
 }
 
-/* Buttons assembled from the original nine-slice blue button atlas. */
-.wood-action { padding:10px 22px;border:solid transparent;border-width:10px;border-image:url('../assets/ui/button-blue.png') 24 fill /10px/0 stretch;border-radius:0;background:transparent;color:#fff6d8;text-shadow:1px 2px #294b57;image-rendering:pixelated;transition:filter .15s,transform .1s; }
+/* Original SmallBlueSquareButton sprites preserve the package borders. */
+.wood-action { padding:10px 22px;border:solid transparent;border-width:10px;border-image:url('../assets/tiny-swords/UI Elements/UI Elements/Buttons/SmallBlueSquareButton_Regular.png') 32 fill /16px/0 stretch;border-radius:0;background:transparent;color:#fff6d8;text-shadow:1px 2px #294b57;image-rendering:pixelated;transition:filter .15s,transform .1s; }
 .wood-action:hover:not(:disabled),.wood-action:focus-visible { background:transparent;filter:brightness(1.12); }
-.wood-action:active:not(:disabled) { border-image-source:url('../assets/ui/button-blue-pressed.png');transform:translateY(2px); }
+.wood-action:active:not(:disabled) { border-image-source:url('../assets/tiny-swords/UI Elements/UI Elements/Buttons/SmallBlueSquareButton_Pressed.png');transform:translateY(2px); }
 .wood-action:focus-visible { outline:2px solid #fff6d8;outline-offset:3px; }
 #construction-status:empty { display:none; }
 #construction-back { margin-top:20px; }
 #home-menu:not(.catalog-open) { width:min(440px,94vw); }
-#home-menu:not(.catalog-open) .construction-table { border-width:24px 32px 36px;border-image:url('../assets/ui/parchment.png') 68 84 112 100 fill /24px 32px 36px/0 stretch;padding:22px 8px; }
+/* Complete nine-patch assembled exclusively from Banners/Banner.png. */
+#home-menu .construction-table { border-width:28px 32px 40px;border-image:url('../assets/ui/home-banner.png') 64 fill /28px 32px 40px/0 stretch;padding:18px 8px; }
+#home-menu .construction-cloth { border:0;padding:8px;background:none; }
 #home-menu:not(.catalog-open) .construction-cloth { border:0;padding:0; }
 #home-menu:not(.catalog-open) #home-menu-title { border:0;margin:0;color:#493c2c;text-shadow:none; }
 #home-menu:not(.catalog-open) #home-menu-root { min-height:160px; }
