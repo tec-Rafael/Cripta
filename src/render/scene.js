@@ -251,8 +251,8 @@ function createScene(canvas, images, reducedMotion) {
           // Sample the generated rails directly; repeat small pieces around the worksite.
           const fence=images.constructionFence;
           const left=x-8,right=x+136,back=y+24,front=y+208;
-          const rail=(px,py)=>ctx.drawImage(fence,39,105,241,158,px-8,py-37,64,42);
-          const side=(px,py)=>ctx.drawImage(fence,439,36,66,264,px-6,py-44,12,48);
+          const rail=(px,py)=>ctx.drawImage(fence,32,106,248,164,px-8,py-37,64,42);
+          const side=(px,py)=>ctx.drawImage(fence,433,30,74,276,px-6,py-44,12,48);
           for(let i=0;i<3;i++){rail(left+i*48,back);rail(left+i*48,front);}
           for(let py=back+44;py<front;py+=44){side(left,py);side(right,py);}
           side(left,front);side(right,front);
