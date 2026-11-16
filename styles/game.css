@@ -315,3 +315,10 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #home-menu:not(.catalog-open) .construction-cloth { border:0;padding:0; }
 #home-menu:not(.catalog-open) #home-menu-title { border:0;margin:0;color:#493c2c;text-shadow:none; }
 #home-menu:not(.catalog-open) #home-menu-root { min-height:160px; }
+
+/* Construction catalog uses the nine joined pieces of WoodTable.png. */
+#home-menu.catalog-open .construction-table { border-width:24px;border-image:url('../assets/ui/construction-wood.png') 64 fill /24px/0 stretch;padding:14px 10px; }
+#home-menu.catalog-open .construction-cloth { border:0;padding:8px;background:none; }
+@media (max-width:540px) {
+  #home-menu.catalog-open .construction-table { border-width:18px;border-image-width:18px;padding:10px 4px; }
+}
