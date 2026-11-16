@@ -21,7 +21,7 @@ function notifyBattle(text){
 function syncBattle(){
   const e=map.encounter;
   el('home-level').hidden=!!e;el('life').hidden=!e;
-  el('remaining').hidden=!e;el('battle-buttons').hidden=!e;
+  el('remaining').hidden=!e;el('battle-buttons').hidden=e?.id!=='knight';
   el('guard').hidden=e?.id!=='knight';el('wallet').textContent=wallet;
   if(e){
     const bar=el('life').querySelector('[role="progressbar"]');
@@ -64,14 +64,14 @@ canvas.addEventListener('pointerup',event=>{
     attackSelected();
   }else if(!['archer','monk'].includes(map.encounter.id))attackSelected();
 });
-el('guard').onpointerdown=e=>{if(canFight()){el('guard').setPointerCapture(e.pointerId);map.encounter.setGuard(true);}};
+el('guard').onpointerdown=e=>{if(canFight()&&map.encounter.id==='knight'){el('guard').setPointerCapture(e.pointerId);map.encounter.setGuard(true);}};
 function releaseGuard(){map?.encounter?.setGuard(false);}
 el('guard').onlostpointercapture=releaseGuard;
 window.addEventListener('blur',releaseGuard);
 window.addEventListener('keydown',e=>{
   if(!canFight()||e.ctrlKey||e.altKey||e.metaKey)return;
   if(e.code==='KeyJ')attackSelected();
-  if(e.code==='Space'){e.preventDefault();map.encounter.setGuard(true);}
+  if(e.code==='Space'&&map.encounter.id==='knight'){e.preventDefault();map.encounter.setGuard(true);}
 });
 window.addEventListener('keyup',e=>{if(e.code==='Space')releaseGuard();});
 el('settings').onclick=()=>{homeInventory.stop();pawn.pause();releaseGuard();el('preferences').showModal();};
