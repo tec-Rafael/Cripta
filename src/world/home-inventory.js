@@ -249,7 +249,6 @@ function createHomeInventory(canvas, pawn) {
             const base = trunk(target);
             state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', hill:target.hill || 0, bornAt:record.cutAt});
             map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
-            if(target.kind==='tree')map.homeEffects.push({kind:'woodGain',...base,amount:1,left:1.5,duration:1.5});
             target = null;
           }
           save();
@@ -272,11 +271,26 @@ function createHomeInventory(canvas, pawn) {
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
   const api = {attach, update, stop,
-    addWood(amount){
-      if(!Number.isSafeInteger(amount)||amount<=0)return;
-      state.wood+=amount;
-      if(!state.order.includes('wood'))state.order.push('wood');
-      save();drawSlots();
+    dropWood(node,amount){
+      if(!map||!Number.isSafeInteger(amount)||amount<=0)return;
+      const base=trunk(node),level=node.hill||0,bornAt=Date.now();
+      const candidates=[];
+      for(const radius of [.75,1.1,1.5])for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const point={x:base.x+dx*radius,y:base.y+dy*radius};
+        const x=Math.floor(point.x),y=Math.floor(point.y);
+        if(map.surface[y]?.[x]&&map.heights[y][x]===level&&
+          !map.stairs.some(stair=>stair.x===x&&stair.y===y)&&
+          canStand(map,point,point.x,point.y)&&visible(map,base,point))candidates.push(point);
+      }
+      candidates.sort((a,b)=>Math.hypot(a.x-base.x,a.y-base.y)-Math.hypot(b.x-base.x,b.y-base.y)||
+        Math.hypot(b.x-pawn.x,b.y-pawn.y)-Math.hypot(a.x-pawn.x,a.y-pawn.y));
+      const chosen=[];
+      for(const point of candidates)if(chosen.every(other=>Math.hypot(point.x-other.x,point.y-other.y)>.4))chosen.push(point);
+      for(let i=0;i<amount;i++){
+        const point=chosen[i%chosen.length]||{x:pawn.x,y:pawn.y};
+        state.drops.push({id:'house-wood:'+node.x+','+node.y+':'+bornAt+':'+i,...point,kind:'wood',hill:level,bornAt});
+      }
+      save();
     },
     get resources(){return {wood:state.wood,gold:state.gold};},
     spend(cost){
