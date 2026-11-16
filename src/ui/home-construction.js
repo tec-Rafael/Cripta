@@ -17,6 +17,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
   } catch {}
   function save(){try{localStorage.setItem(storageKey,JSON.stringify(buildings));}catch{}}
   function showCatalog(show){
+    dialog.classList.toggle('catalog-open',show);
     root.hidden=show;catalog.hidden=!show;title.textContent=show?'Construção':'Lar';status.textContent='';
     if(show)refresh();
   }
@@ -25,7 +26,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
     for(const button of options.querySelectorAll('.build-house')) {
       button.disabled=wallet.coins<cost.coins || resources.wood<cost.wood || resources.gold<cost.gold;
     }
-    status.textContent=`Você possui ${wallet.coins} moedas, ${resources.wood} madeiras e ${resources.gold} minérios de ouro.`;
+    status.textContent='';
   }
   function findSite(){
     const sites=[];
@@ -60,12 +61,12 @@ function createHomeConstruction(inventory, pawn, wallet) {
   }
   for(const [color,label] of Object.entries(colors)){
     const card=document.createElement('article');card.className='house-plan';
-    card.innerHTML=`<h3>Casa ${label}</h3><img class="house-preview" src="assets/tiny-swords/Buildings/${color} Buildings/House1.png" alt="Casa ${label.toLowerCase()}">
+    card.innerHTML=`<img class="house-preview" src="assets/tiny-swords/Buildings/${color} Buildings/House1.png" alt="Casa ${label.toLowerCase()}">
       <div class="construction-cost construction-ribbon" aria-label="Custo: 20 moedas, 10 madeiras e 5 minérios de ouro">
         <span><img src="assets/ui/gold-coin.png" alt="Moedas">20</span>
         <span><img src="assets/tiny-swords/Terrain/Resources/Wood/Wood Resource/Wood Resource.png" alt="Madeira">10</span>
         <span><img src="assets/ui/gold-small.png" alt="Minério de ouro">5</span>
-      </div><button class="wood-action build-house" type="button">Construir</button>`;
+      </div><button class="wood-action build-house" type="button" aria-label="Construir casa ${label.toLowerCase()}">Construir</button>`;
     card.querySelector('button').onclick=()=>build(color);options.append(card);
   }
   document.getElementById('open-construction').onclick=()=>showCatalog(true);
