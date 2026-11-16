@@ -19,18 +19,21 @@ function createAdventure(pawn, changeWorld) {
     enter(MapGenerator.generate(), true);
   }
   function start() { enter(home, false); }
-  function interact(map, canvas, event) {
-    if (ui.open || document.querySelector('dialog[open]') || !canvas.worldToScreen || map.encounter?.hp===0) return false;
+  function clickableBuilding(map, canvas, event) {
+    if (!map || ui.open || document.querySelector('dialog[open]') || !canvas.worldToScreen || map.encounter?.hp===0) return null;
     const rect=canvas.getBoundingClientRect();
     const x=(event.clientX-rect.left)*canvas.width/rect.width;
     const y=(event.clientY-rect.top)*canvas.height/rect.height;
-    const door=[map.house,map.tower].filter(item=>{
+    return [map.house,map.tower].filter(item=>{
       const base={x:item.x+1,y:item.y+.72};
       const point=canvas.worldToScreen(base);
       const height=item.kind==='tower'?3:2;
       return Math.abs(x-point.x)<=64 && y>=point.y-(height+.72)*64 && y<=point.y+.28*64 &&
         Math.hypot(pawn.x-base.x,pawn.y-base.y)<=2 && visible(map,pawn,base);
     }).sort((a,b)=>b.y-a.y)[0];
+  }
+  function interact(map, canvas, event) {
+    const door=clickableBuilding(map,canvas,event);
     if (!door) return false;
     pawn.pause();
     if(map.encounter?.enemies.length){
@@ -57,5 +60,5 @@ function createAdventure(pawn, changeWorld) {
     }
     return true;
   }
-  return {start, interact, get paused() { return ui.open; }};
+  return {start, interact, clickableBuilding, get paused() { return ui.open; }};
 }

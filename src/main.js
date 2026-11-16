@@ -38,10 +38,13 @@ function attackSelected(){
   map.encounter.attack(selectedEnemy);
 }
 let attackPointer=null;
+let hoverPointer=null;
+canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable');});
 canvas.addEventListener('pointerdown',event=>{
   if(event.button===0)attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false};
 });
 canvas.addEventListener('pointermove',event=>{
+  if(event.pointerType==='mouse')hoverPointer={clientX:event.clientX,clientY:event.clientY};
   if(attackPointer?.id===event.pointerId&&Math.hypot(event.clientX-attackPointer.x,event.clientY-attackPointer.y)>8)
     attackPointer.moved=true;
 });
@@ -136,6 +139,7 @@ function render(time) {
   if(document.querySelector('dialog[open]'))homeInventory.stop();
   previousFrame = time;
   drawScene(map, pawn, time);
+  canvas.classList.toggle('building-clickable',Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer)));
 }
 
 async function start() {
