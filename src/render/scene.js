@@ -175,20 +175,34 @@ function createScene(canvas, images, reducedMotion) {
     }
     function drawWorksiteFence(site){
       const x=MARGIN+site.x*TILE,y=MARGIN+site.y*TILE;
-      const left=x-8,right=x+136,back=y-104,front=y+80;
-      // All sections are crops of the approved fence, with nearest-neighbor scaling.
-      const horizontal=(px,py)=>ctx.drawImage(images.fenceHorizontal,px-10,py-44,64,44);
-      const vertical=(px,py)=>ctx.drawImage(images.fenceVertical,px-8,py-64,16,64);
-      for(let i=0;i<3;i++)horizontal(left+i*48,back);
-      for(let py=back+56;py<front;py+=56){vertical(left,py);vertical(right,py);}
-      vertical(left,front);vertical(right,front);
-      // Short front sections leave a clear opening directly in front of the Pawn.
-      ctx.drawImage(images.fenceHorizontal,left-8,front-33,48,33);
-      ctx.drawImage(images.fenceHorizontal,right-40,front-33,48,33);
-      // Open gate leaves use the same upright timber, turned along the side axis.
-      vertical(x+32,front-4);vertical(x+96,front-4);
-      ctx.drawImage(images.fencePost,x+24,front-31,16,31);
-      ctx.drawImage(images.fencePost,x+88,front-31,16,31);
+      // Enclose the house's ground footprint, not the tall roof sprite.
+      const width=2*TILE,depth=TILE,margin=12;
+      const left=x-margin,right=x+width+margin,back=y-margin,front=y+depth+margin;
+      const entrance=x+width/2,opening=48;
+      const horizontal=(from,to,base)=>{
+        const length=to-from,segments=Math.max(1,Math.ceil(length/48));
+        for(let i=0;i<segments;i++){
+          const start=Math.round(from+i*length/segments),end=Math.round(from+(i+1)*length/segments);
+          // Keep all rail pieces the same height and join them at their posts.
+          ctx.drawImage(images.fenceHorizontal,start-8,base-44,end-start+16,44);
+        }
+      };
+      const vertical=(px,from,to)=>{
+        const segments=Math.max(1,Math.ceil((to-from)/48));
+        for(let i=0;i<segments;i++){
+          const start=Math.round(from+i*(to-from)/segments),end=Math.round(from+(i+1)*(to-from)/segments);
+          ctx.drawImage(images.fenceVertical,px-8,start-24,16,end-start+24);
+        }
+      };
+      horizontal(left,right,back);
+      vertical(left,back,front);vertical(right,back,front);
+      horizontal(left,entrance-opening/2,front);
+      horizontal(entrance+opening/2,right,front);
+      // Open leaves fold inward, leaving the approach at the center of the house clear.
+      vertical(entrance-opening/2,front-28,front);
+      vertical(entrance+opening/2,front-28,front);
+      for(const px of [left,entrance-opening/2,entrance+opening/2,right])
+        ctx.drawImage(images.fencePost,px-8,front-31,16,31);
     }
     function drawActor(item) {
       if(item.kind==='worksiteFence'){drawWorksiteFence(item.site);return;}
