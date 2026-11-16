@@ -174,20 +174,21 @@ function createScene(canvas, images, reducedMotion) {
       }
     }
     function drawWorksiteFence(site){
-      const fence=images.constructionFence;
       const x=MARGIN+site.x*TILE,y=MARGIN+site.y*TILE;
       const left=x-8,right=x+136,back=y-104,front=y+80;
-      const rail=(px,py,width=64)=>{
-        const height=Math.round(width*176/256);
-        ctx.drawImage(fence,28,100,256,176,px-8,py-height+5,width,height);
-      };
-      const side=(px,py)=>ctx.drawImage(fence,433,30,78,278,px-6,py-44,12,48);
-      for(let i=0;i<3;i++)rail(left+i*48,back);
-      for(let py=back+44;py<front;py+=44){side(left,py);side(right,py);}
-      side(left,front);side(right,front);
-      rail(left,front,40);rail(x+112,front,40);
-      // Open gate from the fourth row, second cell of the generated sprite sheet.
-      ctx.drawImage(fence,328,1018,276,182,x+22,front-50,84,55);
+      // All sections are crops of the approved fence, with nearest-neighbor scaling.
+      const horizontal=(px,py)=>ctx.drawImage(images.fenceHorizontal,px-10,py-44,64,44);
+      const vertical=(px,py)=>ctx.drawImage(images.fenceVertical,px-8,py-64,16,64);
+      for(let i=0;i<3;i++)horizontal(left+i*48,back);
+      for(let py=back+56;py<front;py+=56){vertical(left,py);vertical(right,py);}
+      vertical(left,front);vertical(right,front);
+      // Short front sections leave a clear opening directly in front of the Pawn.
+      ctx.drawImage(images.fenceHorizontal,left-8,front-33,48,33);
+      ctx.drawImage(images.fenceHorizontal,right-40,front-33,48,33);
+      // Open gate leaves use the same upright timber, turned along the side axis.
+      vertical(x+32,front-4);vertical(x+96,front-4);
+      ctx.drawImage(images.fencePost,x+24,front-31,16,31);
+      ctx.drawImage(images.fencePost,x+88,front-31,16,31);
     }
     function drawActor(item) {
       if(item.kind==='worksiteFence'){drawWorksiteFence(item.site);return;}

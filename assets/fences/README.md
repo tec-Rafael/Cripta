@@ -25,3 +25,8 @@ Prompt: Recreate the supplied reference's irregular squared timber posts, roughl
 `fence-reference-isolated-v4.png` is an isolated L-shaped fence generated with the built-in image editor using only the user's reference crop. It is not yet a modular sheet and is not connected to the game. AI editing can change individual pixels; this is not a pixel-exact extraction of the artist's original.
 
 Prompt: Extract only the wooden fence from the provided reference, remove the background and unrelated character, preserve its exact L-shaped arrangement, crooked rectangular posts, top facets, beige wood, jagged dark outlines, khaki shadows, two low thin rails, chips and asymmetry. Do not redesign, add grain, round the posts, broaden rails, add caps or invent additional fences. Output the same L-shaped fence isolated on transparent alpha, enlarged with hard square pixels without smoothing. No sprite sheet, gates, text or additional objects.
+
+
+## Active modular pieces from version 4
+
+The game now uses `fence-v4-horizontal.png`, `fence-v4-vertical.png` and `fence-v4-post.png`. They are deterministic crops of the approved isolated reference study, reduced with nearest-neighbor sampling. Two reusable L-corner variants (`fence-v4-corner.png`, `fence-v4-corner-mirrored.png`) are also provided. No new AI artwork was generated for this step. The open entrance is assembled from the same straight pieces and posts; the temporary fence disappears when the house completes.

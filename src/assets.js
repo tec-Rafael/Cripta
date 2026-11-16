@@ -2,7 +2,9 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
-    constructionFence:'../fences/wooden-fence-sheet-v3.png',
+    fenceHorizontal:'../fences/fence-v4-horizontal.png',
+    fenceVertical:'../fences/fence-v4-vertical.png',
+    fencePost:'../fences/fence-v4-post.png',
     pawnBuild:'Units/Blue Units/Pawn/Pawn_Interact Hammer.png',
     constructionMarker:'UI Elements/UI Elements/Cursors/Cursor_04.png',
     pawnMine:'Units/Blue Units/Pawn/Pawn_Interact Pickaxe.png',
