@@ -11,13 +11,13 @@ let wallet=0, noticeTimer;
 try {wallet=Math.max(0,parseInt(localStorage.getItem('cripta.coins'),10)||0);}catch{}
 // One-time local construction test credit; never applied on the published site.
 try {
-  const creditKey='cripta.local.construction-credit.2026-11-15';
+  const creditKey='cripta.local.coin-refill.2026-11-15.v2';
   if (['file:','http:'].includes(location.protocol) &&
       (location.protocol==='file:' || ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) &&
       !localStorage.getItem(creditKey)) {
-    wallet+=20;
+    wallet+=100;
     localStorage.setItem('cripta.coins',String(wallet));
-    localStorage.setItem(creditKey,'20');
+    localStorage.setItem(creditKey,'100');
   }
 } catch {}
 // Additional one-time local supplies for placement and construction tests.
