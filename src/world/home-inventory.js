@@ -205,14 +205,16 @@ function createHomeInventory(canvas, pawn) {
 
   function adjacentDrop(node) {
     const level = node.hill || 0;
-    const cells = [[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy]) => ({x:node.x+dx+.5,y:node.y+dy+.5}));
+    const base = trunk(node);
+    const cells = [[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy]) => ({x:base.x+dx*.75,y:base.y+dy*.75}));
     const free = cells.filter(cell => {
       const x=Math.floor(cell.x), y=Math.floor(cell.y);
       return map.surface[y]?.[x] && map.heights[y][x] === level &&
         !map.stairs.some(stair => stair.x === x && stair.y === y) &&
         canStand(map,cell,cell.x,cell.y) && visible(map,trunk(node),cell);
     });
-    return free[Math.floor(Math.random()*free.length)];
+    // Prefer the player's side so gathering needs only a short step.
+    return free.sort((a,b) => Math.hypot(a.x-pawn.x,a.y-pawn.y) - Math.hypot(b.x-pawn.x,b.y-pawn.y))[0];
   }
   function update(dt) {
     if (!map) return;
