@@ -213,8 +213,8 @@ function createHomeInventory(canvas, pawn) {
         !map.stairs.some(stair => stair.x === x && stair.y === y) &&
         canStand(map,cell,cell.x,cell.y) && visible(map,trunk(node),cell);
     });
-    // Prefer the player's side so gathering needs only a short step.
-    return free.sort((a,b) => Math.hypot(a.x-pawn.x,a.y-pawn.y) - Math.hypot(b.x-pawn.x,b.y-pawn.y))[0];
+    // Prefer the side opposite the player while keeping the drop close to the resource.
+    return free.sort((a,b) => Math.hypot(b.x-pawn.x,b.y-pawn.y) - Math.hypot(a.x-pawn.x,a.y-pawn.y))[0];
   }
   function update(dt) {
     if (!map) return;
