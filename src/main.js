@@ -74,6 +74,11 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Space'&&map.encounter.id==='knight'){e.preventDefault();map.encounter.setGuard(true);}
 });
 window.addEventListener('keyup',e=>{if(e.code==='Space')releaseGuard();});
+el('controls-toggle').onclick=()=>{
+  const help=el('controls-help');
+  help.hidden=!help.hidden;
+  el('controls-toggle').setAttribute('aria-expanded',String(!help.hidden));
+};
 el('settings').onclick=()=>{homeInventory.stop();pawn.pause();releaseGuard();el('preferences').showModal();};
 function changeWorld(next) {
   selectedEnemy=null;

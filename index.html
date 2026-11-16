@@ -44,6 +44,26 @@
     <dialog id="preferences"><form method="dialog"><h2>Configurações</h2>
       <section class="adventure-panel">
       <label><input type="checkbox" id="quiet-world"> Reduzir animações do cenário</label>
+      <button id="controls-toggle" type="button" aria-expanded="false" aria-controls="controls-help">Controles</button>
+      <section id="controls-help" aria-label="Controles do jogo" hidden>
+        <h3>No computador</h3>
+        <ul>
+          <li><b>WASD:</b> mover nas quatro direções.</li>
+          <li><b>Segurar Shift:</b> correr.</li>
+          <li><b>J:</b> atacar. Para arqueiro e monge, clique no inimigo para escolher o alvo e atacar.</li>
+          <li><b>Segurar Espaço ou o botão de escudo:</b> bloquear com o cavaleiro.</li>
+          <li><b>1 a 8 ou clique no inventário:</b> selecionar um item no Lar.</li>
+        </ul>
+        <h3>No celular</h3>
+        <ul>
+          <li><b>Joystick ou arrastar no cenário:</b> mover.</li>
+          <li><b>Botão de corrida:</b> ativar ou desativar a corrida.</li>
+          <li><b>Toque no inimigo:</b> atacar.</li>
+          <li><b>Seta do inventário:</b> abrir ou recolher; toque no item para equipar.</li>
+        </ul>
+        <h3>Coleta no Lar</h3>
+        <p>Equipe o machado para cortar árvores ou a picareta para minerar ouro. Aproxime-se a até um quadrado e segure J no computador ou pressione e segure o recurso na tela. São necessários cinco golpes; o progresso fica salvo. Passe sobre o item que cair para coletá-lo.</p>
+      </section>
       <button class="preferences-close icon-button" aria-label="Voltar ao jogo"><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt=""></button></section>
     </form></dialog>
     <dialog id="game-over" aria-labelledby="game-over-title">
