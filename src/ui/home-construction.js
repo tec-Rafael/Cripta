@@ -13,7 +13,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
     const saved=JSON.parse(localStorage.getItem(storageKey));
     if(Array.isArray(saved)) buildings=saved.filter(b=>colors[b.color] && Number.isInteger(b.x) &&
       Number.isInteger(b.y) && b.x>2 && b.y>2 && b.x<46 && b.y<46)
-      .map(b=>({kind:'house',x:b.x,y:b.y,color:b.color,hill:0}));
+      .map(b=>({kind:'house',x:b.x,y:b.y,color:b.color,hill:0,demolitionHits:Number.isInteger(b.demolitionHits)?Math.max(0,Math.min(9,b.demolitionHits)):0}));
   } catch {}
   function save(){try{localStorage.setItem(storageKey,JSON.stringify(buildings));}catch{}}
   function showCatalog(show){
@@ -131,6 +131,16 @@ function createHomeConstruction(inventory, pawn, wallet) {
   dialog.querySelector('.home-menu-close').onclick=()=>dialog.close();
   const api={
     update,aim,select,freeSite,
+    hitHouse(house){
+      if(!map||job||!buildings.includes(house))return false;
+      house.demolitionHits=(house.demolitionHits||0)+1;
+      if(house.demolitionHits<10){save();return false;}
+      buildings=buildings.filter(item=>item!==house);
+      map.decorations=map.decorations.filter(item=>item!==house);
+      map.homeEffects.push({kind:'dust',x:house.x+1,y:house.y+.72,left:.8,duration:.8});
+      inventory.addWood(Math.floor(cost.wood/3));save();
+      return true;
+    },
     get job(){return job;},get preview(){return hover;},
     attach(next){
       map=next.name==='Lar'?next:null;

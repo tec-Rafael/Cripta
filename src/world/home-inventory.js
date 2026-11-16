@@ -47,6 +47,7 @@ function createHomeInventory(canvas, pawn) {
   }
   function treeId(tree) { return tree.resourceId || (tree.kind === 'gold' ? 'gold:' : '') + tree.x + ',' + tree.y; }
   function trunk(tree) {
+    if(tree.kind==='house')return {x:tree.x+1,y:tree.y+.72};
     return {x: tree.x + .5, y: tree.y + (tree.kind === 'gold' ? .55 : tree.variant <= 2 ? .92 : .71)};
   }
   function stop() {
@@ -146,6 +147,7 @@ function createHomeInventory(canvas, pawn) {
     }
   }
   function available(tree) {
+    if(!tree||!(['tree','gold'].includes(tree.kind)||tree.kind==='house'&&tree.color))return false;
     if (!map || map.construction?.job || !tree || tree.felled || (tree.kind === 'gold' ? selected !== 3 : selected !== 1 || map.name !== 'Lar')) return false;
     const base = trunk(tree);
     const col = Math.floor(pawn.x), row = Math.floor(pawn.y);
@@ -164,7 +166,7 @@ function createHomeInventory(canvas, pawn) {
     const bounds = canvas.getBoundingClientRect();
     const x = (event.clientX-bounds.left)*canvas.width/bounds.width;
     const y = (event.clientY-bounds.top)*canvas.height/bounds.height;
-    return map.decorations.filter(item => item.kind === (selected === 3 ? 'gold' : 'tree') && !item.felled)
+    return map.decorations.filter(item => (selected === 3 ? item.kind==='gold' : item.kind==='tree'||item.kind==='house'&&item.color) && !item.felled)
       .map(tree => {
         const point = canvas.worldToScreen(trunk(tree));
         return {tree, distance: Math.hypot(x-point.x, (y-point.y+(tree.kind === 'gold' ? 12 : 48))*.6)};
@@ -194,7 +196,7 @@ function createHomeInventory(canvas, pawn) {
       stop(); drawSlots();
     }
     if (event.code !== 'KeyJ' || event.repeat) return;
-    const tree = map.decorations.filter(item => ['tree','gold'].includes(item.kind) && available(item))
+    const tree = map.decorations.filter(item => ['tree','gold','house'].includes(item.kind) && available(item))
       .filter(item => {
         const base = trunk(item);
         return (base.x-pawn.x)*pawn.heading.x + (base.y-pawn.y)*pawn.heading.y >= 0;
@@ -232,21 +234,25 @@ function createHomeInventory(canvas, pawn) {
       swing.time += dt;
       if (!swing.hit && swing.time >= impactTime) {
         swing.hit = true;
-        const id = treeId(target);
-        const record = state.trees[id] || {hits:0, cutAt:0};
-        const landing = record.hits === 4 ? adjacentDrop(target) : null;
-        if (record.hits === 4 && !landing) { stop(); return; }
-        record.hits++;
-        state.trees[id] = record;
-        if (record.hits === 5) {
-          record.cutAt = Date.now();
-          target.felled = true;
-          const base = trunk(target);
-          state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', hill:target.hill || 0, bornAt:record.cutAt});
-          map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
-          target = null;
+        if(target.kind==='house'){
+          if(map.construction.hitHouse(target))target=null;
+        }else{
+          const id = treeId(target);
+          const record = state.trees[id] || {hits:0, cutAt:0};
+          const landing = record.hits === 4 ? adjacentDrop(target) : null;
+          if (record.hits === 4 && !landing) { stop(); return; }
+          record.hits++;
+          state.trees[id] = record;
+          if (record.hits === 5) {
+            record.cutAt = Date.now();
+            target.felled = true;
+            const base = trunk(target);
+            state.drops.push({id:id+':'+record.cutAt, ...landing, kind:target.kind === 'gold' ? 'goldDrop' : 'wood', hill:target.hill || 0, bornAt:record.cutAt});
+            map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
+            target = null;
+          }
+          save();
         }
-        save();
       }
       if (swing.time >= swingDuration) swing = null;
     } else if (swing) {
@@ -265,6 +271,12 @@ function createHomeInventory(canvas, pawn) {
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
   const api = {attach, update, stop,
+    addWood(amount){
+      if(!Number.isSafeInteger(amount)||amount<=0)return;
+      state.wood+=amount;
+      if(!state.order.includes('wood'))state.order.push('wood');
+      save();drawSlots();
+    },
     get resources(){return {wood:state.wood,gold:state.gold};},
     spend(cost){
       if (!map || state.wood<cost.wood || state.gold<cost.gold) return false;
