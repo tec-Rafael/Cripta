@@ -1,0 +1,25 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../../../"><title>Prévia — remover tocos com a pá</title><link rel="stylesheet" href="styles/game.css">
+<style>.preview-controls{position:absolute;top:12px;left:12px;right:12px;z-index:4;text-align:center;color:#fff5d0;font:18px Georgia;text-shadow:1px 2px #163539}.preview-controls button{font:inherit;padding:8px;margin:5px;background:#387c86;color:#fff3d1;border:2px solid #c3b68f}.preview-controls p{margin:5px}#preview-status{max-width:640px;margin:auto}</style>
+<script src="src/world/buildings.js" defer></script><script src="src/world/map-generator.js" defer></script><script src="src/world/collisions.js" defer></script><script src="src/world/encounter.js" defer></script><script src="src/input/controls.js" defer></script><script src="src/actors/pawn-animation.js" defer></script><script src="src/actors/pawn.js" defer></script><script src="src/world/home-inventory.js" defer></script><script src="src/assets.js" defer></script><script src="src/render/scene.js" defer></script></head>
+<body><main><canvas id="world" aria-label="Prévia interativa de corte e remoção do toco"></canvas><div class="preview-controls"><p id="preview-status" role="status">Carregando a prévia…</p><button id="demo" type="button" disabled>Demonstrar corte e remoção</button><button id="reset" type="button">Reiniciar prévia</button></div>
+<aside id="home-inventory"><button class="inventory-toggle" type="button"><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_08.png" alt="Inventário"></button><div class="inventory-slots"></div></aside><div id="joystick"><i></i></div><button id="sprint" type="button">Correr</button></main>
+<script>
+window.addEventListener('DOMContentLoaded',async()=>{
+const key='cripta.preview.stump.v1',canvas=document.querySelector('#world'),status=document.querySelector('#preview-status');
+const mask=v=>Array.from({length:50},()=>Array(50).fill(v));
+const tree={kind:'tree',variant:1,x:25,y:25,hill:0,phase:0};
+const map={name:'Lar',theme:0,land:mask(true),surface:mask(true),dry:mask(true),wet:mask(false),raised:mask(false),paths:mask(false),pools:mask(false),heights:mask(0),layers:[],stairs:[],decorations:[tree],sheep:[],spawn:{x:25.5,y:26.6}};
+const pawn=createPawn(createControls(canvas));pawn.setCharacter('pawn');pawn.spawn(map);
+const inventory=createHomeInventory(canvas,pawn,{storageKey:key});inventory.attach(map);
+const press=code=>window.dispatchEvent(new KeyboardEvent('keydown',{code}));const release=()=>window.dispatchEvent(new KeyboardEvent('keyup',{code:'KeyJ'}));let auto=false,stage='tree',last=0,wait=0;
+document.querySelector('#reset').onclick=()=>{localStorage.removeItem(key);location.reload();};
+document.querySelector('#demo').onclick=()=>{if(tree.removed){status.textContent='O terreno já está livre. Reinicie a prévia para repetir.';return;}auto=true;stage=tree.felled?'stump':'tree';press(tree.felled?'Digit5':'Digit2');press('KeyJ');};
+try{const draw=createScene(canvas,await loadImages(),{matches:false});document.querySelector('#demo').disabled=false;
+function frame(time){requestAnimationFrame(frame);const dt=last?Math.min(.05,(time-last)/1000):0;last=time;inventory.update(dt);pawn.update(map,dt);
+if(auto&&stage==='tree'&&tree.felled){release();press('Digit5');stage='wait';wait=.4;}
+if(auto&&stage==='wait'){wait-=dt;if(wait<=0){stage='stump';press('KeyJ');}}
+if(auto&&tree.removed){release();auto=false;}
+status.textContent=tree.removed?'Terreno livre: este toco não volta, mesmo após uma hora ou ao recarregar.':tree.felled?'Toco restante: equipe a pá (5) e segure J ou pressione o cenário perto dele.':'Corte com o machado (2), depois use a pá (5) no toco. A prévia não altera seu Lar.';
+draw(map,pawn,time);}
+requestAnimationFrame(frame);}catch(error){status.textContent=error.message;}
+});</script></body></html>

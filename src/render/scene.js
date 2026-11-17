@@ -299,8 +299,8 @@ function createScene(canvas, images, reducedMotion) {
         ctx.restore();return;
       }
       const x = MARGIN + item.x * TILE, y = MARGIN + item.y * TILE - (item.hill || 0)*TILE;
-      if (item.kind === 'tree' && item.felled) ctx.drawImage(images['stump'+item.variant],x-40,y-112,144,192);
-      if (item.kind === 'tree' && !item.felled) drawSprite('tree'+item.variant, (tick+item.phase)%8, images['tree'+item.variant].width/8, images['tree'+item.variant].height, x-40,y-112,144,192);
+      if (item.kind === 'tree' && !item.removed && item.felled) ctx.drawImage(images['stump'+item.variant],x-40,y-112,144,192);
+      if (item.kind === 'tree' && !item.removed && !item.felled) drawSprite('tree'+item.variant, (tick+item.phase)%8, images['tree'+item.variant].width/8, images['tree'+item.variant].height, x-40,y-112,144,192);
       if (item.kind === 'bush') drawSprite('bush'+item.variant, (tick+item.phase)%8, 128,128,x-16,y-32,96,96);
       if (item.kind === 'sheep') {
         ctx.save(); ctx.translate(x+32,y); ctx.scale(item.facing,1);

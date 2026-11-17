@@ -54,7 +54,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
         if(!map.surface[row]?.[col]||map.heights[row][col]!==0||
           map.stairs.some(stair=>stair.x===col&&stair.y===row))return false;
       }
-    if(map.decorations.some(item=>(item.hill||0)===0&&overlaps(item.kind==='house'?houseFootprint(item):
+    if(map.decorations.some(item=>!item.removed&&(item.hill||0)===0&&overlaps(item.kind==='house'?houseFootprint(item):
       {left:item.x,right:item.x+(item.kind==='tower'?2:1),top:item.y,bottom:item.y+1})))return false;
     if(map.sheep.some(item=>overlaps({left:item.x+.2,top:item.y+.2,right:item.x+.8,bottom:item.y+.5})))return false;
     return !inventory.drops.some(item=>areas.some(area=>item.x>=area.left&&item.x<area.right&&item.y>=area.top&&item.y<area.bottom));

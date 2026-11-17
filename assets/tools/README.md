@@ -1,6 +1,6 @@
 # Shovel concept
 
-`shovel-concept-v1.png` is a transparent PNG concept generated with the built-in image tool. Only the image was requested; it is not integrated into inventory or gameplay. This is a newly generated asset, not an official Tiny Swords sprite.
+`shovel-concept-v1.png` is a transparent PNG concept generated with the built-in image tool. The original concept was subsequently adapted into shovel-icon.png and integrated into the fifth inventory slot. See pawn-shovel/ for the animation and interactive stump-removal preview. This is a newly generated asset, not an official Tiny Swords sprite.
 
 References: the project's original Tool_04.png (pickaxe), Tool_02.png (axe) and Tool_01.png (hammer).
 

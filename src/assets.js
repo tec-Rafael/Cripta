@@ -2,6 +2,8 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
+    pawnDig:'../tools/pawn-shovel/Pawn_Interact Shovel.png',
+    shovel:'../tools/shovel-icon.png',
     fenceHorizontal:'../fences/fence-v4-horizontal.png',
     fenceVertical:'../fences/fence-v4-vertical.png',
     fencePost:'../fences/fence-v4-post.png',
