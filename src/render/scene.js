@@ -185,7 +185,15 @@ function createScene(canvas, images, reducedMotion) {
       level(a) - level(b) || base(a) - base(b));
     const ramps = map.layers.map((_,index) =>
       map.stairs.filter(s => map.heights[s.y][s.x] === index+1));
-    let nextActor = 0;
+    // Offscreen worksite markers must never block residents in visible rows.
+    const residents=new Map();
+    for(const actor of actors){
+      const row=Math.floor(base(actor)),height=level(actor);
+      if(row<view.top||row>=view.bottom||height<0||height>map.layers.length)continue;
+      const key=row+':'+height;
+      if(!residents.has(key))residents.set(key,[]);
+      residents.get(key).push(actor);
+    }
     for (let row = view.top; row < view.bottom; row++) {
       const strip = {...view, top:row, bottom:row+1};
       function drawResidents(height) {
@@ -200,10 +208,7 @@ function createScene(canvas, images, reducedMotion) {
           }
           ctx.restore();
         }
-        while (nextActor < actors.length && Math.floor(base(actors[nextActor])) === row &&
-               level(actors[nextActor]) === height) {
-          drawActor(actors[nextActor++]);
-        }
+        for(const actor of residents.get(row+':'+height)||[])drawActor(actor);
       }
       drawResidents(0);
       for (const [index, layer] of map.layers.entries()) {
