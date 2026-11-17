@@ -16,8 +16,7 @@ function drawPawn(ctx, images, player, lift, margin, tile, encounter, inventory,
   else if(swing) action=player.character==='lancer' && Math.abs(swing.dy)>Math.abs(swing.dx)
     ? (swing.dy<0?'Up':'Down') : 'Attack';
   const equipped = inventory && !swing ? inventory.equipped : '';
-  const carryingShovel=equipped==='Shovel';
-  const image = images[(player.character || 'pawn') + action + (carryingShovel?'':equipped)];
+  const image = images[(player.character || 'pawn') + action + equipped];
   const size = image.height;
   const frames=image.width/size;
   const frame = swing ? Math.min(frames-1,Math.floor(swing.time/(chopping ? (building ? .6 : inventory.duration) : encounter.stats.interval)*frames)) :
@@ -26,6 +25,5 @@ function drawPawn(ctx, images, player, lift, margin, tile, encounter, inventory,
   ctx.translate(Math.round(margin + player.x * tile), Math.round(margin + player.y * tile - lift));
   ctx.scale((swing && Math.sign(swing.dx)) || player.facing, 1);
   ctx.drawImage(image, frame * size, 0, size, size, -size/2, -size/2-27, size, size);
-  if(carryingShovel)ctx.drawImage(images.shovel,8,-43,32,32);
   ctx.restore();
 }
