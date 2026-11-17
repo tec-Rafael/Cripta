@@ -79,8 +79,11 @@ function createScene(canvas, images, reducedMotion) {
     ctx.drawImage(images.moss, sourceX, 256, TILE, TILE * 2, x, top, TILE, TILE * 2);
   }
 
-  let placementCamera=null;
+  let placementCamera=null,returnCamera=null,cameraMap=null,lastCameraTime=null;
   function draw(map, pawn, time) {
+    const cameraDt=lastCameraTime===null?25:Math.min(50,Math.max(0,time-lastCameraTime));
+    lastCameraTime=time;
+    if(cameraMap!==map){placementCamera=null;returnCamera=null;cameraMap=map;}
     const tick = reducedMotion.matches ? 0 : Math.floor(time / 100);
     // Keep sprites legible on phones; pan across the world instead of shrinking it.
     const zoom = Math.max(.95, Math.min(1.45, canvas.clientHeight / 710));
@@ -97,11 +100,23 @@ function createScene(canvas, images, reducedMotion) {
     let cameraX = Math.round(offset(pawn.x,w)), cameraY = Math.round(offset(pawn.depth(map),h));
     const placing=map.construction?.job?.phase==='placing';
     if(placing){
+      returnCamera=null;
       if(!placementCamera||!canvas.touchPlacement)placementCamera={x:cameraX,y:cameraY,targetX:cameraX,targetY:cameraY};
       placementCamera.x+=(placementCamera.targetX-placementCamera.x)*.22;
       placementCamera.y+=(placementCamera.targetY-placementCamera.y)*.22;
       cameraX=Math.round(placementCamera.x);cameraY=Math.round(placementCamera.y);
-    }else{placementCamera=null;canvas.touchPlacement=false;}
+    }else{
+      if(placementCamera)returnCamera={x:placementCamera.x,y:placementCamera.y};
+      placementCamera=null;canvas.touchPlacement=false;
+      if(returnCamera){
+        // Ease from the selected plot back to the moving worker without snapping.
+        const blend=reducedMotion.matches?1:1-Math.exp(-cameraDt/180);
+        returnCamera.x+=(cameraX-returnCamera.x)*blend;
+        returnCamera.y+=(cameraY-returnCamera.y)*blend;
+        if(Math.hypot(cameraX-returnCamera.x,cameraY-returnCamera.y)<.75)returnCamera=null;
+        else{cameraX=Math.round(returnCamera.x);cameraY=Math.round(returnCamera.y);}
+      }
+    }
     canvas.placementPointer=()=>{
       const bounds=canvas.getBoundingClientRect();
       return {clientX:bounds.left+bounds.width/2,clientY:bounds.top+bounds.height/2};
