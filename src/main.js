@@ -22,7 +22,7 @@ try {
 } catch {}
 // Additional one-time local supplies for placement and construction tests.
 try {
-  const creditKey='cripta.local.construction-supplies.2026-11-15';
+  const creditKey='cripta.local.construction-supplies.2026-11-17.v2';
   if ((location.protocol==='file:' || location.protocol==='http:'&&
       ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) && !localStorage.getItem(creditKey)) {
     const key='cripta.home.inventory.v1';
