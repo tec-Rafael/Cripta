@@ -44,13 +44,17 @@ function createHomeConstruction(inventory, pawn, wallet) {
     if(!map||!site)return false;
     const {x,y}=site;
     if(x<2||y<3||x>46||y>46)return false;
-    for(let dy=-2;dy<=1;dy++)for(let dx=0;dx<=1;dx++){
+    // Only the ground footprint and front approach need flat land.
+    // The roof may overlap the cliff visually without occupying its terrain.
+    for(let dy=0;dy<=1;dy++)for(let dx=0;dx<=1;dx++){
       if(!map.surface[y+dy]?.[x+dx]||map.heights[y+dy][x+dx]!==0||
         map.stairs.some(s=>s.x===x+dx&&s.y===y+dy))return false;
     }
-    if(map.decorations.some(item=>item.x>=x-1&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1))return false;
-    if(map.sheep.some(item=>item.x>=x-.5&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1))return false;
-    return !inventory.drops.some(item=>item.x>=x&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1);
+    const overlaps=(left,top,right,bottom)=>left<x+2&&right>x&&top<y+2&&bottom>y;
+    if(map.decorations.some(item=>(item.hill||0)===0&&
+      overlaps(item.x,item.y,item.x+(['house','tower'].includes(item.kind)?2:1),item.y+1)))return false;
+    if(map.sheep.some(item=>overlaps(item.x+.2,item.y+.2,item.x+.8,item.y+.5)))return false;
+    return !inventory.drops.some(item=>item.x>=x&&item.x<x+2&&item.y>=y&&item.y<y+2);
   }
   function routeTo(site){
     const goal=routes.key(site.x+1,site.y+1.5);
