@@ -35,16 +35,13 @@ try {
     localStorage.setItem(creditKey,'100');
   }
 } catch {}
-// One-time local gold ore refill for construction testing.
+// One-time local coin refill requested for construction testing.
 try {
-  const creditKey='cripta.local.gold-ore.2026-11-17.v1';
+  const creditKey='cripta.local.gold-coins.2026-11-17.v1';
   if ((location.protocol==='file:' || location.protocol==='http:'&&
       ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) && !localStorage.getItem(creditKey)) {
-    const key='cripta.home.inventory.v1';
-    const saved=JSON.parse(localStorage.getItem(key))||{};
-    saved.gold=(Number.isSafeInteger(saved.gold)&&saved.gold>=0?saved.gold:0)+100;
-    saved.order=[...new Set([...(Array.isArray(saved.order)?saved.order:[]),'gold'])];
-    localStorage.setItem(key,JSON.stringify(saved));localStorage.setItem(creditKey,'100');
+    wallet+=100;localStorage.setItem('cripta.coins',String(wallet));
+    localStorage.setItem(creditKey,'100');
   }
 } catch {}
 const homeInventory = createHomeInventory(canvas, pawn);
