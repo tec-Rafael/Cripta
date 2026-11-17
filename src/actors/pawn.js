@@ -21,7 +21,8 @@ function createPawn(controls) {
       direction=target?(Math.abs(target.x-player.x)>.04?[Math.sign(target.x-player.x),0]:[0,Math.sign(target.y-player.y)]):[0,0];
     }
     const [dx, dy] = direction;
-    const stride = (map.encounter?.guarding ? 1 : controls.sprinting ? 3.8 : 2.1) * Math.min(dt, .05);
+    const sprinting=map.construction?.job?.phase==='walking'||controls.sprinting;
+    const stride = (map.encounter?.guarding ? 1 : sprinting ? 3.8 : 2.1) * Math.min(dt, .05);
     let moving = false;
     if (dx || dy) {
       heading = {x:dx,y:dy};
@@ -41,7 +42,7 @@ function createPawn(controls) {
       player.y += dy*travel;
       moving = travel > 0;
     }
-    const motion = moving ? (controls.sprinting ? 'run' : 'walk') : 'idle';
+    const motion = moving ? (sprinting ? 'run' : 'walk') : 'idle';
     player.elapsed = motion === player.motion ? player.elapsed + dt : 0;
     player.motion = motion;
   }
