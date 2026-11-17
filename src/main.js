@@ -23,16 +23,16 @@ try {
 } catch {}
 // Additional one-time local supplies for placement and construction tests.
 try {
-  const creditKey='cripta.local.construction-supplies.2026-11-17.v2';
+  const creditKey='cripta.local.construction-supplies.2026-11-17.catalog-v3';
   if ((location.protocol==='file:' || location.protocol==='http:'&&
       ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) && !localStorage.getItem(creditKey)) {
     const key='cripta.home.inventory.v1';
     const saved=JSON.parse(localStorage.getItem(key))||{};
-    for(const kind of ['wood','gold'])saved[kind]=(Number.isSafeInteger(saved[kind])&&saved[kind]>=0?saved[kind]:0)+100;
+    for(const kind of ['wood','gold'])saved[kind]=(Number.isSafeInteger(saved[kind])&&saved[kind]>=0?saved[kind]:0)+500;
     saved.order=[...new Set([...(Array.isArray(saved.order)?saved.order:[]),'wood','gold'])];
     localStorage.setItem(key,JSON.stringify(saved));
-    wallet+=100;localStorage.setItem('cripta.coins',String(wallet));
-    localStorage.setItem(creditKey,'100');
+    wallet+=500;localStorage.setItem('cripta.coins',String(wallet));
+    localStorage.setItem(creditKey,'500');
   }
 } catch {}
 // One-time local coin refill requested for construction testing.
