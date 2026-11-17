@@ -55,7 +55,26 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function routeTo(site){
     const goal=routes.key(site.x+1,site.y+1.5);
     if(!routes.graph.has(goal))return null;
-    let current=routes.nearest(pawn),path=[routes.point(current)];
+    // Connect the actual feet to the route using collision-tested cardinal segments.
+    const candidates=[...routes.graph.keys()].sort((a,b)=>Math.hypot(routes.point(a).x-pawn.x,routes.point(a).y-pawn.y)-Math.hypot(routes.point(b).x-pawn.x,routes.point(b).y-pawn.y)).slice(0,24);
+    let current=null,path=null;
+    for(const candidate of candidates){
+      const point=routes.point(candidate);
+      for(const corner of [{x:point.x,y:pawn.y},{x:pawn.x,y:point.y}]){
+        let previous={x:pawn.x,y:pawn.y},clear=true;
+        for(const end of [corner,point]){
+          const start={...previous},steps=Math.max(1,Math.ceil(Math.hypot(end.x-start.x,end.y-start.y)*16));
+          for(let i=1;i<=steps;i++){
+            const next={x:start.x+(end.x-start.x)*i/steps,y:start.y+(end.y-start.y)*i/steps};
+            if(!canStand(map,previous,next.x,next.y)){clear=false;break;}previous=next;
+          }
+          if(!clear)break;
+        }
+        if(clear){current=candidate;path=[corner,point];break;}
+      }
+      if(path)break;
+    }
+    if(!path)return null;
     for(let i=0;i<routes.graph.size&&current!==goal;i++){
       const next=routes.nextStep(current,goal);
       if(next===current)return null;
@@ -84,10 +103,11 @@ function createHomeConstruction(inventory, pawn, wallet) {
     if(job?.phase!=='placing'||!canvas.screenToWorld)return;
     const site=point(event,canvas);hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
   }
-  function select(event,canvas){
+  function select(event,canvas,selectedSite){
     if(!job)return false;
     if(job.phase!=='placing')return true;
-    aim(event,canvas);
+    if(selectedSite){hover={...selectedSite,valid:freeSite(selectedSite)&&Boolean(routeTo(selectedSite))};}
+    else aim(event,canvas);
     if(!hover?.valid)return true;
     job.site={x:hover.x,y:hover.y};job.phase='walking';saveJob();
     pawn.follow(routeTo(job.site));lastPosition={x:pawn.x,y:pawn.y};repathIn=1;return true;
@@ -131,6 +151,12 @@ function createHomeConstruction(inventory, pawn, wallet) {
   dialog.querySelector('.home-menu-close').onclick=()=>dialog.close();
   const api={
     update,aim,select,freeSite,
+    cancel(){
+      if(!job)return;
+      job=null;hover=null;routes=null;lastPosition=null;
+      pawn.follow(null);pawn.pause();inventory.stop();
+      inventory.refund(cost);wallet.refund(cost.coins);saveJob();
+    },
     hitHouse(house){
       if(!map||job||!buildings.includes(house))return false;
       house.demolitionHits=(house.demolitionHits||0)+1;

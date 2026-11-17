@@ -307,6 +307,11 @@ function createHomeInventory(canvas, pawn) {
       }
       save();
     },
+    refund(cost){
+      state.wood+=cost.wood;state.gold+=cost.gold;
+      for(const kind of ['wood','gold'])if(state[kind]>0&&!state.order.includes(kind))state.order.push(kind);
+      save();drawSlots();
+    },
     get resources(){return {wood:state.wood,gold:state.gold};},
     spend(cost){
       if (!map || state.wood<cost.wood || state.gold<cost.gold) return false;

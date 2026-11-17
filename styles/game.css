@@ -356,3 +356,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 @media (hover:hover) and (pointer:fine) {
   #world.building-unavailable { cursor:url('../assets/ui/cursor-03.png') 14 14,not-allowed; }
 }
+
+#cancel-construction { position:absolute;right:max(16px,env(safe-area-inset-right));bottom:max(100px,env(safe-area-inset-bottom));z-index:5; }
+#cancel-construction img { width:56px;height:56px; }
+#cancel-construction[hidden] { display:none; }

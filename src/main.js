@@ -66,7 +66,11 @@ let attackPointer=null;
 let hoverPointer=null;
 canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable','building-unavailable');});
 canvas.addEventListener('pointerdown',event=>{
-  if(event.button===0)attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false};
+  if(event.button===0){
+    homeConstruction.aim(event,canvas);
+    attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false,
+      site:homeConstruction.job?.phase==='placing'?{...homeConstruction.preview}:null};
+  }
 });
 canvas.addEventListener('pointermove',event=>{
   homeConstruction.aim(event,canvas);
@@ -79,7 +83,7 @@ canvas.addEventListener('pointerup',event=>{
   const tap=attackPointer;
   attackPointer=null;
   if(!tap||tap.id!==event.pointerId||tap.moved)return;
-  if(homeConstruction.select(event,canvas))return;
+  if(homeConstruction.select(event,canvas,tap.site))return;
   if(adventure.interact(map,canvas,event))return;
   if(!canFight()||!canvas.worldToScreen)return;
   const rect=canvas.getBoundingClientRect();
@@ -129,6 +133,10 @@ function changeWorld(next) {
 
 const homeConstruction = createHomeConstruction(homeInventory, pawn, {
   get coins(){return wallet;},
+  refund(amount){
+    wallet+=amount;el('wallet').textContent=wallet;
+    try{localStorage.setItem('cripta.coins',String(wallet));}catch{}
+  },
   spend(amount){
     if(wallet<amount)return false;
     wallet-=amount;el('wallet').textContent=wallet;
@@ -136,6 +144,8 @@ const homeConstruction = createHomeConstruction(homeInventory, pawn, {
     return true;
   }
 });
+canvas.isPlacingBuilding=()=>homeConstruction.job?.phase==='placing';
+el('cancel-construction').onclick=()=>homeConstruction.cancel();
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
 el('retry').onclick=()=>{
@@ -166,6 +176,7 @@ function render(time) {
   }
   if(document.querySelector('dialog[open]'))homeInventory.stop();
   previousFrame = time;
+  el('cancel-construction').hidden=!homeConstruction.job||map.name!=='Lar';
   drawScene(map, pawn, time);
   const buildingReady=Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer));
   canvas.classList.toggle('building-clickable',buildingReady);

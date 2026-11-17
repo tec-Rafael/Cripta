@@ -123,7 +123,7 @@ function createScene(canvas, images, reducedMotion) {
       }
     }
     const encounter=map.encounter;
-    const fighters=encounter?[...encounter.coins,...encounter.enemies,...encounter.effects]:
+    const fighters=encounter?[...encounter.coins.map(coin=>({...coin,...resourceDropMotion(coin,Date.now())})),...encounter.enemies,...encounter.effects]:
       [...(map.homeInventory?.drops || []).map(drop=>({...drop,...resourceDropMotion(drop,Date.now()),kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
@@ -233,9 +233,8 @@ function createScene(canvas, images, reducedMotion) {
           if(item.kind==='goldDrop')ctx.drawImage(images.goldDrop,-12,-18,24,24);
           else ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
-          const pop=Math.min(1,item.age/.3);
-          ctx.translate(0,-Math.sin(pop*Math.PI)*20);
-          ctx.scale(.5+pop*.5,.5+pop*.5);
+          ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
+          ctx.scale(item.pop??1,item.pop??1);
           ctx.drawImage(images.coin,-20,-30,40,40);
         }else if(item.kind==='dust'){
           const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
