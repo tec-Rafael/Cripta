@@ -29,7 +29,7 @@ function encounterRoutes(map) {
   const byCell=new Map();
   for (const item of map.decorations) {
     if (!['house','tower','rock','tree','gold'].includes(item.kind)) continue;
-    for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=2;dx++) {
+    for(let dy=item.kind==='house'?-3:-1;dy<=1;dy++) for(let dx=-1;dx<=2;dx++) {
       const k=key(item.x+dx,item.y+dy);
       if(!byCell.has(k)) byCell.set(k,[]);
       byCell.get(k).push(item);
