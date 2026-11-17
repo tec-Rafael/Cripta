@@ -160,9 +160,9 @@ function createScene(canvas, images, reducedMotion) {
     const work=map.construction?.job;
     if(work?.site&&['walking','building'].includes(work.phase))
       actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site});
-    // Draw the axe swing after its house so the worker stays visible on every side.
-    const demolition=map.homeInventory?.swing;
-    const demolitionBase=demolition?.kind==='house'?demolition.target.y+.8:null;
+    // Keep depth stable between presses and swings until the worker leaves the house.
+    const demolition=map.homeInventory?.demolitionTarget;
+    const demolitionBase=demolition?demolition.y+.8:null;
     const base = item => item===pawn&&demolitionBase!==null?demolitionBase:
       item === pawn || fighters.includes(item) ? item.y :
       item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);

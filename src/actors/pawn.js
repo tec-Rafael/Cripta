@@ -55,6 +55,8 @@ function createPawn(controls) {
     update,
     follow(points){controls.stop();route=points;},
     draw(ctx, images, map, margin, tile) { drawPawn(ctx, images, player, elevation(map), margin, tile,map.encounter,map.homeInventory,map.construction); },
+    get facing(){return player.facing;},
+    face(direction){if(direction)player.facing=Math.sign(direction);},
     get character(){return player.character;},
     get heading(){return heading;},
     setCharacter(character) { player.character = character; },
