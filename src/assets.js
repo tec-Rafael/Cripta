@@ -2,6 +2,10 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
+    pawnIdleShovel:'../tools/pawn-shovel/Pawn_Idle Shovel.png',
+    pawnRunShovel:'../tools/pawn-shovel/Pawn_Run Shovel.png',
+    pawnDig:'../tools/pawn-shovel/Pawn_Interact Shovel.png',
+    shovel:'../tools/shovel-icon.png',
     fenceHorizontal:'../fences/fence-v4-horizontal.png',
     fenceVertical:'../fences/fence-v4-vertical.png',
     fencePost:'../fences/fence-v4-post.png',
@@ -47,6 +51,8 @@ async function loadImages() {
     cloud: 'Terrain/Decorations/Clouds/Clouds_01.png',
   };
   for (const color of ['Blue','Red','Purple','Yellow']) sources['house'+color]='Buildings/'+color+' Buildings/House1.png';
+  for(const model of Object.keys(buildingModels))for(const color of ['Blue','Red','Purple','Yellow'])
+    sources['building'+model+color]='Buildings/'+color+' Buildings/'+model+'.png';
   for (const [name, folder] of Object.entries({
     knight:'Warrior/Warrior_', archer:'Archer/Archer_', monk:'Monk/', lancer:'Lancer/Lancer_',
   })) {

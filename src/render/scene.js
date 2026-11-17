@@ -79,8 +79,11 @@ function createScene(canvas, images, reducedMotion) {
     ctx.drawImage(images.moss, sourceX, 256, TILE, TILE * 2, x, top, TILE, TILE * 2);
   }
 
-  let placementCamera=null;
+  let placementCamera=null,returnCamera=null,cameraMap=null,lastCameraTime=null;
   function draw(map, pawn, time) {
+    const cameraDt=lastCameraTime===null?25:Math.min(50,Math.max(0,time-lastCameraTime));
+    lastCameraTime=time;
+    if(cameraMap!==map){placementCamera=null;returnCamera=null;cameraMap=map;}
     const tick = reducedMotion.matches ? 0 : Math.floor(time / 100);
     // Keep sprites legible on phones; pan across the world instead of shrinking it.
     const zoom = Math.max(.95, Math.min(1.45, canvas.clientHeight / 710));
@@ -97,11 +100,23 @@ function createScene(canvas, images, reducedMotion) {
     let cameraX = Math.round(offset(pawn.x,w)), cameraY = Math.round(offset(pawn.depth(map),h));
     const placing=map.construction?.job?.phase==='placing';
     if(placing){
+      returnCamera=null;
       if(!placementCamera||!canvas.touchPlacement)placementCamera={x:cameraX,y:cameraY,targetX:cameraX,targetY:cameraY};
       placementCamera.x+=(placementCamera.targetX-placementCamera.x)*.22;
       placementCamera.y+=(placementCamera.targetY-placementCamera.y)*.22;
       cameraX=Math.round(placementCamera.x);cameraY=Math.round(placementCamera.y);
-    }else{placementCamera=null;canvas.touchPlacement=false;}
+    }else{
+      if(placementCamera)returnCamera={x:placementCamera.x,y:placementCamera.y};
+      placementCamera=null;canvas.touchPlacement=false;
+      if(returnCamera){
+        // Ease from the selected plot back to the moving worker without snapping.
+        const blend=reducedMotion.matches?1:1-Math.exp(-cameraDt/180);
+        returnCamera.x+=(cameraX-returnCamera.x)*blend;
+        returnCamera.y+=(cameraY-returnCamera.y)*blend;
+        if(Math.hypot(cameraX-returnCamera.x,cameraY-returnCamera.y)<.75)returnCamera=null;
+        else{cameraX=Math.round(returnCamera.x);cameraY=Math.round(returnCamera.y);}
+      }
+    }
     canvas.placementPointer=()=>{
       const bounds=canvas.getBoundingClientRect();
       return {clientX:bounds.left+bounds.width/2,clientY:bounds.top+bounds.height/2};
@@ -123,7 +138,7 @@ function createScene(canvas, images, reducedMotion) {
       left: Math.max(0, Math.floor((cameraX-MARGIN)/TILE)-2),
       top: Math.max(0, Math.floor((cameraY-MARGIN)/TILE)-2),
       right: Math.min(SIZE, Math.ceil((cameraX+w-MARGIN)/TILE)+2),
-      bottom: Math.min(SIZE, Math.ceil((cameraY+h-MARGIN)/TILE)+3+map.layers.length),
+      bottom: Math.min(SIZE, Math.ceil((cameraY+h-MARGIN)/TILE)+6+map.layers.length),
     };
     ctx.strokeStyle = '#c0f0dc32';
     ctx.lineWidth = 2;
@@ -155,17 +170,14 @@ function createScene(canvas, images, reducedMotion) {
     const fighters=encounter?[...encounter.coins.map(coin=>({...coin,...resourceDropMotion(coin,Date.now())})),...encounter.enemies,...encounter.effects]:
       [...(map.homeInventory?.drops || []).map(drop=>({...drop,...resourceDropMotion(drop,Date.now()),kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
-      item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
+      item.x+(item.kind==='house'?getBuildingModel(item.model).width/TILE:0) >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
     // Gold occludes actors only behind its footprint (.55 center - .24 depth).
     const work=map.construction?.job;
     if(work?.site&&['walking','building'].includes(work.phase))
-      actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site});
-    // Draw the axe swing after its house so the worker stays visible on every side.
-    const demolition=map.homeInventory?.swing;
-    const demolitionBase=demolition?.kind==='house'?demolition.target.y+.8:null;
-    const base = item => item===pawn&&demolitionBase!==null?demolitionBase:
-      item === pawn || fighters.includes(item) ? item.y :
-      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
+      actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site,model:work.model});
+    // Use the feet for depth on every frame, including all demolition swings.
+    const base = item => item === pawn || fighters.includes(item) ? item.y :
+      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.68, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
@@ -173,7 +185,15 @@ function createScene(canvas, images, reducedMotion) {
       level(a) - level(b) || base(a) - base(b));
     const ramps = map.layers.map((_,index) =>
       map.stairs.filter(s => map.heights[s.y][s.x] === index+1));
-    let nextActor = 0;
+    // Offscreen worksite markers must never block residents in visible rows.
+    const residents=new Map();
+    for(const actor of actors){
+      const row=Math.floor(base(actor)),height=level(actor);
+      if(row<view.top||row>=view.bottom||height<0||height>map.layers.length)continue;
+      const key=row+':'+height;
+      if(!residents.has(key))residents.set(key,[]);
+      residents.get(key).push(actor);
+    }
     for (let row = view.top; row < view.bottom; row++) {
       const strip = {...view, top:row, bottom:row+1};
       function drawResidents(height) {
@@ -188,10 +208,7 @@ function createScene(canvas, images, reducedMotion) {
           }
           ctx.restore();
         }
-        while (nextActor < actors.length && Math.floor(base(actors[nextActor])) === row &&
-               level(actors[nextActor]) === height) {
-          drawActor(actors[nextActor++]);
-        }
+        for(const actor of residents.get(row+':'+height)||[])drawActor(actor);
       }
       drawResidents(0);
       for (const [index, layer] of map.layers.entries()) {
@@ -202,10 +219,10 @@ function createScene(canvas, images, reducedMotion) {
         drawResidents(index+1);
       }
     }
-    function drawWorksiteFence(site){
+    function drawWorksiteFence(site,model){
       const x=MARGIN+site.x*TILE,y=MARGIN+site.y*TILE;
       // Enclose the house's ground footprint, not the tall roof sprite.
-      const width=2*TILE,depth=TILE,margin=12;
+      const width=getBuildingModel(model).width,depth=TILE,margin=12;
       const left=x-margin,right=x+width+margin,back=y-margin,front=y+depth+margin;
       const entrance=x+width/2,opening=48;
       const clear=(ax,ay,bx=ax,by=ay)=>!fenceTouchesMountain(map,
@@ -237,7 +254,7 @@ function createScene(canvas, images, reducedMotion) {
         if(clear(px,front))ctx.drawImage(images.fencePost,px-8,front-31,16,31);
     }
     function drawActor(item) {
-      if(item.kind==='worksiteFence'){drawWorksiteFence(item.site);return;}
+      if(item.kind==='worksiteFence'){drawWorksiteFence(item.site,item.model);return;}
       if (item === pawn) { pawn.draw(ctx, images, map, MARGIN, TILE); return; }
       if(fighters.includes(item)){
         const col=Math.floor(item.x),row=Math.floor(item.y);
@@ -282,8 +299,8 @@ function createScene(canvas, images, reducedMotion) {
         ctx.restore();return;
       }
       const x = MARGIN + item.x * TILE, y = MARGIN + item.y * TILE - (item.hill || 0)*TILE;
-      if (item.kind === 'tree' && item.felled) ctx.drawImage(images['stump'+item.variant],x-40,y-112,144,192);
-      if (item.kind === 'tree' && !item.felled) drawSprite('tree'+item.variant, (tick+item.phase)%8, images['tree'+item.variant].width/8, images['tree'+item.variant].height, x-40,y-112,144,192);
+      if (item.kind === 'tree' && !item.removed && item.felled) ctx.drawImage(images['stump'+item.variant],x-40,y-112,144,192);
+      if (item.kind === 'tree' && !item.removed && !item.felled) drawSprite('tree'+item.variant, (tick+item.phase)%8, images['tree'+item.variant].width/8, images['tree'+item.variant].height, x-40,y-112,144,192);
       if (item.kind === 'bush') drawSprite('bush'+item.variant, (tick+item.phase)%8, 128,128,x-16,y-32,96,96);
       if (item.kind === 'sheep') {
         ctx.save(); ctx.translate(x+32,y); ctx.scale(item.facing,1);
@@ -291,7 +308,11 @@ function createScene(canvas, images, reducedMotion) {
         ctx.restore();
       }
       if (item.kind === 'tower') ctx.drawImage(images.tower,x,y-192,128,256);
-      if (item.kind === 'house') ctx.drawImage(images[item.color?'house'+item.color:map.name==='Lar'?'houseBlack':'house'],x,y-128,128,192);
+      if (item.kind === 'house') {
+        const model=getBuildingModel(item.model);
+        const sprite=item.color?'building'+(item.model||'House1')+item.color:map.name==='Lar'?'houseBlack':'house';
+        ctx.drawImage(images[sprite],x,y-(model.height-TILE),model.width,model.height);
+      }
       if (item.kind === 'gold' && !item.felled) {
         const variant = item.variant % 2 === 0 ? 6 : 5;
         const crop = variant === 6 ? {x:17,y:17,width:92,height:81} : {x:28,y:20,width:74,height:80};
@@ -306,23 +327,25 @@ function createScene(canvas, images, reducedMotion) {
     if(construction?.job){
       const job=construction.job,site=job.site||construction.preview;
       if(site){
-        const x=MARGIN+site.x*TILE,y=MARGIN+(site.y-2)*TILE;
+        const model=getBuildingModel(job.model);
+        const x=MARGIN+site.x*TILE,y=MARGIN+site.y*TILE-(model.height-TILE);
         if(job.phase==='placing'){
           // Preview and worksite share the same rear fence and house origin.
-          const groundY=MARGIN+site.y*TILE,margin=12;
+          // The placement indicator measures the building sprite, excluding the fence margin.
           ctx.save();
           ctx.globalAlpha=.35;
-          ctx.drawImage(images['house'+job.color],x,y,128,192);
-          ctx.globalAlpha=.85;drawWorksiteFence(site);
+          ctx.drawImage(images['building'+(job.model||'House1')+job.color],x,y,model.width,model.height);
+          ctx.globalAlpha=.85;
           ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';
-          ctx.fillRect(x-margin,groundY-margin,2*TILE+2*margin,TILE+2*margin);
-          ctx.drawImage(images.constructionMarker,x-margin,groundY-margin,2*TILE+2*margin,TILE+2*margin);
+          ctx.fillRect(x,y,model.width,model.height);
+          ctx.drawImage(images.constructionMarker,x,y,model.width,model.height);
           ctx.restore();
         }else if(job.phase==='building'){
           const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
-          for(let i=0;i<4;i++){
+          const columns=model.width/TILE;
+          for(let i=0;i<columns*2;i++){
             const frame=Math.floor((job.elapsed*12+i*3)%frames);
-            ctx.drawImage(sheet,frame*size,0,size,size,x-16+(i%2)*48,y+48+Math.floor(i/2)*48,128,128);
+            ctx.drawImage(sheet,frame*size,0,size,size,x-16+(i%columns)*64,y+model.height-144+Math.floor(i/columns)*48,128,128);
           }
         }
 

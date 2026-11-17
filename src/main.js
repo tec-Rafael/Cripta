@@ -1,5 +1,6 @@
 const canvas = document.querySelector('#world');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const mobileConstruction = matchMedia('(hover:none) and (pointer:coarse), (max-width:600px)');
 const SIZE = MapGenerator.size;
 let drawScene;
 let map;
@@ -22,14 +23,23 @@ try {
 } catch {}
 // Additional one-time local supplies for placement and construction tests.
 try {
-  const creditKey='cripta.local.construction-supplies.2026-11-17.v2';
+  const creditKey='cripta.local.construction-supplies.2026-11-17.catalog-v3';
   if ((location.protocol==='file:' || location.protocol==='http:'&&
       ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) && !localStorage.getItem(creditKey)) {
     const key='cripta.home.inventory.v1';
     const saved=JSON.parse(localStorage.getItem(key))||{};
-    for(const kind of ['wood','gold'])saved[kind]=(Number.isSafeInteger(saved[kind])&&saved[kind]>=0?saved[kind]:0)+100;
+    for(const kind of ['wood','gold'])saved[kind]=(Number.isSafeInteger(saved[kind])&&saved[kind]>=0?saved[kind]:0)+500;
     saved.order=[...new Set([...(Array.isArray(saved.order)?saved.order:[]),'wood','gold'])];
     localStorage.setItem(key,JSON.stringify(saved));
+    wallet+=500;localStorage.setItem('cripta.coins',String(wallet));
+    localStorage.setItem(creditKey,'500');
+  }
+} catch {}
+// One-time local coin refill requested for construction testing.
+try {
+  const creditKey='cripta.local.gold-coins.2026-11-17.v1';
+  if ((location.protocol==='file:' || location.protocol==='http:'&&
+      ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) && !localStorage.getItem(creditKey)) {
     wallet+=100;localStorage.setItem('cripta.coins',String(wallet));
     localStorage.setItem(creditKey,'100');
   }
@@ -101,7 +111,11 @@ canvas.addEventListener('pointerup',event=>{
   attackPointer=null;
   if(tap.moved&&!tap.placingTouch)return;
   if(homeConstruction.job){
-    if(homeConstruction.job.phase==='placing'&&!tap.placingTouch)homeConstruction.aim(event,canvas);
+    if(homeConstruction.job.phase==='placing'&&!tap.placingTouch){
+      homeConstruction.aim(event,canvas);
+      if(event.pointerType==='mouse'&&!mobileConstruction.matches)
+        homeConstruction.select(event,canvas,homeConstruction.preview);
+    }
     return;
   }
   if(adventure.interact(map,canvas,event))return;
@@ -204,7 +218,7 @@ function render(time) {
   drawScene(map, pawn, time);
   const placing=homeConstruction.job?.phase==='placing';
   if(placing&&canvas.touchPlacement)homeConstruction.aim(canvas.placementPointer(),canvas);
-  el('confirm-construction').hidden=!placing||map.name!=='Lar';
+  el('confirm-construction').hidden=!placing||map.name!=='Lar'||!mobileConstruction.matches;
   el('confirm-construction').disabled=!homeConstruction.preview?.valid;
   const buildingReady=Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer));
   canvas.classList.toggle('building-clickable',buildingReady);
