@@ -43,20 +43,23 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function freeSite(site){
     if(!map||!site)return false;
     const {x,y}=site;
-    const columns=getBuildingModel(job?.model||selectedModel).width/64;
+    const model=job?.model||selectedModel,columns=getBuildingModel(model).width/64;
     if(!Number.isInteger(x)||!Number.isInteger(y)||x<2||y<3||x+columns>48||y>46)return false;
-    // Only the ground footprint and front approach need flat land.
-    // The roof may overlap the cliff visually without occupying its terrain.
-    for(let dy=0;dy<=1;dy++)for(let dx=0;dx<columns;dx++){
-      if(!map.surface[y+dy]?.[x+dx]||map.heights[y+dy][x+dx]!==0||
-        map.stairs.some(s=>s.x===x+dx&&s.y===y+dy))return false;
-    }
-    const overlaps=(left,top,right,bottom)=>left<x+columns&&right>x&&top<y+2&&bottom>y;
-    if(map.decorations.some(item=>(item.hill||0)===0&&
-      overlaps(item.x,item.y,item.x+(item.kind==='house'?getBuildingModel(item.model).width/64:item.kind==='tower'?2:1),item.y+1)))return false;
-    if(map.sheep.some(item=>overlaps(item.x+.2,item.y+.2,item.x+.8,item.y+.5)))return false;
-    return !inventory.drops.some(item=>item.x>=x&&item.x<x+columns&&item.y>=y&&item.y<y+2);
+    const footprint=houseFootprint({...site,model});
+    const door=buildingEntrance(site,model);
+    const areas=[footprint,{left:door.x-.25,right:door.x+.25,top:door.y-.25,bottom:door.y+.25}];
+    const overlaps=(box)=>areas.some(area=>box.left<area.right&&box.right>area.left&&box.top<area.bottom&&box.bottom>area.top);
+    for(const area of areas)for(let row=Math.floor(area.top);row<Math.ceil(area.bottom);row++)
+      for(let col=Math.floor(area.left);col<Math.ceil(area.right);col++){
+        if(!map.surface[row]?.[col]||map.heights[row][col]!==0||
+          map.stairs.some(stair=>stair.x===col&&stair.y===row))return false;
+      }
+    if(map.decorations.some(item=>(item.hill||0)===0&&overlaps(item.kind==='house'?houseFootprint(item):
+      {left:item.x,right:item.x+(item.kind==='tower'?2:1),top:item.y,bottom:item.y+1})))return false;
+    if(map.sheep.some(item=>overlaps({left:item.x+.2,top:item.y+.2,right:item.x+.8,bottom:item.y+.5})))return false;
+    return !inventory.drops.some(item=>areas.some(area=>item.x>=area.left&&item.x<area.right&&item.y>=area.top&&item.y<area.bottom));
   }
+
   function routeTo(site){
     const goal=routes.key(buildingEntrance(site,job?.model||selectedModel).x,site.y+1.5);
     if(!routes.graph.has(goal))return null;
@@ -107,7 +110,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function point(event,canvas){
     const rect=canvas.getBoundingClientRect();
     const world=canvas.screenToWorld({x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height});
-    return {x:Math.floor(world.x-getBuildingModel(job?.model||selectedModel).width/128),y:Math.floor(world.y-(canvas.touchPlacement ? .5 : 0))};
+    return {x:Math.floor(world.x-getBuildingModel(job?.model||selectedModel).width/128),y:Math.floor(world.y+(canvas.touchPlacement ? getBuildingModel(job?.model||selectedModel).height/128-1 : 0))};
   }
   function aim(event,canvas){
     if(job?.phase!=='placing'||!canvas.screenToWorld)return;

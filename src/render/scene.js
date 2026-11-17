@@ -331,14 +331,14 @@ function createScene(canvas, images, reducedMotion) {
         const x=MARGIN+site.x*TILE,y=MARGIN+site.y*TILE-(model.height-TILE);
         if(job.phase==='placing'){
           // Preview and worksite share the same rear fence and house origin.
-          const groundY=MARGIN+site.y*TILE,margin=12;
+          // The placement indicator measures the building sprite, excluding the fence margin.
           ctx.save();
           ctx.globalAlpha=.35;
           ctx.drawImage(images['building'+(job.model||'House1')+job.color],x,y,model.width,model.height);
           ctx.globalAlpha=.85;drawWorksiteFence(site,job.model);
           ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';
-          ctx.fillRect(x-margin,groundY-margin,model.width+2*margin,TILE+2*margin);
-          ctx.drawImage(images.constructionMarker,x-margin,groundY-margin,model.width+2*margin,TILE+2*margin);
+          ctx.fillRect(x,y,model.width,model.height);
+          ctx.drawImage(images.constructionMarker,x,y,model.width,model.height);
           ctx.restore();
         }else if(job.phase==='building'){
           const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
