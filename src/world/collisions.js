@@ -1,6 +1,6 @@
 // Solid outline includes the roof so the worker cannot stand underneath it.
 function houseFootprint(item){
-  return {left:item.x,right:item.x+2,top:item.y-1.8,bottom:item.y+.68};
+  return {left:item.x,right:item.x+2,top:item.y-.8,bottom:item.y+.68};
 }
 
 /* Positions use fractions of a map cell. The feet determine the occupied cell. */
