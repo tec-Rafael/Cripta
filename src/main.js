@@ -1,5 +1,6 @@
 const canvas = document.querySelector('#world');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const mobileConstruction = matchMedia('(hover:none) and (pointer:coarse), (max-width:600px)');
 const SIZE = MapGenerator.size;
 let drawScene;
 let map;
@@ -101,7 +102,11 @@ canvas.addEventListener('pointerup',event=>{
   attackPointer=null;
   if(tap.moved&&!tap.placingTouch)return;
   if(homeConstruction.job){
-    if(homeConstruction.job.phase==='placing'&&!tap.placingTouch)homeConstruction.aim(event,canvas);
+    if(homeConstruction.job.phase==='placing'&&!tap.placingTouch){
+      homeConstruction.aim(event,canvas);
+      if(event.pointerType==='mouse'&&!mobileConstruction.matches)
+        homeConstruction.select(event,canvas,homeConstruction.preview);
+    }
     return;
   }
   if(adventure.interact(map,canvas,event))return;
@@ -204,7 +209,7 @@ function render(time) {
   drawScene(map, pawn, time);
   const placing=homeConstruction.job?.phase==='placing';
   if(placing&&canvas.touchPlacement)homeConstruction.aim(canvas.placementPointer(),canvas);
-  el('confirm-construction').hidden=!placing||map.name!=='Lar';
+  el('confirm-construction').hidden=!placing||map.name!=='Lar'||!mobileConstruction.matches;
   el('confirm-construction').disabled=!homeConstruction.preview?.valid;
   const buildingReady=Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer));
   canvas.classList.toggle('building-clickable',buildingReady);
