@@ -68,6 +68,7 @@ function createScene(canvas, images, reducedMotion) {
     ctx.drawImage(images.moss, sourceX, 256, TILE, TILE * 2, x, top, TILE, TILE * 2);
   }
 
+  let placementCamera=null;
   function draw(map, pawn, time) {
     const tick = reducedMotion.matches ? 0 : Math.floor(time / 100);
     // Keep sprites legible on phones; pan across the world instead of shrinking it.
@@ -82,7 +83,23 @@ function createScene(canvas, images, reducedMotion) {
       Math.max(0, Math.min(world - span, MARGIN + feet*TILE - span/2));
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const cameraX = Math.round(offset(pawn.x,w)), cameraY = Math.round(offset(pawn.depth(map),h));
+    let cameraX = Math.round(offset(pawn.x,w)), cameraY = Math.round(offset(pawn.depth(map),h));
+    const placing=map.construction?.job?.phase==='placing';
+    if(placing){
+      if(!placementCamera||!canvas.touchPlacement)placementCamera={x:cameraX,y:cameraY};
+      cameraX=placementCamera.x;cameraY=placementCamera.y;
+    }else{placementCamera=null;canvas.touchPlacement=false;}
+    canvas.placementPointer=()=>{
+      const bounds=canvas.getBoundingClientRect();
+      return {clientX:bounds.left+bounds.width/2,clientY:bounds.top+bounds.height/2};
+    };
+    canvas.panPlacement=(dx,dy)=>{
+      if(!placing)return;
+      const bounds=canvas.getBoundingClientRect();
+      cameraX=Math.round(Math.max(0,Math.min(Math.max(0,world-w),cameraX-dx*w/bounds.width)));
+      cameraY=Math.round(Math.max(0,Math.min(Math.max(0,world-h),cameraY-dy*h/bounds.height)));
+      placementCamera={x:cameraX,y:cameraY};
+    };
     canvas.worldToScreen=point=>{
       const x=Math.floor(point.x),y=Math.floor(point.y);
       return {x:MARGIN+point.x*TILE-cameraX,y:MARGIN+(point.y-mountainHeight(map,x,y,point.x-x))*TILE-cameraY};

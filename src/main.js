@@ -69,14 +69,18 @@ canvas.isPositioningBuilding=()=>Boolean(attackPointer?.placingTouch);
 canvas.addEventListener('pointerdown',event=>{
   if(event.button!==0||attackPointer)return;
   const placingTouch=event.pointerType==='touch'&&homeConstruction.job?.phase==='placing';
-  if(placingTouch){pawn.pause();canvas.setPointerCapture(event.pointerId);}
-  homeConstruction.aim(event,canvas);
-  attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false,placingTouch,
+  if(placingTouch){pawn.pause();canvas.touchPlacement=true;canvas.setPointerCapture(event.pointerId);}
+  homeConstruction.aim(placingTouch?canvas.placementPointer():event,canvas);
+  attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false,placingTouch,lastX:event.clientX,lastY:event.clientY,
     site:homeConstruction.job?.phase==='placing'?{...homeConstruction.preview}:null};
 });
 canvas.addEventListener('pointermove',event=>{
   if(!attackPointer||attackPointer.id===event.pointerId){
-    homeConstruction.aim(event,canvas);
+    if(attackPointer?.placingTouch){
+      canvas.panPlacement(event.clientX-attackPointer.lastX,event.clientY-attackPointer.lastY);
+      attackPointer.lastX=event.clientX;attackPointer.lastY=event.clientY;
+    }
+    homeConstruction.aim(attackPointer?.placingTouch?canvas.placementPointer():event,canvas);
     if(attackPointer?.placingTouch)attackPointer.site={...homeConstruction.preview};
   }
   if(event.pointerType==='mouse')hoverPointer={clientX:event.clientX,clientY:event.clientY};
@@ -90,7 +94,8 @@ canvas.addEventListener('pointerup',event=>{
   const tap=attackPointer;
   if(!tap||tap.id!==event.pointerId)return;
   if(tap.placingTouch){
-    homeConstruction.aim(event,canvas);
+    canvas.panPlacement(event.clientX-tap.lastX,event.clientY-tap.lastY);
+    homeConstruction.aim(canvas.placementPointer(),canvas);
     tap.site={...homeConstruction.preview};
   }
   attackPointer=null;
