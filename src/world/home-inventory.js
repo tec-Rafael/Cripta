@@ -268,7 +268,10 @@ function createHomeInventory(canvas, pawn) {
           save();
         }
       }
-      if (swing.time >= swingDuration) swing = null;
+      if (swing.time >= swingDuration) {
+        // Start the next held swing immediately: no idle frame or depth-order flicker.
+        swing = target ? {...swing,time:swing.time % swingDuration,hit:false} : null;
+      }
     } else if (swing) {
       swing.time += dt;
       if (swing.time >= swingDuration) swing = null;
