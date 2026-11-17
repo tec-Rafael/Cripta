@@ -101,7 +101,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function point(event,canvas){
     const rect=canvas.getBoundingClientRect();
     const world=canvas.screenToWorld({x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height});
-    return {x:Math.floor(world.x)-1,y:Math.floor(world.y+(canvas.touchPlacement ? .5 : 0))};
+    return {x:Math.floor(world.x)-1,y:Math.floor(world.y-(canvas.touchPlacement ? .5 : 0))};
   }
   function aim(event,canvas){
     if(job?.phase!=='placing'||!canvas.screenToWorld)return;

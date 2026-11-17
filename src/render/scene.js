@@ -294,9 +294,16 @@ function createScene(canvas, images, reducedMotion) {
       if(site){
         const x=MARGIN+site.x*TILE,y=MARGIN+(site.y-2)*TILE;
         if(job.phase==='placing'){
-          ctx.save();ctx.globalAlpha=.8;
-          ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';ctx.fillRect(x,y,128,192);
-          ctx.drawImage(images.constructionMarker,x,y,128,192);ctx.restore();
+          // Preview and worksite share the same rear fence and house origin.
+          const groundY=MARGIN+site.y*TILE,margin=12;
+          ctx.save();
+          ctx.globalAlpha=.35;
+          ctx.drawImage(images['house'+job.color],x,y,128,192);
+          ctx.globalAlpha=.85;drawWorksiteFence(site);
+          ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';
+          ctx.fillRect(x-margin,groundY-margin,2*TILE+2*margin,TILE+2*margin);
+          ctx.drawImage(images.constructionMarker,x-margin,groundY-margin,2*TILE+2*margin,TILE+2*margin);
+          ctx.restore();
         }else if(job.phase==='building'){
           const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
           for(let i=0;i<4;i++){
