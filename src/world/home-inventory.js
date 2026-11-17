@@ -26,7 +26,6 @@ function createHomeInventory(canvas, pawn) {
   let map = null;
   let selected = 0;
   let target = null;
-  let demolitionTarget = null;
   let swing = null;
   let pointerId = null;
   let refreshIn = 0;
@@ -146,7 +145,6 @@ function createHomeInventory(canvas, pawn) {
   }
   function attach(next) {
     stop();
-    demolitionTarget=null;
     map = next.name === 'Lar' ? next : null;
     panel.hidden = !map;
     next.homeInventory = map ? api : null;
@@ -185,6 +183,9 @@ function createHomeInventory(canvas, pawn) {
     return map.decorations.filter(item => (selected === 3 ? item.kind==='gold' : item.kind==='tree'||item.kind==='house'&&item.color) && !item.felled)
       .map(tree => {
         const point = canvas.worldToScreen(trunk(tree));
+        // Accept clicks on the complete house, including its roof when approaching from behind.
+        if(tree.kind==='house'&&Math.abs(x-point.x)<=64&&y>=point.y-2.72*64&&y<=point.y+.28*64)
+          return {tree,distance:0};
         return {tree, distance: Math.hypot(x-point.x, (y-point.y+(tree.kind === 'gold' ? 12 : 48))*.6)};
       }).filter(hit => hit.distance < 48).sort((a,b) => a.distance-b.distance)[0]?.tree || null;
   }
@@ -194,7 +195,6 @@ function createHomeInventory(canvas, pawn) {
     pawn.pause();
     target = tree;
     if(tree.kind==='house'){
-      demolitionTarget=tree;
       pawn.face(Math.sign(trunk(tree).x-pawn.x)||pawn.facing||1);
     }
   }
@@ -248,8 +248,6 @@ function createHomeInventory(canvas, pawn) {
       map.homeEffects[index].left -= dt;
       if (map.homeEffects[index].left <= 0) map.homeEffects.splice(index,1);
     }
-    if(demolitionTarget&&(selected!==1||!map.decorations.includes(demolitionTarget)||
-        Math.hypot(pawn.x-trunk(demolitionTarget).x,pawn.y-trunk(demolitionTarget).y)>1.2))demolitionTarget=null;
     if (target && !available(target)) stop();
     if (target) {
       if (!swing) swing = {time:0, hit:false, kind:target.kind, target, dx:Math.sign(trunk(target).x-pawn.x) || pawn.facing || pawn.heading.x || 1};
@@ -297,7 +295,6 @@ function createHomeInventory(canvas, pawn) {
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
   const api = {attach, update, stop,
-    get demolitionTarget(){return selected===1?demolitionTarget:null;},
     dropWood(node,amount){
       if(!map||!Number.isSafeInteger(amount)||amount<=0)return;
       const base=trunk(node),level=node.hill||0,bornAt=Date.now();

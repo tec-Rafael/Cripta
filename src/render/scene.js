@@ -160,11 +160,8 @@ function createScene(canvas, images, reducedMotion) {
     const work=map.construction?.job;
     if(work?.site&&['walking','building'].includes(work.phase))
       actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site});
-    // Keep depth stable between presses and swings until the worker leaves the house.
-    const demolition=map.homeInventory?.demolitionTarget;
-    const demolitionBase=demolition?demolition.y+.8:null;
-    const base = item => item===pawn&&demolitionBase!==null?demolitionBase:
-      item === pawn || fighters.includes(item) ? item.y :
+    // Use the feet for depth on every frame, including all demolition swings.
+    const base = item => item === pawn || fighters.includes(item) ? item.y :
       item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
