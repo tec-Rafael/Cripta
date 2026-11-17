@@ -65,24 +65,36 @@ function attackSelected(){
 let attackPointer=null;
 let hoverPointer=null;
 canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable','building-unavailable');});
+canvas.isPositioningBuilding=()=>Boolean(attackPointer?.placingTouch);
 canvas.addEventListener('pointerdown',event=>{
-  if(event.button===0){
-    homeConstruction.aim(event,canvas);
-    attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false,
-      site:homeConstruction.job?.phase==='placing'?{...homeConstruction.preview}:null};
-  }
+  if(event.button!==0||attackPointer)return;
+  const placingTouch=event.pointerType==='touch'&&homeConstruction.job?.phase==='placing';
+  if(placingTouch){pawn.pause();canvas.setPointerCapture(event.pointerId);}
+  homeConstruction.aim(event,canvas);
+  attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false,placingTouch,
+    site:homeConstruction.job?.phase==='placing'?{...homeConstruction.preview}:null};
 });
 canvas.addEventListener('pointermove',event=>{
-  homeConstruction.aim(event,canvas);
+  if(!attackPointer||attackPointer.id===event.pointerId){
+    homeConstruction.aim(event,canvas);
+    if(attackPointer?.placingTouch)attackPointer.site={...homeConstruction.preview};
+  }
   if(event.pointerType==='mouse')hoverPointer={clientX:event.clientX,clientY:event.clientY};
   if(attackPointer?.id===event.pointerId&&Math.hypot(event.clientX-attackPointer.x,event.clientY-attackPointer.y)>8)
     attackPointer.moved=true;
 });
-canvas.addEventListener('pointercancel',()=>{attackPointer=null;});
+for(const type of ['pointercancel','lostpointercapture'])canvas.addEventListener(type,event=>{
+  if(attackPointer?.id===event.pointerId)attackPointer=null;
+});
 canvas.addEventListener('pointerup',event=>{
   const tap=attackPointer;
+  if(!tap||tap.id!==event.pointerId)return;
+  if(tap.placingTouch){
+    homeConstruction.aim(event,canvas);
+    tap.site={...homeConstruction.preview};
+  }
   attackPointer=null;
-  if(!tap||tap.id!==event.pointerId||tap.moved)return;
+  if(tap.moved&&!tap.placingTouch)return;
   if(homeConstruction.select(event,canvas,tap.site))return;
   if(adventure.interact(map,canvas,event))return;
   if(!canFight()||!canvas.worldToScreen)return;
@@ -144,7 +156,7 @@ const homeConstruction = createHomeConstruction(homeInventory, pawn, {
     return true;
   }
 });
-canvas.isPlacingBuilding=()=>homeConstruction.job?.phase==='placing';
+canvas.isPlacingBuilding=()=>Boolean(homeConstruction.job);
 el('cancel-construction').onclick=()=>homeConstruction.cancel();
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());

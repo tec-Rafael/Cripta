@@ -64,7 +64,7 @@ function createControls(canvas) {
 
   return {
     stop,
-    get direction() { return touch?.direction ?? vectors[Array.from(keys).pop()] ?? [0,0]; },
+    get direction() { if(canvas.isPositioningBuilding?.())return [0,0];return touch?.direction ?? vectors[Array.from(keys).pop()] ?? [0,0]; },
     get sprinting() { return shifts.size > 0 || sprintEnabled; },
   };
 }
