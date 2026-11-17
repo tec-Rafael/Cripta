@@ -43,7 +43,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function freeSite(site){
     if(!map||!site)return false;
     const {x,y}=site;
-    if(x<2||y<3||x>46||y>46)return false;
+    if(!Number.isInteger(x)||!Number.isInteger(y)||x<2||y<3||x>46||y>46)return false;
     // Only the ground footprint and front approach need flat land.
     // The roof may overlap the cliff visually without occupying its terrain.
     for(let dy=0;dy<=1;dy++)for(let dx=0;dx<=1;dx++){

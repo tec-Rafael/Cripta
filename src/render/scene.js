@@ -1,3 +1,14 @@
+// Test the ground line of each fence piece, including the width of its posts.
+function fenceTouchesMountain(map, from, to) {
+  const steps=Math.max(1,Math.ceil(Math.hypot(to.x-from.x,to.y-from.y)*16));
+  for(let i=0;i<=steps;i++){
+    const x=from.x+(to.x-from.x)*i/steps,y=from.y+(to.y-from.y)*i/steps;
+    for(const dx of [-.08,.08])for(const dy of [-.08,.08])
+      if((map.heights[Math.floor(y+dy)]?.[Math.floor(x+dx)]||0)>0)return true;
+  }
+  return false;
+}
+
 function createScene(canvas, images, reducedMotion) {
   const SIZE = MapGenerator.size;
   const TILE = 64;
@@ -197,10 +208,13 @@ function createScene(canvas, images, reducedMotion) {
       const width=2*TILE,depth=TILE,margin=12;
       const left=x-margin,right=x+width+margin,back=y-margin,front=y+depth+margin;
       const entrance=x+width/2,opening=48;
+      const clear=(ax,ay,bx=ax,by=ay)=>!fenceTouchesMountain(map,
+        {x:(ax-MARGIN)/TILE,y:(ay-MARGIN)/TILE},{x:(bx-MARGIN)/TILE,y:(by-MARGIN)/TILE});
       const horizontal=(from,to,base)=>{
         const length=to-from,segments=Math.max(1,Math.ceil(length/48));
         for(let i=0;i<segments;i++){
           const start=Math.round(from+i*length/segments),end=Math.round(from+(i+1)*length/segments);
+          if(!clear(start-4,base,end+4,base))continue;
           // Keep all rail pieces the same height and join them at their posts.
           ctx.drawImage(images.fenceHorizontal,start-8,base-44,end-start+16,44);
         }
@@ -209,7 +223,7 @@ function createScene(canvas, images, reducedMotion) {
         const segments=Math.max(1,Math.ceil((to-from)/48));
         for(let i=0;i<segments;i++){
           const start=Math.round(from+i*(to-from)/segments),end=Math.round(from+(i+1)*(to-from)/segments);
-          ctx.drawImage(images.fenceVertical,px-8,start-24,16,end-start+24);
+          if(clear(px,start,px,end))ctx.drawImage(images.fenceVertical,px-8,start-24,16,end-start+24);
         }
       };
       horizontal(left,right,back);
@@ -220,7 +234,7 @@ function createScene(canvas, images, reducedMotion) {
       vertical(entrance-opening/2,front-28,front);
       vertical(entrance+opening/2,front-28,front);
       for(const px of [left,entrance-opening/2,entrance+opening/2,right])
-        ctx.drawImage(images.fencePost,px-8,front-31,16,31);
+        if(clear(px,front))ctx.drawImage(images.fencePost,px-8,front-31,16,31);
     }
     function drawActor(item) {
       if(item.kind==='worksiteFence'){drawWorksiteFence(item.site);return;}
