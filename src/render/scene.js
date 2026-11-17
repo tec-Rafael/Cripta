@@ -335,7 +335,7 @@ function createScene(canvas, images, reducedMotion) {
           ctx.save();
           ctx.globalAlpha=.35;
           ctx.drawImage(images['building'+(job.model||'House1')+job.color],x,y,model.width,model.height);
-          ctx.globalAlpha=.85;drawWorksiteFence(site,job.model);
+          ctx.globalAlpha=.85;
           ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';
           ctx.fillRect(x,y,model.width,model.height);
           ctx.drawImage(images.constructionMarker,x,y,model.width,model.height);
