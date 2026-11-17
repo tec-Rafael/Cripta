@@ -64,6 +64,11 @@ function createHomeInventory(canvas, pawn) {
     if(tree.kind==='house')return {x:tree.x+1,y:tree.y+.72};
     return {x: tree.x + .5, y: tree.y + (tree.kind === 'gold' ? .55 : tree.variant <= 2 ? .92 : .71)};
   }
+  function attackPoint(item){
+    if(item.kind!=='house')return trunk(item);
+    const box=houseFootprint(item);
+    return {x:Math.max(box.left,Math.min(box.right,pawn.x)),y:Math.max(box.top,Math.min(box.bottom,pawn.y))};
+  }
   function stop() {
     target = null;
     swing = null;
@@ -163,7 +168,7 @@ function createHomeInventory(canvas, pawn) {
   function available(tree) {
     if(!tree||!(['tree','gold'].includes(tree.kind)||tree.kind==='house'&&tree.color))return false;
     if (!map || map.construction?.job || !tree || tree.felled || (tree.kind === 'gold' ? selected !== 3 : selected !== 1 || map.name !== 'Lar')) return false;
-    const base = trunk(tree);
+    const base = attackPoint(tree);
     const col = Math.floor(pawn.x), row = Math.floor(pawn.y);
     return Math.hypot(pawn.x-base.x, pawn.y-base.y) <= 1 &&
       !map.stairs.some(stair => stair.x === col && stair.y === row) &&
@@ -195,7 +200,7 @@ function createHomeInventory(canvas, pawn) {
     pawn.pause();
     target = tree;
     if(tree.kind==='house'){
-      pawn.face(Math.sign(trunk(tree).x-pawn.x)||pawn.facing||1);
+      pawn.face(Math.sign(attackPoint(tree).x-pawn.x)||pawn.facing||1);
     }
   }
   canvas.addEventListener('pointerdown', event => {
@@ -218,7 +223,7 @@ function createHomeInventory(canvas, pawn) {
     if (event.code !== 'KeyJ' || event.repeat) return;
     const tree = map.decorations.filter(item => ['tree','gold','house'].includes(item.kind) && available(item))
       .filter(item => {
-        const base = trunk(item);
+        const base = attackPoint(item);
         return (base.x-pawn.x)*pawn.heading.x + (base.y-pawn.y)*pawn.heading.y >= 0;
       }).sort((a,b) => Math.hypot(trunk(a).x-pawn.x,trunk(a).y-pawn.y) - Math.hypot(trunk(b).x-pawn.x,trunk(b).y-pawn.y))[0];
     begin(tree);
@@ -250,7 +255,7 @@ function createHomeInventory(canvas, pawn) {
     }
     if (target && !available(target)) stop();
     if (target) {
-      if (!swing) swing = {time:0, hit:false, kind:target.kind, target, dx:Math.sign(trunk(target).x-pawn.x) || pawn.facing || pawn.heading.x || 1};
+      if (!swing) swing = {time:0, hit:false, kind:target.kind, target, dx:Math.sign(attackPoint(target).x-pawn.x) || pawn.facing || pawn.heading.x || 1};
       swing.time += dt;
       if (!swing.hit && swing.time >= impactTime) {
         swing.hit = true;

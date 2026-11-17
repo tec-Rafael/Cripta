@@ -1,3 +1,8 @@
+// Ground footprint of the house foundation; the roof only affects visual occlusion.
+function houseFootprint(item){
+  return {left:item.x+.34,right:item.x+1.69,top:item.y-.10,bottom:item.y+.68};
+}
+
 /* Positions use fractions of a map cell. The feet determine the occupied cell. */
 // Contact areas use tile coordinates, measured at the base of each sprite.
 const feet = { x: .10, y: .045 };
@@ -66,7 +71,11 @@ function canStand(map, player, px, py) {
   return !map.decorations.some(item => {
     if(item.felled) return false;
     if ((item.hill || 0) !== onHill) return false;
-    if (item.kind === 'house' || item.kind === 'tower')
+    if(item.kind==='house'){
+      const box=houseFootprint(item);
+      return px+feet.x>box.left&&px-feet.x<box.right&&py+feet.y>box.top&&py-feet.y<box.bottom;
+    }
+    if (item.kind === 'tower')
       return px + feet.x > item.x + .34 && px - feet.x < item.x + 1.69 &&
              py + feet.y > item.y + .06 && py - feet.y < item.y + .57;
     if (item.kind !== 'tree' && item.kind !== 'rock' && item.kind !== 'gold') return false;

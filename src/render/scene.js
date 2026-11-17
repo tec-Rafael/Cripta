@@ -162,7 +162,7 @@ function createScene(canvas, images, reducedMotion) {
       actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site});
     // Use the feet for depth on every frame, including all demolition swings.
     const base = item => item === pawn || fighters.includes(item) ? item.y :
-      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.57, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
+      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.68, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
