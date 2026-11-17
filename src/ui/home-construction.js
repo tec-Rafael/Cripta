@@ -75,11 +75,15 @@ function createHomeConstruction(inventory, pawn, wallet) {
       if(path)break;
     }
     if(!path)return null;
-    for(let i=0;i<routes.graph.size&&current!==goal;i++){
-      const next=routes.nextStep(current,goal);
-      if(next===current)return null;
-      current=next;path.push(routes.point(current));
+    const queue=[current],parents=new Map([[current,null]]);
+    for(let i=0;i<queue.length&&!parents.has(goal);i++)for(const next of routes.graph.get(queue[i])||[]){
+      if(parents.has(next))continue;
+      parents.set(next,queue[i]);queue.push(next);
     }
+    if(!parents.has(goal))return null;
+    const steps=[];
+    for(let node=goal;node!==current;node=parents.get(node))steps.push(routes.point(node));
+    path.push(...steps.reverse());
     path.push({x:site.x+1,y:site.y+1.5});
     return path;
   }
@@ -101,7 +105,9 @@ function createHomeConstruction(inventory, pawn, wallet) {
   }
   function aim(event,canvas){
     if(job?.phase!=='placing'||!canvas.screenToWorld)return;
-    const site=point(event,canvas);hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
+    const site=point(event,canvas);
+    if(hover?.x===site.x&&hover?.y===site.y)return;
+    hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
   }
   function select(event,canvas,selectedSite){
     if(!job)return false;

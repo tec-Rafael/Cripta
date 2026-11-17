@@ -86,8 +86,10 @@ function createScene(canvas, images, reducedMotion) {
     let cameraX = Math.round(offset(pawn.x,w)), cameraY = Math.round(offset(pawn.depth(map),h));
     const placing=map.construction?.job?.phase==='placing';
     if(placing){
-      if(!placementCamera||!canvas.touchPlacement)placementCamera={x:cameraX,y:cameraY};
-      cameraX=placementCamera.x;cameraY=placementCamera.y;
+      if(!placementCamera||!canvas.touchPlacement)placementCamera={x:cameraX,y:cameraY,targetX:cameraX,targetY:cameraY};
+      placementCamera.x+=(placementCamera.targetX-placementCamera.x)*.22;
+      placementCamera.y+=(placementCamera.targetY-placementCamera.y)*.22;
+      cameraX=Math.round(placementCamera.x);cameraY=Math.round(placementCamera.y);
     }else{placementCamera=null;canvas.touchPlacement=false;}
     canvas.placementPointer=()=>{
       const bounds=canvas.getBoundingClientRect();
@@ -96,9 +98,8 @@ function createScene(canvas, images, reducedMotion) {
     canvas.panPlacement=(dx,dy)=>{
       if(!placing)return;
       const bounds=canvas.getBoundingClientRect();
-      cameraX=Math.round(Math.max(0,Math.min(Math.max(0,world-w),cameraX-dx*w/bounds.width)));
-      cameraY=Math.round(Math.max(0,Math.min(Math.max(0,world-h),cameraY-dy*h/bounds.height)));
-      placementCamera={x:cameraX,y:cameraY};
+      placementCamera.targetX=Math.max(0,Math.min(Math.max(0,world-w),placementCamera.targetX-dx*w/bounds.width*.55));
+      placementCamera.targetY=Math.max(0,Math.min(Math.max(0,world-h),placementCamera.targetY-dy*h/bounds.height*.55));
     };
     canvas.worldToScreen=point=>{
       const x=Math.floor(point.x),y=Math.floor(point.y);

@@ -100,7 +100,10 @@ canvas.addEventListener('pointerup',event=>{
   }
   attackPointer=null;
   if(tap.moved&&!tap.placingTouch)return;
-  if(homeConstruction.select(event,canvas,tap.site))return;
+  if(homeConstruction.job){
+    if(homeConstruction.job.phase==='placing'&&!tap.placingTouch)homeConstruction.aim(event,canvas);
+    return;
+  }
   if(adventure.interact(map,canvas,event))return;
   if(!canFight()||!canvas.worldToScreen)return;
   const rect=canvas.getBoundingClientRect();
@@ -163,6 +166,10 @@ const homeConstruction = createHomeConstruction(homeInventory, pawn, {
 });
 canvas.isPlacingBuilding=()=>Boolean(homeConstruction.job);
 el('cancel-construction').onclick=()=>homeConstruction.cancel();
+el('confirm-construction').onclick=()=>{
+  const site=homeConstruction.preview;
+  if(site?.valid)homeConstruction.select(null,canvas,{...site});
+};
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
 el('retry').onclick=()=>{
@@ -195,6 +202,10 @@ function render(time) {
   previousFrame = time;
   el('cancel-construction').hidden=!homeConstruction.job||map.name!=='Lar';
   drawScene(map, pawn, time);
+  const placing=homeConstruction.job?.phase==='placing';
+  if(placing&&canvas.touchPlacement)homeConstruction.aim(canvas.placementPointer(),canvas);
+  el('confirm-construction').hidden=!placing||map.name!=='Lar';
+  el('confirm-construction').disabled=!homeConstruction.preview?.valid;
   const buildingReady=Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer));
   canvas.classList.toggle('building-clickable',buildingReady);
   canvas.classList.toggle('building-unavailable',Boolean(!buildingReady&&hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer,false)));

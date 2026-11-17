@@ -360,3 +360,8 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #resources #cancel-construction { position:static;order:2;background:transparent;border:0;padding:0;z-index:5; }
 #cancel-construction img { width:56px;height:56px; }
 #cancel-construction[hidden] { display:none; }
+
+#resources #confirm-construction { order:3;background:transparent;border:0;padding:0; }
+#resources #confirm-construction img { width:56px;height:56px; }
+#confirm-construction[hidden] { display:none; }
+#confirm-construction:disabled { opacity:.45; }
