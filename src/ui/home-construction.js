@@ -43,24 +43,51 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function freeSite(site){
     if(!map||!site)return false;
     const {x,y}=site;
-    if(x<2||y<3||x>46||y>46)return false;
-    for(let dy=-2;dy<=1;dy++)for(let dx=0;dx<=1;dx++){
+    if(!Number.isInteger(x)||!Number.isInteger(y)||x<2||y<3||x>46||y>46)return false;
+    // Only the ground footprint and front approach need flat land.
+    // The roof may overlap the cliff visually without occupying its terrain.
+    for(let dy=0;dy<=1;dy++)for(let dx=0;dx<=1;dx++){
       if(!map.surface[y+dy]?.[x+dx]||map.heights[y+dy][x+dx]!==0||
         map.stairs.some(s=>s.x===x+dx&&s.y===y+dy))return false;
     }
-    if(map.decorations.some(item=>item.x>=x-1&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1))return false;
-    if(map.sheep.some(item=>item.x>=x-.5&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1))return false;
-    return !inventory.drops.some(item=>item.x>=x&&item.x<=x+2&&item.y>=y-2&&item.y<=y+1);
+    const overlaps=(left,top,right,bottom)=>left<x+2&&right>x&&top<y+2&&bottom>y;
+    if(map.decorations.some(item=>(item.hill||0)===0&&
+      overlaps(item.x,item.y,item.x+(['house','tower'].includes(item.kind)?2:1),item.y+1)))return false;
+    if(map.sheep.some(item=>overlaps(item.x+.2,item.y+.2,item.x+.8,item.y+.5)))return false;
+    return !inventory.drops.some(item=>item.x>=x&&item.x<x+2&&item.y>=y&&item.y<y+2);
   }
   function routeTo(site){
     const goal=routes.key(site.x+1,site.y+1.5);
     if(!routes.graph.has(goal))return null;
-    let current=routes.nearest(pawn),path=[routes.point(current)];
-    for(let i=0;i<routes.graph.size&&current!==goal;i++){
-      const next=routes.nextStep(current,goal);
-      if(next===current)return null;
-      current=next;path.push(routes.point(current));
+    // Connect the actual feet to the route using collision-tested cardinal segments.
+    const candidates=[...routes.graph.keys()].sort((a,b)=>Math.hypot(routes.point(a).x-pawn.x,routes.point(a).y-pawn.y)-Math.hypot(routes.point(b).x-pawn.x,routes.point(b).y-pawn.y)).slice(0,24);
+    let current=null,path=null;
+    for(const candidate of candidates){
+      const point=routes.point(candidate);
+      for(const corner of [{x:point.x,y:pawn.y},{x:pawn.x,y:point.y}]){
+        let previous={x:pawn.x,y:pawn.y},clear=true;
+        for(const end of [corner,point]){
+          const start={...previous},steps=Math.max(1,Math.ceil(Math.hypot(end.x-start.x,end.y-start.y)*16));
+          for(let i=1;i<=steps;i++){
+            const next={x:start.x+(end.x-start.x)*i/steps,y:start.y+(end.y-start.y)*i/steps};
+            if(!canStand(map,previous,next.x,next.y)){clear=false;break;}previous=next;
+          }
+          if(!clear)break;
+        }
+        if(clear){current=candidate;path=[corner,point];break;}
+      }
+      if(path)break;
     }
+    if(!path)return null;
+    const queue=[current],parents=new Map([[current,null]]);
+    for(let i=0;i<queue.length&&!parents.has(goal);i++)for(const next of routes.graph.get(queue[i])||[]){
+      if(parents.has(next))continue;
+      parents.set(next,queue[i]);queue.push(next);
+    }
+    if(!parents.has(goal))return null;
+    const steps=[];
+    for(let node=goal;node!==current;node=parents.get(node))steps.push(routes.point(node));
+    path.push(...steps.reverse());
     path.push({x:site.x+1,y:site.y+1.5});
     return path;
   }
@@ -78,16 +105,19 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function point(event,canvas){
     const rect=canvas.getBoundingClientRect();
     const world=canvas.screenToWorld({x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height});
-    return {x:Math.floor(world.x)-1,y:Math.floor(world.y)};
+    return {x:Math.floor(world.x)-1,y:Math.floor(world.y-(canvas.touchPlacement ? .5 : 0))};
   }
   function aim(event,canvas){
     if(job?.phase!=='placing'||!canvas.screenToWorld)return;
-    const site=point(event,canvas);hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
+    const site=point(event,canvas);
+    if(hover?.x===site.x&&hover?.y===site.y)return;
+    hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
   }
-  function select(event,canvas){
+  function select(event,canvas,selectedSite){
     if(!job)return false;
     if(job.phase!=='placing')return true;
-    aim(event,canvas);
+    if(selectedSite){hover={...selectedSite,valid:freeSite(selectedSite)&&Boolean(routeTo(selectedSite))};}
+    else aim(event,canvas);
     if(!hover?.valid)return true;
     job.site={x:hover.x,y:hover.y};job.phase='walking';saveJob();
     pawn.follow(routeTo(job.site));lastPosition={x:pawn.x,y:pawn.y};repathIn=1;return true;
@@ -131,6 +161,12 @@ function createHomeConstruction(inventory, pawn, wallet) {
   dialog.querySelector('.home-menu-close').onclick=()=>dialog.close();
   const api={
     update,aim,select,freeSite,
+    cancel(){
+      if(!job)return;
+      job=null;hover=null;routes=null;lastPosition=null;
+      pawn.follow(null);pawn.pause();inventory.stop();
+      inventory.refund(cost);wallet.refund(cost.coins);saveJob();
+    },
     hitHouse(house){
       if(!map||job||!buildings.includes(house))return false;
       house.demolitionHits=(house.demolitionHits||0)+1;

@@ -22,7 +22,7 @@ try {
 } catch {}
 // Additional one-time local supplies for placement and construction tests.
 try {
-  const creditKey='cripta.local.construction-supplies.2026-11-15';
+  const creditKey='cripta.local.construction-supplies.2026-11-17.v2';
   if ((location.protocol==='file:' || location.protocol==='http:'&&
       ['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)) && !localStorage.getItem(creditKey)) {
     const key='cripta.home.inventory.v1';
@@ -65,21 +65,45 @@ function attackSelected(){
 let attackPointer=null;
 let hoverPointer=null;
 canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable','building-unavailable');});
+canvas.isPositioningBuilding=()=>Boolean(attackPointer?.placingTouch);
 canvas.addEventListener('pointerdown',event=>{
-  if(event.button===0)attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false};
+  if(event.button!==0||attackPointer)return;
+  const placingTouch=event.pointerType==='touch'&&homeConstruction.job?.phase==='placing';
+  if(placingTouch){pawn.pause();canvas.touchPlacement=true;canvas.setPointerCapture(event.pointerId);}
+  homeConstruction.aim(placingTouch?canvas.placementPointer():event,canvas);
+  attackPointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false,placingTouch,lastX:event.clientX,lastY:event.clientY,
+    site:homeConstruction.job?.phase==='placing'?{...homeConstruction.preview}:null};
 });
 canvas.addEventListener('pointermove',event=>{
-  homeConstruction.aim(event,canvas);
+  if(!attackPointer||attackPointer.id===event.pointerId){
+    if(attackPointer?.placingTouch){
+      canvas.panPlacement(event.clientX-attackPointer.lastX,event.clientY-attackPointer.lastY);
+      attackPointer.lastX=event.clientX;attackPointer.lastY=event.clientY;
+    }
+    homeConstruction.aim(attackPointer?.placingTouch?canvas.placementPointer():event,canvas);
+    if(attackPointer?.placingTouch)attackPointer.site={...homeConstruction.preview};
+  }
   if(event.pointerType==='mouse')hoverPointer={clientX:event.clientX,clientY:event.clientY};
   if(attackPointer?.id===event.pointerId&&Math.hypot(event.clientX-attackPointer.x,event.clientY-attackPointer.y)>8)
     attackPointer.moved=true;
 });
-canvas.addEventListener('pointercancel',()=>{attackPointer=null;});
+for(const type of ['pointercancel','lostpointercapture'])canvas.addEventListener(type,event=>{
+  if(attackPointer?.id===event.pointerId)attackPointer=null;
+});
 canvas.addEventListener('pointerup',event=>{
   const tap=attackPointer;
+  if(!tap||tap.id!==event.pointerId)return;
+  if(tap.placingTouch){
+    canvas.panPlacement(event.clientX-tap.lastX,event.clientY-tap.lastY);
+    homeConstruction.aim(canvas.placementPointer(),canvas);
+    tap.site={...homeConstruction.preview};
+  }
   attackPointer=null;
-  if(!tap||tap.id!==event.pointerId||tap.moved)return;
-  if(homeConstruction.select(event,canvas))return;
+  if(tap.moved&&!tap.placingTouch)return;
+  if(homeConstruction.job){
+    if(homeConstruction.job.phase==='placing'&&!tap.placingTouch)homeConstruction.aim(event,canvas);
+    return;
+  }
   if(adventure.interact(map,canvas,event))return;
   if(!canFight()||!canvas.worldToScreen)return;
   const rect=canvas.getBoundingClientRect();
@@ -129,6 +153,10 @@ function changeWorld(next) {
 
 const homeConstruction = createHomeConstruction(homeInventory, pawn, {
   get coins(){return wallet;},
+  refund(amount){
+    wallet+=amount;el('wallet').textContent=wallet;
+    try{localStorage.setItem('cripta.coins',String(wallet));}catch{}
+  },
   spend(amount){
     if(wallet<amount)return false;
     wallet-=amount;el('wallet').textContent=wallet;
@@ -136,6 +164,12 @@ const homeConstruction = createHomeConstruction(homeInventory, pawn, {
     return true;
   }
 });
+canvas.isPlacingBuilding=()=>Boolean(homeConstruction.job);
+el('cancel-construction').onclick=()=>homeConstruction.cancel();
+el('confirm-construction').onclick=()=>{
+  const site=homeConstruction.preview;
+  if(site?.valid)homeConstruction.select(null,canvas,{...site});
+};
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
 el('retry').onclick=()=>{
@@ -166,7 +200,12 @@ function render(time) {
   }
   if(document.querySelector('dialog[open]'))homeInventory.stop();
   previousFrame = time;
+  el('cancel-construction').hidden=!homeConstruction.job||map.name!=='Lar';
   drawScene(map, pawn, time);
+  const placing=homeConstruction.job?.phase==='placing';
+  if(placing&&canvas.touchPlacement)homeConstruction.aim(canvas.placementPointer(),canvas);
+  el('confirm-construction').hidden=!placing||map.name!=='Lar';
+  el('confirm-construction').disabled=!homeConstruction.preview?.valid;
   const buildingReady=Boolean(hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer));
   canvas.classList.toggle('building-clickable',buildingReady);
   canvas.classList.toggle('building-unavailable',Boolean(!buildingReady&&hoverPointer&&adventure.clickableBuilding(map,canvas,hoverPointer,false)));

@@ -268,7 +268,10 @@ function createHomeInventory(canvas, pawn) {
           save();
         }
       }
-      if (swing.time >= swingDuration) swing = null;
+      if (swing.time >= swingDuration) {
+        // Start the next held swing immediately: no idle frame or depth-order flicker.
+        swing = target ? {...swing,time:swing.time % swingDuration,hit:false} : null;
+      }
     } else if (swing) {
       swing.time += dt;
       if (swing.time >= swingDuration) swing = null;
@@ -306,6 +309,11 @@ function createHomeInventory(canvas, pawn) {
         state.drops.push({id:'house-wood:'+node.x+','+node.y+':'+bornAt+':'+i,...point,kind:'wood',hill:level,bornAt,fromX:base.x,fromY:base.y,delay:i*70});
       }
       save();
+    },
+    refund(cost){
+      state.wood+=cost.wood;state.gold+=cost.gold;
+      for(const kind of ['wood','gold'])if(state[kind]>0&&!state.order.includes(kind))state.order.push(kind);
+      save();drawSlots();
     },
     get resources(){return {wood:state.wood,gold:state.gold};},
     spend(cost){

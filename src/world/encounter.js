@@ -160,7 +160,10 @@ function createEncounter(map,pawn,id,reward){
       const e=enemies[i];
       if(e.hp<=0){
         effects.push({kind:'dust',x:e.x,y:e.y,left:.8,duration:.8});
-        coins.push({kind:'coin',x:e.x,y:e.y,age:0});
+        const landings=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:e.x+dx*.75,y:e.y+dy*.75}))
+          .filter(point=>canStand(map,e,point.x,point.y)&&visible(map,e,point));
+        const landing=landings[Math.floor(Math.random()*landings.length)]||{x:e.x,y:e.y};
+        coins.push({kind:'coin',...landing,fromX:e.x,fromY:e.y,bornAt:Date.now(),age:0});
         enemies.splice(i,1);continue;
       }
       e.clock+=dt;e.timer-=dt;e.moving=false;
@@ -218,7 +221,7 @@ function createEncounter(map,pawn,id,reward){
     }
     for(let i=coins.length-1;i>=0;i--){
       const coin=coins[i];coin.age+=dt;
-      if(coin.age>.25&&gap(coin,pawn)<.8&&visible(map,coin,pawn)){coins.splice(i,1);reward();}
+      if(resourceDropMotion(coin,Date.now()).settled&&gap(coin,pawn)<.8&&visible(map,coin,pawn)){coins.splice(i,1);reward();}
     }
   }
   return {enemies,coins,effects,attack,update,stats,id,get deathTime(){return deathTime;},get hp(){return hp;},get swing(){return swing;},

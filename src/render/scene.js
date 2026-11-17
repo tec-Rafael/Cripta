@@ -1,3 +1,14 @@
+// Test the ground line of each fence piece, including the width of its posts.
+function fenceTouchesMountain(map, from, to) {
+  const steps=Math.max(1,Math.ceil(Math.hypot(to.x-from.x,to.y-from.y)*16));
+  for(let i=0;i<=steps;i++){
+    const x=from.x+(to.x-from.x)*i/steps,y=from.y+(to.y-from.y)*i/steps;
+    for(const dx of [-.08,.08])for(const dy of [-.08,.08])
+      if((map.heights[Math.floor(y+dy)]?.[Math.floor(x+dx)]||0)>0)return true;
+  }
+  return false;
+}
+
 function createScene(canvas, images, reducedMotion) {
   const SIZE = MapGenerator.size;
   const TILE = 64;
@@ -68,6 +79,7 @@ function createScene(canvas, images, reducedMotion) {
     ctx.drawImage(images.moss, sourceX, 256, TILE, TILE * 2, x, top, TILE, TILE * 2);
   }
 
+  let placementCamera=null;
   function draw(map, pawn, time) {
     const tick = reducedMotion.matches ? 0 : Math.floor(time / 100);
     // Keep sprites legible on phones; pan across the world instead of shrinking it.
@@ -82,7 +94,24 @@ function createScene(canvas, images, reducedMotion) {
       Math.max(0, Math.min(world - span, MARGIN + feet*TILE - span/2));
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const cameraX = Math.round(offset(pawn.x,w)), cameraY = Math.round(offset(pawn.depth(map),h));
+    let cameraX = Math.round(offset(pawn.x,w)), cameraY = Math.round(offset(pawn.depth(map),h));
+    const placing=map.construction?.job?.phase==='placing';
+    if(placing){
+      if(!placementCamera||!canvas.touchPlacement)placementCamera={x:cameraX,y:cameraY,targetX:cameraX,targetY:cameraY};
+      placementCamera.x+=(placementCamera.targetX-placementCamera.x)*.22;
+      placementCamera.y+=(placementCamera.targetY-placementCamera.y)*.22;
+      cameraX=Math.round(placementCamera.x);cameraY=Math.round(placementCamera.y);
+    }else{placementCamera=null;canvas.touchPlacement=false;}
+    canvas.placementPointer=()=>{
+      const bounds=canvas.getBoundingClientRect();
+      return {clientX:bounds.left+bounds.width/2,clientY:bounds.top+bounds.height/2};
+    };
+    canvas.panPlacement=(dx,dy)=>{
+      if(!placing)return;
+      const bounds=canvas.getBoundingClientRect();
+      placementCamera.targetX=Math.max(0,Math.min(Math.max(0,world-w),placementCamera.targetX-dx*w/bounds.width*.55));
+      placementCamera.targetY=Math.max(0,Math.min(Math.max(0,world-h),placementCamera.targetY-dy*h/bounds.height*.55));
+    };
     canvas.worldToScreen=point=>{
       const x=Math.floor(point.x),y=Math.floor(point.y);
       return {x:MARGIN+point.x*TILE-cameraX,y:MARGIN+(point.y-mountainHeight(map,x,y,point.x-x))*TILE-cameraY};
@@ -123,7 +152,7 @@ function createScene(canvas, images, reducedMotion) {
       }
     }
     const encounter=map.encounter;
-    const fighters=encounter?[...encounter.coins,...encounter.enemies,...encounter.effects]:
+    const fighters=encounter?[...encounter.coins.map(coin=>({...coin,...resourceDropMotion(coin,Date.now())})),...encounter.enemies,...encounter.effects]:
       [...(map.homeInventory?.drops || []).map(drop=>({...drop,...resourceDropMotion(drop,Date.now()),kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
     const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
@@ -179,10 +208,13 @@ function createScene(canvas, images, reducedMotion) {
       const width=2*TILE,depth=TILE,margin=12;
       const left=x-margin,right=x+width+margin,back=y-margin,front=y+depth+margin;
       const entrance=x+width/2,opening=48;
+      const clear=(ax,ay,bx=ax,by=ay)=>!fenceTouchesMountain(map,
+        {x:(ax-MARGIN)/TILE,y:(ay-MARGIN)/TILE},{x:(bx-MARGIN)/TILE,y:(by-MARGIN)/TILE});
       const horizontal=(from,to,base)=>{
         const length=to-from,segments=Math.max(1,Math.ceil(length/48));
         for(let i=0;i<segments;i++){
           const start=Math.round(from+i*length/segments),end=Math.round(from+(i+1)*length/segments);
+          if(!clear(start-4,base,end+4,base))continue;
           // Keep all rail pieces the same height and join them at their posts.
           ctx.drawImage(images.fenceHorizontal,start-8,base-44,end-start+16,44);
         }
@@ -191,7 +223,7 @@ function createScene(canvas, images, reducedMotion) {
         const segments=Math.max(1,Math.ceil((to-from)/48));
         for(let i=0;i<segments;i++){
           const start=Math.round(from+i*(to-from)/segments),end=Math.round(from+(i+1)*(to-from)/segments);
-          ctx.drawImage(images.fenceVertical,px-8,start-24,16,end-start+24);
+          if(clear(px,start,px,end))ctx.drawImage(images.fenceVertical,px-8,start-24,16,end-start+24);
         }
       };
       horizontal(left,right,back);
@@ -202,7 +234,7 @@ function createScene(canvas, images, reducedMotion) {
       vertical(entrance-opening/2,front-28,front);
       vertical(entrance+opening/2,front-28,front);
       for(const px of [left,entrance-opening/2,entrance+opening/2,right])
-        ctx.drawImage(images.fencePost,px-8,front-31,16,31);
+        if(clear(px,front))ctx.drawImage(images.fencePost,px-8,front-31,16,31);
     }
     function drawActor(item) {
       if(item.kind==='worksiteFence'){drawWorksiteFence(item.site);return;}
@@ -233,9 +265,8 @@ function createScene(canvas, images, reducedMotion) {
           if(item.kind==='goldDrop')ctx.drawImage(images.goldDrop,-12,-18,24,24);
           else ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
-          const pop=Math.min(1,item.age/.3);
-          ctx.translate(0,-Math.sin(pop*Math.PI)*20);
-          ctx.scale(.5+pop*.5,.5+pop*.5);
+          ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
+          ctx.scale(item.pop??1,item.pop??1);
           ctx.drawImage(images.coin,-20,-30,40,40);
         }else if(item.kind==='dust'){
           const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
@@ -277,9 +308,16 @@ function createScene(canvas, images, reducedMotion) {
       if(site){
         const x=MARGIN+site.x*TILE,y=MARGIN+(site.y-2)*TILE;
         if(job.phase==='placing'){
-          ctx.save();ctx.globalAlpha=.8;
-          ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';ctx.fillRect(x,y,128,192);
-          ctx.drawImage(images.constructionMarker,x,y,128,192);ctx.restore();
+          // Preview and worksite share the same rear fence and house origin.
+          const groundY=MARGIN+site.y*TILE,margin=12;
+          ctx.save();
+          ctx.globalAlpha=.35;
+          ctx.drawImage(images['house'+job.color],x,y,128,192);
+          ctx.globalAlpha=.85;drawWorksiteFence(site);
+          ctx.fillStyle=site.valid?'#90d99a33':'#e25b5b55';
+          ctx.fillRect(x-margin,groundY-margin,2*TILE+2*margin,TILE+2*margin);
+          ctx.drawImage(images.constructionMarker,x-margin,groundY-margin,2*TILE+2*margin,TILE+2*margin);
+          ctx.restore();
         }else if(job.phase==='building'){
           const sheet=images.dust,size=sheet.height,frames=sheet.width/size;
           for(let i=0;i<4;i++){

@@ -14,7 +14,7 @@ function createPawn(controls) {
     }
     // The most recently held key wins. Releasing it restores the previous key.
     if(map.construction?.job?.phase==='building'){player.motion='idle';return;}
-    let direction=controls.direction;
+    let direction=map.construction?.job?.phase==='walking'?[0,0]:controls.direction;
     if(route){
       while(route.length&&Math.hypot(player.x-route[0].x,player.y-route[0].y)<.04)route.shift();
       const target=route[0];

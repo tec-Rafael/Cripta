@@ -47,7 +47,7 @@ function createControls(canvas) {
   }
   for (const area of [canvas, joystick]) {
     area.addEventListener('pointerdown', event => {
-      if (area === canvas && canvas.pickHarvestTree?.(event)) return;
+      if (area === canvas && (canvas.isPlacingBuilding?.() || canvas.pickHarvestTree?.(event))) return;
       if (touch || event.button !== 0 || (area === canvas && event.pointerType === 'mouse')) return;
       const rect = joystick.getBoundingClientRect();
       touch = { id: event.pointerId,
@@ -64,7 +64,7 @@ function createControls(canvas) {
 
   return {
     stop,
-    get direction() { return touch?.direction ?? vectors[Array.from(keys).pop()] ?? [0,0]; },
+    get direction() { if(canvas.isPositioningBuilding?.())return [0,0];return touch?.direction ?? vectors[Array.from(keys).pop()] ?? [0,0]; },
     get sprinting() { return shifts.size > 0 || sprintEnabled; },
   };
 }
