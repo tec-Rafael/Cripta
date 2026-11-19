@@ -22,3 +22,8 @@ Estes arquivos são uma adaptação local dos sprites existentes. A animação e
 - A pá acompanha o deslocamento da mão em cada quadro. Não há ícone estático sobreposto durante o movimento.
 - O metal usa a paleta original de Tool_03.png: RGB (22,28,46), (105,119,127), (160,179,182), (218,243,238). A transparência dos recortes é limpa, sem RGB branco invisível nas bordas.
 - `build-sprites.ps1` reproduz a composição a partir dos sprites originais de martelo e da pá aprovada, sem gerar um novo personagem. Executar com PowerShell no Windows.
+
+
+## Versão ativa: novos sprites completos
+
+A pasta `generated-v2/` contém a versão ativa gerada a partir das referências originais de picareta e martelo. O Pawn, as mãos e a pá foram desenhados como poses completas. Os arquivos antigos e `build-sprites.ps1` permanecem apenas como histórico e não geram nem substituem a versão ativa. A interação atual tem 6 quadros, em ciclo de 0,6 segundo; ver `generated-v2/README.md` para a origem e o prompt.
