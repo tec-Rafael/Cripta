@@ -2,9 +2,9 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
-    pawnIdleShovel:'../tools/pawn-shovel/generated-v2/Pawn_Idle Shovel.png',
-    pawnRunShovel:'../tools/pawn-shovel/generated-v2/Pawn_Run Shovel.png',
-    pawnDig:'../tools/pawn-shovel/generated-v2/Pawn_Interact Shovel.png',
+    pawnIdleShovel:'../tools/pawn-shovel/Pawn_Idle Shovel.png',
+    pawnRunShovel:'../tools/pawn-shovel/Pawn_Run Shovel.png',
+    pawnDig:'../tools/pawn-shovel/Pawn_Interact Shovel.png',
     shovel:'../tools/shovel-icon.png',
     fenceHorizontal:'../fences/fence-v4-horizontal.png',
     fenceVertical:'../fences/fence-v4-vertical.png',

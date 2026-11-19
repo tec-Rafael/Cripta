@@ -27,3 +27,8 @@ Estes arquivos são uma adaptação local dos sprites existentes. A animação e
 ## Versão ativa: novos sprites completos
 
 A pasta `generated-v2/` contém a versão ativa gerada a partir das referências originais de picareta e martelo. O Pawn, as mãos e a pá foram desenhados como poses completas. Os arquivos antigos e `build-sprites.ps1` permanecem apenas como histórico e não geram nem substituem a versão ativa. A interação atual tem 6 quadros, em ciclo de 0,6 segundo; ver `generated-v2/README.md` para a origem e o prompt.
+
+
+## Versão ativa corrigida — Pawn base do pacote
+
+O jogo e a prévia usam novamente os arquivos desta pasta, feitos com o Pawn original do pacote. Corpo, cabelo, rosto e poses são preservados; a adaptação é restrita à ferramenta. Idle: 8 quadros a 10 fps; caminhada: 6 quadros a 8 fps; corrida: 6 quadros a 15 fps; escavação: 3 poses originais em ciclo de 0,6 s. Os arquivos de generated-v2 permanecem apenas como histórico e não são carregados.
