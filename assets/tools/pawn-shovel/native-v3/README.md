@@ -1,0 +1,12 @@
+# Nova interação com pá, na escala do Pawn base
+
+A interação foi gerada pela ferramenta de imagens a partir de uma guia ampliada em 4x dos seis quadros originais de Pawn_Interact Pickaxe.png e do ícone aprovado da pá. Braços, mãos e ferramenta foram gerados juntos como poses completas, sem recortar uma ferramenta e colá-la sobre o personagem.
+
+A folha gerada contém seis poses. Cada quadro completo foi normalizado por vizinho mais próximo para um corpo de 70 pixels de altura, com apoio dos pés em y=134, colocado numa célula de 192 × 192 e convertido para a paleta RGB original da interação com picareta. Pixels exteriores transparentes têm alpha e RGB zerados. Não houve substituição de partes do corpo nesta etapa. A folha final tem 1152 × 192; o ciclo usa os seis quadros em 0,6 segundo.
+
+Prompt: Edit the original Pawn interaction reference sheet, not a redesigned character. Keep the same angular hair, cream face, blue scarf, dark tiny body, native coarse pixel density and proportions. Redraw arms, hands and shovel together with the shaft visibly gripped by two hands. Produce six digging poses: ready, anticipate, push down, contact, lever upward, recover. No overhead pickaxe action, old pickaxe or swoosh effects. Same character scale and anchor, transparent background, no new costume, details, glow or environment.
+
+`source.png` preserva o resultado gerado. `Pawn_Interact Shovel.png` é a folha normalizada aplicada à remoção de tocos. Repouso e movimento também usam novos quadros completos com braços redesenhados e pegada de duas mãos. idle-run-source.png contém quatro poses de repouso e quatro de movimento; cada pose é mantida por dois quadros nas faixas de 192 pixels. Todos os arquivos ativos usam a mesma paleta original e a mesma linha de apoio dos pés. normalize.ps1 reproduz somente a normalização dos quadros completos; não recorta nem sobrepõe partes de personagem ou ferramenta.
+
+
+Prompt de repouso e movimento: Gerar o mesmo Pawn da nova interação e das referências originais de idle/run com picareta, mantendo escala pequena, cabelo angular, rosto creme, cachecol azul e corpo escuro sem novos detalhes. Redesenhar braços e mãos conectados ao corpo segurando o cabo contínuo com duas mãos. Folha de quatro colunas por duas linhas: quatro poses de respiração e quatro poses de caminhada com contato e passagem. A pá acompanha o balanço natural dos braços, com comprimento constante. Fundo transparente, sem cenário, texto ou brilho.

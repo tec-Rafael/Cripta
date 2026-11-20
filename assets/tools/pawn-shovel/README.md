@@ -1,3 +1,10 @@
+# Versão ativa: native-v3
+
+O jogo e a prévia usam as três folhas de native-v3/. São novos quadros completos de repouso, movimento e escavação, gerados com o Pawn original como referência e braços, mãos e pá desenhados juntos. A normalização mantém a paleta original, o corpo com 70 pixels de altura, a linha dos pés e as células de 192 × 192. Repouso e movimento têm oito quadros; a escavação tem seis em 0,6 segundo. Consulte native-v3/README.md para a origem e normalize.ps1 para a normalização.
+
+As seções abaixo documentam tentativas anteriores. Seus arquivos e scripts permanecem como histórico e não são carregados pelo jogo.
+
+---
 # Pawn — interação com pá
 
 Animação composta com os três quadros originais de `Pawn_Interact Hammer.png`, do pacote Tiny Swords. Não utiliza o personagem redesenhado por IA. O Pawn mantém os pixels, poses, dimensões e alinhamento do sprite original; somente as regiões da ferramenta e seus efeitos de impacto foram adaptadas.
