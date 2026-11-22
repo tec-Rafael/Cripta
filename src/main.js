@@ -54,11 +54,25 @@ function notifyBattle(text){
   clearTimeout(noticeTimer);el('battle-notice').textContent=text;el('battle-notice').hidden=false;
   noticeTimer=setTimeout(()=>{el('battle-notice').hidden=true;},3500);
 }
+el('home-level-toggle').addEventListener('click',()=>{
+  if(map?.encounter)return;
+  const button=el('home-level-toggle');
+  const expanded=button.getAttribute('aria-expanded')!=='true';
+  button.setAttribute('aria-expanded',String(expanded));
+  button.setAttribute('aria-label',expanded?'Mostrar experiência':'Mostrar nível atual');
+  el('vitals').setAttribute('data-show-level',String(expanded));
+});
 function syncBattle(){
   const e=map.encounter;
   el('life').hidden=!e;
   el('vitals').setAttribute('data-world',e?'adventure':'home');
   const progress=progression.state;
+  el('home-level-label').textContent='Nível '+progress.level;
+  if(e){
+    el('vitals').setAttribute('data-show-level','false');
+    el('home-level-toggle').setAttribute('aria-expanded','false');
+    el('home-level-toggle').setAttribute('aria-label','Mostrar nível atual');
+  }
   el('player-level').textContent=progress.level;
   el('player-level').setAttribute('aria-label','Nível '+progress.level);
   const xp=el('experience');
