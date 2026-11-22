@@ -374,9 +374,15 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #experience { top:44px;font:700 11px/19px Georgia,serif;color:#fff4ce;text-shadow:0 1px 2px #162833; }
 #vitals[data-world="home"] #experience { top:31px; }
 #life b,#experience span { position:absolute;inset:0;display:block;margin:0;font:bold 11px/19px Georgia,serif;color:#493c2c;text-shadow:0 1px #fff3d6;z-index:2; }
-/* The sword supplies the visible texture behind both meters. */
-#experience .xp-track,#life .health-bar { position:relative;height:19px;min-width:28px;background:none; }
-#experience .xp-well,#life .health-well { position:absolute;left:0;right:0;top:5px;height:9px;overflow:hidden;border-radius:2px; }
-#experience i,#life .health-bar i { display:block;height:9px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 9px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
+/* Original SmallBar frame, sliced into fixed caps and a continuous middle. */
+#experience .xp-track,#life .health-bar {
+ position:relative;height:19px;min-width:28px;image-rendering:pixelated;
+ background:url('../assets/ui/xp-bar/left.png') left top/12px 19px no-repeat,
+ url('../assets/ui/xp-bar/right.png') right top/12px 19px no-repeat,
+ url('../assets/ui/xp-bar/middle.png') center top/calc(100% - 24px) 19px no-repeat;
+}
+#experience .xp-well,#life .health-well { position:absolute;left:8px;right:8px;top:8px;height:3px;overflow:hidden; }
+#experience i,#life .health-bar i { display:block;height:3px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 3px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
 #life .health-bar i { width:var(--health,100%);background-image:url('../assets/ui/sword-panel/fill-red.png'); }
+#life b,#experience span { color:#fff4ce;text-shadow:0 1px 2px #162833,1px 0 #162833; }
 @media (prefers-reduced-motion:reduce) { #experience i,#life .health-bar i { transition:none; } }
