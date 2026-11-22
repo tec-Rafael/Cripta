@@ -210,9 +210,14 @@ el('confirm-construction').onclick=()=>{
 };
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
-el('retry').onclick=()=>{
+function clearCoinsOnDeath(){
+  // Death affects coins only; persistent XP, level and home resources are retained.
   wallet=0;
+  el('wallet').textContent=wallet;
   try{localStorage.setItem('cripta.coins','0');}catch{}
+}
+el('retry').onclick=()=>{
+  clearCoinsOnDeath();
   el('game-over').close();
   adventure.start();
 };
@@ -229,6 +234,7 @@ function render(time) {
     if(map.encounter){
       const e=map.encounter, hp=e.hp, count=e.enemies.length;
       e.update(dt);
+      if(hp>0 && e.hp===0)clearCoinsOnDeath();
       if(hp!==e.hp||count!==e.enemies.length)syncBattle();
       if(!e.hp && e.deathTime>=.8){
         pawn.pause();

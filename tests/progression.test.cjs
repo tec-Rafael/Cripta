@@ -86,3 +86,19 @@ test('HUD keeps the same XP and level when switching between adventure and home'
 
   assert.equal(el('experience').querySelector('span').textContent,'20 / 150 XP');
 });
+test('death resets only coins and preserves XP, level and home inventory after reload', () => {
+  const saved=new Map([['cripta.coins','80'],['cripta.home.inventory.v1','{"wood":10,"gold":5}']]);
+  const storage={getItem:key=>saved.get(key),setItem:(key,value)=>saved.set(key,value)};
+  const label={textContent:'80'};
+  const context=vm.createContext({localStorage:storage,wallet:80,el:()=>label});
+  vm.runInContext(code,context);
+  vm.runInContext('const progression=createProgression();progression.add(270);',context);
+  const main=fs.readFileSync(path.join(root,'src/main.js'),'utf8');
+  vm.runInContext(main.slice(main.indexOf('function clearCoinsOnDeath()'),main.indexOf("el('retry').onclick")),context);
+  vm.runInContext('clearCoinsOnDeath()',context);
+  assert.equal(context.wallet,0);
+  assert.equal(saved.get('cripta.coins'),'0');
+  assert.equal(label.textContent,0);
+  assert.equal(saved.get('cripta.home.inventory.v1'),'{"wood":10,"gold":5}');
+  assert.deepEqual(plain(vm.runInContext('createProgression().state',context)),{level:3,xp:20,required:200,totalXP:270});
+});
