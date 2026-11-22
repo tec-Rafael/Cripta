@@ -166,7 +166,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #resources span { display:flex;align-items:center; }
 #resources img { width:34px;height:34px;image-rendering:pixelated; }
 #resources #remaining { gap:5px; }
-#resources #remaining img { width:48.3px;height:50.6px;object-fit:contain; }
+#resources #remaining img { width:55.545px;height:58.19px;object-fit:contain; }
 #resources #settings { order:-1;background:transparent;border:0;padding:0;width:42px;height:42px; }
 #resources #settings img { width:42px;height:42px; }
 #battle-buttons { right:16px;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 86px); }
