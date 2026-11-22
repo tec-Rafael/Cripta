@@ -375,7 +375,12 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #combat-level { position:absolute;left:-49px;top:1px;width:44px;height:32px;display:grid;place-items:center;border:solid transparent;border-width:6px;border-image:url('../assets/ui/level-badge.png') 14 fill / 6px / 0 stretch;font:bold 16px/1 Georgia,serif;color:#fff9dc;text-shadow:0 1px 2px #493c2c;image-rendering:pixelated; }
 #combat-level[hidden] { display:none; }
 #experience { margin-top:4px;width:100%;font:700 11px/1.2 Georgia,serif;text-align:center;color:#fff4ce;text-shadow:0 1px 2px #162833; }
-#experience .xp-track { position:relative;height:14px;border:solid transparent;border-width:4px 6px;border-image:url('../assets/ui/xp-base.png') 6 8 fill / 4px 6px / 0 stretch;image-rendering:pixelated; }
-#experience i { position:absolute;left:0;top:0;bottom:0;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-fill.png') left center/100% 100% no-repeat;filter:hue-rotate(100deg) saturate(.85);transition:width .25s ease-out;image-rendering:pixelated; }
+/* Native 19px frame: fixed end caps plus a repeating center, never stretched. */
+#experience .xp-track { position:relative;height:19px;min-width:28px;background:url('../assets/ui/xp-bar/middle.png') left top/2px 19px repeat-x;image-rendering:pixelated; }
+#experience .xp-track::before,#experience .xp-track::after { content:'';position:absolute;top:0;width:12px;height:19px;pointer-events:none;background-repeat:no-repeat;background-size:12px 19px; }
+#experience .xp-track::before { left:0;background-image:url('../assets/ui/xp-bar/left.png'); }
+#experience .xp-track::after { right:0;background-image:url('../assets/ui/xp-bar/right.png'); }
+#experience .xp-well { position:absolute;z-index:1;left:8px;right:8px;top:8px;height:3px;overflow:hidden; }
+#experience i { display:block;height:3px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 3px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
 #experience span { display:block;margin-top:2px; }
 @media (prefers-reduced-motion:reduce) { #experience i { transition:none; } }
