@@ -75,11 +75,13 @@ test('HUD keeps the same XP and level when switching between adventure and home'
   assert.equal(el('player-level').attrs['aria-label'],'Nível 2');
   assert.equal(el('player-level').textContent,2);
   assert.equal(el('life').hidden,false);
+  assert.equal(el('vitals').attrs['data-world'],'adventure');
   assert.equal(el('experience').querySelector('span').textContent,'20 / 150 XP');
   assert.equal(el('experience').attrs['aria-valuenow'],'20');
   vm.runInContext('map={encounter:null};syncBattle()',context);
   assert.equal(el('player-level').textContent,2);
   assert.equal(el('life').hidden,true);
+  assert.equal(el('vitals').attrs['data-world'],'home');
   assert.equal(el('player-level').attrs['aria-label'],'Nível 2');
 
   assert.equal(el('experience').querySelector('span').textContent,'20 / 150 XP');

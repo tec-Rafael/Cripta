@@ -151,12 +151,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   .dialog-cancel img { width: 44px; height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) { .character-choice { transition: none; } }
-.vitals { position:absolute;top:100%;left:16%;width:80%;color:#fff4ce;font:700 15px/1.2 Georgia,serif;text-shadow:0 1px 3px #162833; }
-#life { position:relative;text-align:center;line-height:18px; }
-#life .health-bar { position:absolute;inset:0;background:url('../assets/ui/health-base.png') center/100% 100%;image-rendering:pixelated; }
-#life { height:36px;line-height:32px; }
-#life .health-bar i { position:absolute;left:6.667%;top:21.569%;height:47.059%;width:calc(var(--health,100%) * .86666);background:url('../assets/ui/health-fill.png') center/100% 100%; }
-#life b { position:relative; }
+.vitals { display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:4px;position:absolute;top:100%;left:16%;width:80%;color:#fff4ce;font:700 15px/1.2 Georgia,serif;text-shadow:0 1px 3px #162833; }
 #resources,#battle-buttons { position:absolute;display:flex;align-items:center;gap:.4rem; }
 #resources { top:max(12px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));flex-direction:column;align-items:flex-end;color:#fff5cf;background:transparent;padding:4px 8px;font:bold 16px Georgia,serif;text-shadow:0 2px 3px #213c44; }
 #resources button,#battle-buttons button { color:#fff5cf;background:#214453aa;border:1px solid #ffedbf88;border-radius:50%;cursor:pointer;touch-action:none; }
@@ -369,16 +364,34 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #house-options .house-preview { width:100%;height:192px;max-width:280px;object-fit:contain; }
 @media(max-width:540px){#house-options .house-preview {height:168px;} }
 
-/* Shared level button and XP row, beneath health in adventures. */
-.progression-row { display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:6px;min-height:50px;margin-top:2px; }
+/* Home keeps XP only; adventure classes share a sword with two matching meters. */
 #player-level { display:grid;place-items:center;width:44px;height:44px;padding-bottom:3px;background:url('../assets/ui/level-red-button.png') center/contain no-repeat;font:bold 16px/1 Georgia,serif;color:#fff9dc;text-shadow:0 1px 2px #68372f;image-rendering:pixelated; }
 #experience { position:relative;margin:0;width:100%;min-width:0;height:19px;font:700 11px/1.2 Georgia,serif;text-align:center;color:#fff4ce;text-shadow:0 1px 2px #162833; }
 /* Native 19px frame: fixed end caps plus a repeating center, never stretched. */
-#experience .xp-track { position:relative;height:19px;min-width:28px;background:url('../assets/ui/xp-bar/middle.png') left top/2px 19px repeat-x;image-rendering:pixelated; }
-#experience .xp-track::before,#experience .xp-track::after { content:'';position:absolute;top:0;width:12px;height:19px;pointer-events:none;background-repeat:no-repeat;background-size:12px 19px; }
-#experience .xp-track::before { left:0;background-image:url('../assets/ui/xp-bar/left.png'); }
-#experience .xp-track::after { right:0;background-image:url('../assets/ui/xp-bar/right.png'); }
-#experience .xp-well { position:absolute;z-index:1;left:8px;right:8px;top:8px;height:3px;overflow:hidden; }
-#experience i { display:block;height:3px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 3px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
+#experience .xp-track,#life .health-bar { position:relative;height:19px;min-width:28px;background:url('../assets/ui/xp-bar/middle.png') left top/2px 19px repeat-x;image-rendering:pixelated; }
+#experience .xp-track::before,#experience .xp-track::after,#life .health-bar::before,#life .health-bar::after { content:'';position:absolute;top:0;width:12px;height:19px;pointer-events:none;background-repeat:no-repeat;background-size:12px 19px; }
+#experience .xp-track::before,#life .health-bar::before { left:0;background-image:url('../assets/ui/xp-bar/left.png'); }
+#experience .xp-track::after,#life .health-bar::after { right:0;background-image:url('../assets/ui/xp-bar/right.png'); }
+#experience .xp-well,#life .health-well { position:absolute;z-index:1;left:8px;right:8px;top:8px;height:3px;overflow:hidden; }
+#experience i,#life .health-bar i { display:block;height:3px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 3px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
 #experience span { position:absolute;top:100%;left:0;right:0;display:block;margin-top:2px; }
-@media (prefers-reduced-motion:reduce) { #experience i { transition:none; } }
+@media (prefers-reduced-motion:reduce) { #experience i,#life .health-bar i { transition:none; } }
+.stat-panel { position:relative;min-width:0;min-height:50px;display:flex;align-items:center; }
+.sword-art { display:none;pointer-events:none;image-rendering:pixelated; }
+#life { position:relative;height:19px;text-align:center; }
+#life b { position:absolute;inset:0;font:bold 11px/19px Georgia,serif;color:#fff4ce;text-shadow:0 1px 2px #162833; }
+#life .health-bar i { width:var(--health,100%);background-image:url('../assets/ui/sword-panel/fill-red.png'); }
+#life[hidden] { display:none; }
+#vitals[data-world="adventure"] .stat-panel { height:80px;display:block; }
+#vitals[data-world="adventure"] .sword-art { display:block;position:absolute;inset:0 40px 0 55px;background:url('../assets/ui/sword-panel/blade.png') left top/2px 80px repeat-x; }
+#vitals[data-world="adventure"] .sword-art::before,#vitals[data-world="adventure"] .sword-art::after { content:'';position:absolute;top:0;height:80px;background-repeat:no-repeat; }
+#vitals[data-world="adventure"] .sword-art::before { left:-55px;width:55px;background-image:url('../assets/ui/sword-panel/hilt.png');background-size:55px 80px; }
+#vitals[data-world="adventure"] .sword-art::after { right:-40px;width:40px;background-image:url('../assets/ui/sword-panel/tip.png');background-size:40px 80px; }
+#vitals[data-world="adventure"] #life,#vitals[data-world="adventure"] #experience { position:absolute;left:61px;right:32px;width:auto;height:19px; }
+#vitals[data-world="adventure"] #life { top:17px; }
+#vitals[data-world="adventure"] #experience { top:44px; }
+#vitals[data-world="adventure"] #experience span { top:0;margin:0;line-height:19px;z-index:2; }
+@media(max-width:480px) {
+  #vitals[data-world="adventure"] { left:5%;width:94%;grid-template-columns:38px minmax(0,1fr);gap:2px; }
+  #vitals[data-world="adventure"] #player-level { width:38px;height:38px; }
+}

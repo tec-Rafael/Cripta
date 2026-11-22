@@ -57,6 +57,7 @@ function notifyBattle(text){
 function syncBattle(){
   const e=map.encounter;
   el('life').hidden=!e;
+  el('vitals').setAttribute('data-world',e?'adventure':'home');
   const progress=progression.state;
   el('player-level').textContent=progress.level;
   el('player-level').setAttribute('aria-label','Nível '+progress.level);
