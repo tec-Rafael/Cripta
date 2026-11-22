@@ -12,7 +12,7 @@ function drawPawn(ctx, images, player, lift, margin, tile, encounter, inventory,
   const swing=chopping || encounter?.swing;
   let action=suffix;
   if(encounter?.guarding) action='Guard';
-  if(chopping) action=building?'Build':chopping.kind==='stump'?'Dig':chopping.kind === 'gold' ? 'Mine' : 'Chop';
+  if(chopping) action=building?'Build':chopping.kind === 'gold' ? 'Mine' : 'Chop';
   else if(swing) action=player.character==='lancer' && Math.abs(swing.dy)>Math.abs(swing.dx)
     ? (swing.dy<0?'Up':'Down') : 'Attack';
   const equipped = inventory && !swing ? inventory.equipped : '';
