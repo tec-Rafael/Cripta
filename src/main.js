@@ -44,6 +44,7 @@ try {
     localStorage.setItem(creditKey,'100');
   }
 } catch {}
+const progression = createProgression();
 const homeInventory = createHomeInventory(canvas, pawn);
 function collectCoin(){
   wallet++;el('wallet').textContent=wallet;
@@ -56,6 +57,16 @@ function notifyBattle(text){
 function syncBattle(){
   const e=map.encounter;
   el('home-level').hidden=!!e;el('life').hidden=!e;
+  const progress=progression.state;
+  el('home-level').textContent='Nível '+progress.level;
+  el('combat-level').hidden=!e;
+  el('combat-level').textContent=progress.level;
+  el('combat-level').setAttribute('aria-label','Nível '+progress.level);
+  const xp=el('experience');
+  xp.setAttribute('aria-valuemax',progress.required);xp.setAttribute('aria-valuenow',progress.xp);
+  xp.setAttribute('aria-valuetext',progress.xp+' de '+progress.required+' XP. Nível '+progress.level);
+  xp.style.setProperty('--xp',progress.xp/progress.required*100+'%');
+  xp.querySelector('span').textContent=progress.xp+' / '+progress.required+' XP';
   el('remaining').hidden=!e;el('battle-buttons').hidden=e?.id!=='knight';
   el('guard').hidden=e?.id!=='knight';el('wallet').textContent=wallet;
   if(e){
@@ -155,7 +166,7 @@ function changeWorld(next) {
   map = next;
   map.dry = map.land.map((row,y) => row.map((cell,x) => cell && !map.pools[y][x]));
   pawn.spawn(map);
-  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin):null;
+  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{onDefeat:enemy=>progression.add(enemy.xp)}):null;
   homeConstruction.attach(map);
   homeInventory.attach(map);
   el('battle-notice').hidden=true;syncBattle();

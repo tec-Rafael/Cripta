@@ -4,7 +4,7 @@ const combatClasses = {
   monk: {hp:9, damage:7, range:4, interval:1.3, impact:.65},
   archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
 };
-const hammerGnome = {hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
+const hammerGnome = {xp:20, hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
 function visible(map,a,b) {
@@ -79,7 +79,7 @@ function encounterRoutes(map) {
   return {key,point,graph,nextStep,nearest};
 }
 
-function createEncounter(map,pawn,id,reward){
+function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
   const routes=encounterRoutes(map), stats=combatClasses[id], enemies=[], coins=[], effects=[];
   const sites=[...routes.graph.keys()].map(routes.point).filter(p=>gap(p,map.spawn)>8 &&
     [map.house,map.tower].every(b=>Math.hypot(p.x-b.x-1,p.y-b.y-.72)>2) &&
@@ -164,7 +164,8 @@ function createEncounter(map,pawn,id,reward){
           .filter(point=>canStand(map,e,point.x,point.y)&&visible(map,e,point));
         const landing=landings[Math.floor(Math.random()*landings.length)]||{x:e.x,y:e.y};
         coins.push({kind:'coin',...landing,fromX:e.x,fromY:e.y,bornAt:Date.now(),age:0});
-        enemies.splice(i,1);continue;
+        enemies.splice(i,1);
+        onDefeat({kind:e.kind,xp:hammerGnome.xp});continue;
       }
       e.clock+=dt;e.timer-=dt;e.moving=false;
       if(e.phase==='strike'){
