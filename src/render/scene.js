@@ -265,14 +265,20 @@ function createScene(canvas, images, reducedMotion) {
             ctx.strokeStyle='#ffe28a';ctx.lineWidth=2;
             ctx.beginPath();ctx.ellipse(0,0,19,8,0,0,Math.PI*2);ctx.stroke();
           }
-          const attacking=item.phase==='strike'||(item.phase==='recover'&&item.clock<.08);
+          const attacking=item.phase==='strike'||item.phase==='recover';
           const sheet=images[attacking?'gnomeStrike':item.moving?'gnomeRun':'gnomeIdle'];
           const size=sheet.height, frames=sheet.width/size;
-          // Reserve the final frames for the faster downswing and show contact on impact.
-          const progress=item.phase==='recover'?1:item.clock<hammerGnome.windup
-            ? .6*item.clock/hammerGnome.windup
-            : .6+.4*(item.clock-hammerGnome.windup)/hammerGnome.impact;
-          const frame=attacking?Math.min(frames-1,Math.floor(progress*frames)):Math.floor(item.clock*9)%frames;
+          // One extracted swing: anticipation 0..2, downswing 3..4, recovery 5..6.
+          // Contact is frame 4, held at the exact moment encounter applies damage.
+          let frame;
+          if(item.phase==='recover') {
+            frame=item.clock<.06?4:5+Math.min(1,Math.floor((item.clock-.06)/Math.max(.01,hammerGnome.rest-.06)*2));
+          } else if(item.phase==='strike') {
+            frame=item.clock<hammerGnome.windup
+              ? Math.min(2,Math.floor(item.clock/hammerGnome.windup*3))
+              : 3+Math.min(1,Math.floor((item.clock-hammerGnome.windup)/hammerGnome.impact*2));
+          } else frame=Math.floor(item.clock*10)%frames;
+          frame=Math.min(frames-1,frame);
           ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
