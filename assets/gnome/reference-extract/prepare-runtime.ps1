@@ -3,7 +3,7 @@ Add-Type -AssemblyName System.Drawing
 $src=[Drawing.Bitmap]::new((Join-Path $PSScriptRoot 'Portrait.png'))
 $badge=[Drawing.Bitmap]::new($src.Width,$src.Height)
 $shape=[Drawing.Drawing2D.GraphicsPath]::new()
-$shape.AddPolygon([Drawing.Point[]]@([Drawing.Point]::new(0,0),[Drawing.Point]::new(158,0),[Drawing.Point]::new(158,73),[Drawing.Point]::new(174,73),[Drawing.Point]::new(180,90),[Drawing.Point]::new(174,117),[Drawing.Point]::new(167,137),[Drawing.Point]::new(164,164),[Drawing.Point]::new(149,179),[Drawing.Point]::new(87,194),[Drawing.Point]::new(0,194)))
+$shape.AddPolygon([Drawing.Point[]]@([Drawing.Point]::new(0,0),[Drawing.Point]::new(158,0),[Drawing.Point]::new(158,73),[Drawing.Point]::new(174,73),[Drawing.Point]::new(180,90),[Drawing.Point]::new(174,117),[Drawing.Point]::new(167,132),[Drawing.Point]::new(83,186),[Drawing.Point]::new(0,194)))
 for($y=0;$y -lt $src.Height;$y++){for($x=0;$x -lt $src.Width;$x++){
  $c=$src.GetPixel($x,$y)
  $sea=$c.G -gt 110 -and $c.B -gt 110 -and $c.R -lt $c.G*.65
