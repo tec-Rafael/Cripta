@@ -365,14 +365,15 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 @media(max-width:540px){#house-options .house-preview {height:168px;} }
 
 /* Full-width sword below every character banner; level uses its pommel. */
-#player-level { position:absolute;z-index:3;left:1px;top:32px;display:grid;place-items:center;width:21px;height:16px;padding:0;background:none;font:bold 11px/1 Georgia,serif;color:#fff9dc;text-shadow:0 1px 2px #162833; }
+#player-level { display:none; }
 .stat-panel { position:relative;width:100%;height:80px;min-width:0; }
 .sword-art { z-index:0;position:absolute;inset:0;pointer-events:none;background:url('../assets/ui/sword-panel/sword-complete.png') center/100% 100% no-repeat;image-rendering:pixelated; }
 #life,#experience { z-index:1;position:absolute;left:24%;right:17%;width:auto;height:19px;min-width:0;margin:0;text-align:center; }
 #life { top:17px; }
 #life[hidden] { display:none; }
 #experience { top:44px;font:700 11px/19px Georgia,serif;color:#fff4ce;text-shadow:0 1px 2px #162833; }
-#vitals[data-world="home"] #experience { top:31px; }
+#vitals[data-world="home"] .stat-panel { height:68px; }
+#vitals[data-world="home"] #experience { top:25px; }
 #life b,#experience span { position:absolute;inset:0;display:block;margin:0;font:bold 11px/19px Georgia,serif;color:#493c2c;text-shadow:0 1px #fff3d6;z-index:2; }
 /* Original SmallBar frame, sliced into fixed caps and a continuous middle. */
 #experience .xp-track,#life .health-bar {
