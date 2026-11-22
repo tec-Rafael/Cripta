@@ -56,12 +56,10 @@ function notifyBattle(text){
 }
 function syncBattle(){
   const e=map.encounter;
-  el('home-level').hidden=!!e;el('life').hidden=!e;
+  el('life').hidden=!e;
   const progress=progression.state;
-  el('home-level').textContent='Nível '+progress.level;
-  el('combat-level').hidden=!e;
-  el('combat-level').textContent=progress.level;
-  el('combat-level').setAttribute('aria-label','Nível '+progress.level);
+  el('player-level').textContent=progress.level;
+  el('player-level').setAttribute('aria-label','Nível '+progress.level);
   const xp=el('experience');
   xp.setAttribute('aria-valuemax',progress.required);xp.setAttribute('aria-valuenow',progress.xp);
   xp.setAttribute('aria-valuetext',progress.xp+' de '+progress.required+' XP. Nível '+progress.level);

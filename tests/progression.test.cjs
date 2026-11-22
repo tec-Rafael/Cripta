@@ -72,15 +72,15 @@ test('HUD keeps the same XP and level when switching between adventure and home'
   const main=fs.readFileSync(path.join(root,'src/main.js'),'utf8');
   vm.runInContext(main.slice(main.indexOf('function syncBattle()'),main.indexOf('function canFight()')),context);
   vm.runInContext('syncBattle()',context);
-  assert.equal(el('combat-level').hidden,false);
-  assert.equal(el('combat-level').textContent,2);
-  assert.equal(el('home-level').hidden,true);
+  assert.equal(el('player-level').attrs['aria-label'],'Nível 2');
+  assert.equal(el('player-level').textContent,2);
+  assert.equal(el('life').hidden,false);
   assert.equal(el('experience').querySelector('span').textContent,'20 / 150 XP');
   assert.equal(el('experience').attrs['aria-valuenow'],'20');
   vm.runInContext('map={encounter:null};syncBattle()',context);
-  assert.equal(el('combat-level').hidden,true);
+  assert.equal(el('player-level').textContent,2);
   assert.equal(el('life').hidden,true);
-  assert.equal(el('home-level').hidden,false);
-  assert.equal(el('home-level').textContent,'Nível 2');
+  assert.equal(el('player-level').attrs['aria-label'],'Nível 2');
+
   assert.equal(el('experience').querySelector('span').textContent,'20 / 150 XP');
 });
