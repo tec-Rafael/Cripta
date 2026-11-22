@@ -396,7 +396,12 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
  cursor:pointer;color:#fff4ce;font:bold 20px/1.2 Georgia,serif;text-shadow:0 2px 2px #162833;
 }
 #home-level-toggle:focus-visible { outline:2px solid #fff4ce;outline-offset:3px; }
-#home-level-label { display:block;opacity:0;transform:scale(.8);transition:opacity .18s ease,transform .18s ease; }
+#home-level-label {
+ display:grid;place-items:center;width:82%;max-width:300px;min-height:44px;margin:auto;padding:6px 32px;
+ background:url('../assets/ui/ribbon-red.png') center/100% 100% no-repeat;
+ image-rendering:pixelated;color:#fff4ce;text-shadow:0 2px #784b42;
+ opacity:0;transform:scale(.8);transition:opacity .18s ease,transform .18s ease;
+}
 #vitals[data-world="home"] .sword-art,#vitals[data-world="home"] #experience {
  transform-origin:center;transition:transform .28s ease,opacity .22s ease;
 }
