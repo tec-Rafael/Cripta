@@ -367,11 +367,8 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 /* Full-width sword below every character banner; level uses its pommel. */
 #player-level { position:absolute;z-index:3;left:1px;top:32px;display:grid;place-items:center;width:21px;height:16px;padding:0;background:none;font:bold 11px/1 Georgia,serif;color:#fff9dc;text-shadow:0 1px 2px #162833; }
 .stat-panel { position:relative;width:100%;height:80px;min-width:0; }
-.sword-art { z-index:0;position:absolute;inset:0 40px 0 55px;pointer-events:none;background:url('../assets/ui/sword-panel/blade.png') left top/2px 80px repeat-x;image-rendering:pixelated; }
-.sword-art::before,.sword-art::after { content:'';position:absolute;top:0;height:80px;background-repeat:no-repeat; }
-.sword-art::before { left:-55px;width:55px;background-image:url('../assets/ui/sword-panel/hilt.png');background-size:55px 80px; }
-.sword-art::after { right:-40px;width:40px;background-image:url('../assets/ui/sword-panel/tip.png');background-size:40px 80px; }
-#life,#experience { z-index:1;position:absolute;left:62px;right:38px;width:auto;height:19px;min-width:0;margin:0;text-align:center; }
+.sword-art { z-index:0;position:absolute;inset:0;pointer-events:none;background:url('../assets/ui/sword-panel/sword-complete.png') center/100% 100% no-repeat;image-rendering:pixelated; }
+#life,#experience { z-index:1;position:absolute;left:24%;right:17%;width:auto;height:19px;min-width:0;margin:0;text-align:center; }
 #life { top:17px; }
 #life[hidden] { display:none; }
 #experience { top:44px;font:700 11px/19px Georgia,serif;color:#fff4ce;text-shadow:0 1px 2px #162833; }
@@ -379,7 +376,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #life b,#experience span { position:absolute;inset:0;display:block;margin:0;font:bold 11px/19px Georgia,serif;color:#493c2c;text-shadow:0 1px #fff3d6;z-index:2; }
 /* The sword supplies the visible texture behind both meters. */
 #experience .xp-track,#life .health-bar { position:relative;height:19px;min-width:28px;background:none; }
-#experience .xp-well,#life .health-well { position:absolute;left:0;right:0;top:8px;height:3px;overflow:hidden; }
-#experience i,#life .health-bar i { display:block;height:3px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 3px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
+#experience .xp-well,#life .health-well { position:absolute;left:0;right:0;top:5px;height:9px;overflow:hidden;border-radius:2px; }
+#experience i,#life .health-bar i { display:block;height:9px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 9px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
 #life .health-bar i { width:var(--health,100%);background-image:url('../assets/ui/sword-panel/fill-red.png'); }
 @media (prefers-reduced-motion:reduce) { #experience i,#life .health-bar i { transition:none; } }
