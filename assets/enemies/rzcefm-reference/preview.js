@@ -5,7 +5,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const button = document.querySelector('#pause');
   const tools = document.querySelectorAll('[data-tool]');
   let selected = 'Strike';
-  const shot={range:3,radius:.35};
+  const shot={range:6,radius:.6};
   for(const [id,key] of [['shot-range','range'],['shot-radius','radius']]){
     const input=document.getElementById(id);
     input.oninput=()=>{shot[key]=Number(input.value);document.getElementById(key+'-value').textContent=input.value;};
