@@ -39,7 +39,7 @@ test('large awards stay bounded with a valid current-level remainder', () => {
   assert.equal(p.state.totalXP, 1000000000);
   assert.ok(p.state.xp >= 0 && p.state.xp < p.state.required);
 });
-test('a dead enemy grants XP once, before collecting its coin', () => {
+test('a dead enemy grants scaled XP once, before collecting its coin', () => {
   const context = vm.createContext({Math, Date, connectedEdge:()=>true, resourceDropMotion:()=>({settled:false})});
   vm.runInContext(code, context);
   vm.runInContext(fs.readFileSync(path.join(root,'src/world/encounter.js'),'utf8'), context);
@@ -54,7 +54,7 @@ test('a dead enemy grants XP once, before collecting its coin', () => {
     encounter.update(.01);encounter.update(.01);
     return {xp:p.state.totalXP, enemies:encounter.enemies.length, coins:encounter.coins.length, collected:reward.length};
   })()`, context);
-  assert.deepEqual(plain(result), {xp:20,enemies:0,coins:1,collected:0});
+  assert.deepEqual(plain(result), {xp:30,enemies:0,coins:1,collected:0});
 });
 test('HUD keeps the same XP and level when switching between adventure and home', () => {
   function element() {
@@ -122,7 +122,7 @@ test('death resets coins and unprotected XP but preserves home inventory', () =>
  const boss=createEncounter(map,pawn,'knight',()=>{},{level:5,boss:true});
  return {low:a.enemies.every(e=>e.kind==='gnome'),yellow:b.enemies.some(e=>e.kind==='yellowGnome'),hp:b.stats.hp,damage:b.stats.damage,boss:boss.enemies.map(e=>e.kind),count:b.enemies.length};
  })()`,context);
- assert(result.low);assert(result.yellow);assert.equal(result.hp,12);assert.equal(result.damage,5);assert.deepEqual(plain(result.boss),['bear']);assert(result.count>=6&&result.count<=8);
+ assert(result.low);assert(result.yellow);assert.equal(result.hp,12);assert.equal(result.damage,6);assert.deepEqual(plain(result.boss),['bear']);assert(result.count>=6&&result.count<=8);
  });
 
 test('ranged impact respects radius and knight shield; class upgrades preserve missing health',()=>{

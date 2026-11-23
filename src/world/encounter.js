@@ -1,11 +1,11 @@
 const combatClasses = {
-  knight: {hp:10, damage:4, range:1, interval:.4, impact:.18},
+  knight: {hp:10, damage:5, range:1, interval:.4, impact:.18},
   lancer: {hp:16, damage:5, range:2, interval:.45, impact:.07},
   monk: {hp:9, damage:7, range:4, interval:1.3, impact:.65},
   archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
 };
-const hammerGnome = {xp:20, hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
-const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:30,hp:10,damage:5,sight:10,reach:3,speed:2.2,windup:.45,impact:.1,tolerance:0,rest:.35,radius:.6},bear:{xp:100,hp:100,damage:6,sight:12,reach:1.5,speed:2,windup:.6,impact:.15,tolerance:.25,rest:.8}};
+const hammerGnome = {xp:30, hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
+const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:45,hp:10,damage:4,sight:10,reach:3,speed:2.2,windup:.45,impact:.1,tolerance:0,rest:.35,radius:.6},bear:{xp:250,hp:160,damage:6,sight:12,reach:1.5,speed:1.3,windup:.7,impact:.09,tolerance:.25,rest:.9}};
 function scaledClass(id,level){const base=combatClasses[id];return {...base,hp:Math.round(base.hp*(1+.12*(level-1))),damage:Math.round(base.damage*(1+.08*(level-1)))};}
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -91,7 +91,7 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{},level=1,boss=false}
   while(enemies.length<count && sites.length){
     const p=sites.splice(Math.floor(Math.random()*sites.length),1)[0];
     const kind=boss?'bear':level>=3&&(enemies.length===0||Math.random()<.35)?'yellowGnome':'gnome';
-    const base=enemyTypes[kind],config={...base,hp:Math.round(base.hp*(1+.10*(level-1))),damage:Math.round(base.damage*(1+.06*(level-1)))};
+    const base=enemyTypes[kind],config={...base,xp:Math.round(base.xp*(1+.10*(level-1))),hp:Math.round(base.hp*(1+.10*(level-1))),damage:Math.round(base.damage*(1+.06*(level-1)))};
     enemies.push({...p,kind,config,hp:config.hp,phase:'patrol',timer:0,facing:1,clock:0});
   }
   let hp=stats.hp, cooldown=0, swing=null, guard=false;

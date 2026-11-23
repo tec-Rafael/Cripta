@@ -195,7 +195,7 @@ function changeWorld(next) {
   map = next;
   map.dry = map.land.map((row,y) => row.map((cell,x) => cell && !map.pools[y][x]));
   pawn.spawn(map);
-  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{level:progression.state.level,boss:progression.state.level>=5&&progression.checkpoint<5,onDefeat:enemy=>{if(enemy.bossLevel){progression.defeatBoss(enemy.bossLevel);notifyBattle('Urso derrotado! Marco do n�vel 5 salvo. Pr�xima regi�o desbloqueada � em breve.');}progression.add(enemy.xp);map.encounter?.levelUp(progression.state.level);}}):null;
+  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{level:progression.state.level,boss:progression.state.level>=5&&progression.checkpoint<5,onDefeat:enemy=>{if(enemy.bossLevel){progression.defeatBoss(enemy.bossLevel);}progression.add(enemy.xp);map.encounter?.levelUp(progression.state.level);}}):null;
   homeConstruction.attach(map);
   homeInventory.attach(map);
   el('battle-notice').hidden=true;syncBattle();

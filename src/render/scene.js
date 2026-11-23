@@ -282,8 +282,17 @@ function createScene(canvas, images, reducedMotion) {
               : 3+Math.min(1,Math.floor((item.clock-hammerGnome.windup)/hammerGnome.impact*2));
           } else frame=Math.floor(item.clock*10)%frames;
           if(item.kind!=='gnome')frame=item.phase==='recover'?Math.min(11,9+Math.floor(item.clock/config.rest*3)):item.phase==='strike'?Math.min(8,Math.floor(item.clock/(config.windup+config.impact)*9)):Math.floor(item.clock*10)%frames;
+          if(item.kind==='bear'){
+            // Slow anticipation; accelerate only the final downswing and follow-through.
+            if(item.phase==='strike')frame=item.clock<config.windup
+              ?Math.min(5,Math.floor(item.clock/config.windup*6))
+              :Math.min(6,6+Math.floor((item.clock-config.windup)/config.impact));
+            else if(item.phase==='recover')frame=item.clock<.20?Math.min(11,6+Math.floor(item.clock/.04)):0;
+            else frame=Math.floor(item.clock*(item.moving?6:8))%frames;
+          }
           frame=Math.min(frames-1,frame);
-          ctx.scale(item.facing,1);
+          const enemyScale=item.kind==='bear'?1.4:1;
+          ctx.scale(item.facing*enemyScale,enemyScale);
           if(item.kind==='yellowGnome'){
             // Keep the actor centered; omit the projectile already baked into the GIF.
             ctx.drawImage(sheet,frame*size,0,120,size,-58,-size/2-27,120,size);
