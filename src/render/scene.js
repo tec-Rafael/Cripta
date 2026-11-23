@@ -12,6 +12,7 @@ function fenceTouchesMountain(map, from, to) {
 function createScene(canvas, images, reducedMotion) {
   const SIZE = MapGenerator.size;
   const TILE = 64;
+  const buildingOpacity = new WeakMap();
   const MARGIN = 64;
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
@@ -313,11 +314,20 @@ function createScene(canvas, images, reducedMotion) {
         drawSprite(item.walking ? 'sheepMove' : 'sheep',(tick+item.phase)%(item.walking ? 4 : 6),128,128,-48,-32,96,96);
         ctx.restore();
       }
-      if (item.kind === 'tower') ctx.drawImage(images.tower,x,y-192,128,256);
-      if (item.kind === 'house') {
-        const model=getBuildingModel(item.model);
-        const sprite=item.color?'building'+(item.model||'House1')+item.color:map.name==='Lar'?'houseBlack':'house';
-        ctx.drawImage(images[sprite],x,y-(model.height-TILE),model.width,model.height);
+      if (item.kind === 'tower' || item.kind === 'house') {
+        const model=item.kind==='tower'?{width:128,height:256}:getBuildingModel(item.model);
+        const sprite=item.kind==='tower'?'tower':item.color?'building'+(item.model||'House1')+item.color:map.name==='Lar'?'houseBlack':'house';
+        const pawnX=MARGIN+pawn.x*TILE,pawnY=MARGIN+pawn.depth(map)*TILE;
+        const top=y-(model.height-TILE),bottom=y+TILE;
+        const covered=level(pawn)===level(item)&&base(pawn)<base(item)&&
+          pawnX+22>x+10&&pawnX-22<x+model.width-10&&pawnY>top&&pawnY-70<bottom;
+        const target=covered?.4:1;
+        const previous=buildingOpacity.get(item)??1;
+        const opacity=reducedMotion.matches?target:previous+(target-previous)*(1-Math.exp(-cameraDt/90));
+        buildingOpacity.set(item,opacity);
+        ctx.save();ctx.globalAlpha=opacity;
+        ctx.drawImage(images[sprite],x,top,model.width,model.height);
+        ctx.restore();
       }
       if (item.kind === 'gold' && !item.felled) {
         const variant = item.variant % 2 === 0 ? 6 : 5;
