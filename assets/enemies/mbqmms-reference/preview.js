@@ -56,12 +56,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         const distance = progress < .5 ? -2 + progress * 8 : 6 - progress * 8;
         const actorX = margin + (this.x + (selected === 'Run' ? distance * .65 : 0)) * tile;
         const image = toolSheets[selected];
-        const frame = Math.floor(elapsed / 100) % (image.width / 192);
+        const size = image.height;
+        const frame = Math.floor(elapsed / 100) % (image.width / size);
         ctx.save();
         ctx.imageSmoothingEnabled = false;
         ctx.translate(Math.round(actorX), Math.round(ground + 11));
         ctx.scale(direction * zoom, zoom);
-        ctx.drawImage(image, frame * 192, 0, 192, 192, -96, -134, 192, 192);
+        ctx.drawImage(image, frame * size, 0, size, size, -size/2, -134-(size-192)/2, size, size);
         ctx.restore();
         ctx.save();
         ctx.textAlign = 'center'; ctx.font = 'bold 15px Georgia';

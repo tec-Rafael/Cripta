@@ -13,9 +13,9 @@ function Cut-Outlined($source,$rect){
   if($script:bgColors.Contains($crop.GetPixel($x,$y).ToArgb())){$crop.SetPixel($x,$y,[Drawing.Color]::FromArgb(0,0,0,0))}
  }}
  # Remove the panel's horizontal outline only where it lies outside the fur.
- if($rect.Width -eq 140){
+ if($rect.Width -eq 140 -or $rect.Width -eq 210){
   $mask=$crop.Clone()
-  for($y=23;$y -le 28;$y++){for($x=0;$x -lt $w;$x++){
+  for($y=(63-$rect.Y);$y -le (68-$rect.Y);$y++){for($x=0;$x -lt $w;$x++){
    $pixel=$mask.GetPixel($x,$y)
    if($pixel.A -eq 0 -or $pixel.R -gt 65){continue}
    $nearFur=$false
@@ -53,15 +53,21 @@ $gif=[Drawing.Image]::FromFile((Join-Path $PSScriptRoot 'reference.gif'))
 $count=$gif.GetFrameCount([Drawing.Imaging.FrameDimension]::Time)
 $names=@('Idle','Run','Strike')
 for($action=0;$action -lt 3;$action++){
- $sheet=[Drawing.Bitmap]::new(192*$count,192)
+ $frameSize=if($action -eq 2){256}else{192}
+ $sheet=[Drawing.Bitmap]::new($frameSize*$count,$frameSize)
  $graphics=[Drawing.Graphics]::FromImage($sheet)
  for($i=0;$i -lt $count;$i++){
   [void]$gif.SelectActiveFrame([Drawing.Imaging.FrameDimension]::Time,$i)
   $full=[Drawing.Bitmap]::new($gif.Width,$gif.Height)
   $g=[Drawing.Graphics]::FromImage($full);$g.DrawImageUnscaled($gif,0,0);$g.Dispose()
   $x=510+200*$action
-  $cut=Cut-Outlined $full ([Drawing.Rectangle]::new($x,40,140,132))
-  $graphics.DrawImageUnscaled($cut,$i*192+26,38)
+  if($action -eq 2){
+   $cut=Cut-Outlined $full ([Drawing.Rectangle]::new(872,0,210,174))
+   $graphics.DrawImageUnscaled($cut,$i*256+20,30)
+  }else{
+   $cut=Cut-Outlined $full ([Drawing.Rectangle]::new($x,40,140,132))
+   $graphics.DrawImageUnscaled($cut,$i*192+26,38)
+  }
   if($action -eq 0 -and $i -eq 0){
    $portrait=Cut-Outlined $full ([Drawing.Rectangle]::new(338,36,176,174))
       for($py=0;$py -lt $portrait.Height;$py++){for($px=0;$px -lt $portrait.Width;$px++){
@@ -79,8 +85,6 @@ for($action=0;$action -lt 3;$action++){
  $graphics.Dispose()
  $sheet.Save((Join-Path $PSScriptRoot ($names[$action]+'.png')))
  $sheet.Dispose()
- Write-Output ($names[$action]+' : '+$count+' quadros originais, 192x192')
+ Write-Output $names[$action]
 }
 $gif.Dispose()
-
-
