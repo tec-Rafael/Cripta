@@ -43,7 +43,11 @@
     </div>
     <aside id="resources" aria-label="Recursos">
       <span title="Moedas"><img src="assets/ui/gold-coin.png" alt="Moedas de ouro"><b id="wallet">0</b></span>
-      <span id="remaining" title="Gnomos restantes" hidden><img src="assets/gnome/reference-extract/Badge.png" alt="Gnomos restantes" draggable="false"><b>0</b></span>
+      <div id="remaining" aria-label="Inimigos restantes" hidden>
+        <span id="remaining-gnome" hidden><img src="assets/gnome/reference-extract/Badge.png" alt="Gnomos de martelo"><b>0</b></span>
+        <span id="remaining-yellowGnome" hidden><img src="assets/enemies/rzcefm-reference/Badge.png" alt="Gnomos de estilingue"><b>0</b></span>
+        <span id="remaining-bear" hidden><img src="assets/enemies/mbqmms-reference/Badge.png" alt="Urso"><b>0</b></span>
+      </div>
       <button id="settings" aria-label="Configurações"><img src="assets/ui/settings-gear.png" alt=""></button>
     <button id="cancel-construction" class="icon-button" type="button" aria-label="Cancelar construção e recuperar recursos" hidden><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt=""></button>
     <button id="confirm-construction" class="icon-button" type="button" aria-label="Construir no terreno selecionado" hidden><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_01.png" alt=""></button>

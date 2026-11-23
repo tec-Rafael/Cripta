@@ -439,3 +439,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 @media(prefers-reduced-motion:reduce){.adventure-map-emblem{transition:none;}}
 
 .future-region {position:absolute;right:5%;top:8%;border:2px dashed #8e7952;background:#e6d6a0;color:#756044;padding:14px;font:600 16px Georgia;}.future-region[hidden]{display:none;}
+
+#resources #remaining {display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+#resources #remaining span{gap:5px;min-width:78px;justify-content:flex-end;}
+#resources #remaining[hidden],#resources #remaining span[hidden]{display:none;}

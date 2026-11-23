@@ -4,8 +4,8 @@ const combatClasses = {
   monk: {hp:9, damage:7, range:4, interval:1.3, impact:.65},
   archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
 };
-const hammerGnome = {xp:30, hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
-const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:45,hp:10,damage:4,sight:10,reach:3,speed:2.2,windup:.45,impact:.1,tolerance:0,rest:.35,radius:.6},bear:{xp:250,hp:112,damage:6,sight:12,reach:1.5,speed:2,windup:.7,impact:.09,tolerance:.25,rest:.9}};
+const hammerGnome = {xp:30, hp:9, damage:2, sight:8, reach:.9, speed:2, windup:.25, impact:.1, tolerance:.2, rest:.6};
+const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:45,hp:8,damage:3,sight:10,reach:3,speed:1.8,windup:.55,impact:.1,tolerance:0,rest:.7,radius:.6},bear:{xp:250,hp:112,damage:6,sight:12,reach:1.5,speed:2,windup:.7,impact:.09,tolerance:.25,rest:.9}};
 function scaledClass(id,level){const base=combatClasses[id];return {...base,hp:Math.round(base.hp*(1+.12*(level-1))),damage:Math.round(base.damage*(1+.08*(level-1)))};}
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -87,10 +87,11 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{},level=1,boss=false}
     [map.house,map.tower].every(b=>Math.hypot(p.x-b.x-1,p.y-b.y-.72)>2) &&
     canStand(map,p,p.x,p.y) &&
     !map.stairs.some(s=>s.x===Math.floor(p.x)&&s.y===Math.floor(p.y)));
-  const count=boss?1:3+Math.min(level,20)+Math.floor(Math.random()*3);
+  const count=boss?4:3+Math.min(level,20)+Math.floor(Math.random()*3);
   while(enemies.length<count && sites.length){
-    const p=sites.splice(Math.floor(Math.random()*sites.length),1)[0];
-    const kind=boss?'bear':level>=3&&(enemies.length===0||Math.random()<.35)?'yellowGnome':'gnome';
+    if(boss&&enemies.length)sites.sort((a,b)=>gap(a,enemies[0])-gap(b,enemies[0]));
+    const p=sites.splice(Math.floor(Math.random()*(boss&&enemies.length?Math.min(8,sites.length):sites.length)),1)[0];
+    const kind=boss?(enemies.length===0?'bear':enemies.length===3?'yellowGnome':'gnome'):level>=3&&(enemies.length===0||Math.random()<.35)?'yellowGnome':'gnome';
     const base=enemyTypes[kind],config={...base,xp:Math.round(base.xp*(1+.10*(level-1))),hp:Math.round(base.hp*(1+.10*(level-1))),damage:Math.round(base.damage*(1+.06*(level-1)))};
     enemies.push({...p,kind,config,hp:config.hp,phase:'patrol',timer:0,facing:1,clock:0});
   }

@@ -122,7 +122,7 @@ test('death resets coins and unprotected XP but preserves home inventory', () =>
  const boss=createEncounter(map,pawn,'knight',()=>{},{level:5,boss:true});
  return {low:a.enemies.every(e=>e.kind==='gnome'),yellow:b.enemies.some(e=>e.kind==='yellowGnome'),hp:b.stats.hp,damage:b.stats.damage,boss:boss.enemies.map(e=>e.kind),count:b.enemies.length};
  })()`,context);
- assert(result.low);assert(result.yellow);assert.equal(result.hp,12);assert.equal(result.damage,6);assert.deepEqual(plain(result.boss),['bear']);assert(result.count>=6&&result.count<=8);
+ assert(result.low);assert(result.yellow);assert.equal(result.hp,12);assert.equal(result.damage,6);assert.deepEqual(plain(result.boss),['bear','gnome','gnome','yellowGnome']);assert(result.count>=6&&result.count<=8);
  });
 
 test('ranged impact respects radius and knight shield; class upgrades preserve missing health',()=>{

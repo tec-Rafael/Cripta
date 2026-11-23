@@ -100,8 +100,10 @@ function syncBattle(){
     bar.setAttribute('aria-valuemax',e.stats.hp);bar.setAttribute('aria-valuenow',e.hp);
     bar.style.setProperty('--health',e.hp/e.stats.hp*100+'%');
     el('life').querySelector('b').textContent=e.hp+' / '+e.stats.hp;
-    el('remaining').querySelector('b').textContent=e.enemies.length;
-    el('remaining').querySelector('img').src=e.enemies.some(enemy=>enemy.kind==='bear')?'assets/enemies/mbqmms-reference/Badge.png':'assets/gnome/reference-extract/Badge.png';
+    for(const kind of ['gnome','yellowGnome','bear']){
+      const count=e.enemies.filter(enemy=>enemy.kind===kind&&enemy.hp>0).length;
+      const row=el('remaining-'+kind);row.hidden=count===0;row.querySelector('b').textContent=count;
+    }
   }
 }
 function canFight(){return map?.encounter&&!document.querySelector('dialog[open]');}
