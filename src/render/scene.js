@@ -86,7 +86,7 @@ function createScene(canvas, images, reducedMotion) {
     lastCameraTime=time;
     if(cameraMap!==map){placementCamera=null;returnCamera=null;cameraMap=map;}
     const tick = reducedMotion.matches ? 0 : Math.floor(time / 100);
-    // Keep sprites legible on phones; pan across the world instead of shrinking it.
+    // Camera zoom changes the visible world span; HTML menus remain at their native size.
     const zoom = Math.max(.95, Math.min(1.45, canvas.clientHeight / 710)) * (canvas.viewZoom || 1);
     const w = Math.max(1, Math.round(canvas.clientWidth / zoom));
     const h = Math.max(1, Math.round(canvas.clientHeight / zoom));

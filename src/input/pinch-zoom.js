@@ -3,6 +3,14 @@ function enablePinchZoom(canvas, cancelActions) {
   const touches = new Map();
   let initialDistance=0, initialZoom=1, pinching=false;
   canvas.viewZoom=1;
+  const clampZoom=value=>Math.max(.25,Math.min(1,value));
+  // Wheel and pinch control the same camera scale, never the page or HUD.
+  canvas.addEventListener('wheel',event=>{
+    if(document.querySelector('dialog[open]'))return;
+    event.preventDefault();
+    const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?canvas.clientHeight:1);
+    canvas.viewZoom=clampZoom(canvas.viewZoom*Math.exp(-delta*.0015));
+  },{passive:false});
   // Prevent page-level pinch from scaling HUD/menu elements, including Safari gestures.
   document.addEventListener('touchmove',event=>{
     if(event.touches.length>1)event.preventDefault();
@@ -24,7 +32,7 @@ function enablePinchZoom(canvas, cancelActions) {
     if(!touches.has(event.pointerId))return;
     touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
     if(!pinching)return;
-    if(touches.size>=2)canvas.viewZoom=Math.max(.5,Math.min(1,initialZoom*distance()/initialDistance));
+    if(touches.size>=2)canvas.viewZoom=clampZoom(initialZoom*distance()/initialDistance);
     block(event);
   },true);
   function end(event){
