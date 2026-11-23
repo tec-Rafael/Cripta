@@ -5,7 +5,7 @@ const combatClasses = {
   archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
 };
 const hammerGnome = {xp:20, hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
-const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:30,hp:10,damage:3,sight:10,reach:6,speed:2.2,windup:.9,impact:.1,tolerance:0,rest:.8,radius:.6},bear:{xp:100,hp:100,damage:6,sight:12,reach:1.5,speed:2,windup:.6,impact:.15,tolerance:.25,rest:.8}};
+const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:30,hp:10,damage:5,sight:10,reach:3,speed:2.2,windup:.45,impact:.1,tolerance:0,rest:.35,radius:.6},bear:{xp:100,hp:100,damage:6,sight:12,reach:1.5,speed:2,windup:.6,impact:.15,tolerance:.25,rest:.8}};
 function scaledClass(id,level){const base=combatClasses[id];return {...base,hp:Math.round(base.hp*(1+.12*(level-1))),damage:Math.round(base.damage*(1+.08*(level-1)))};}
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -150,7 +150,7 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{},level=1,boss=false}
     for(let i=effects.length-1;i>=0;i--){
       const f=effects[i];
       if(f.kind==='enemyShot'){
-        f.age+=dt;f.left-=dt;const t=Math.min(1,f.age/.55);f.x=f.start.x+(f.target.x-f.start.x)*t;f.y=f.start.y+(f.target.y-f.start.y)*t;
+        f.age+=dt;f.left-=dt;const t=Math.min(1,f.age/(f.duration||.55));f.x=f.start.x+(f.target.x-f.start.x)*t;f.y=f.start.y+(f.target.y-f.start.y)*t;
         if(f.left<=0&&gap(pawn,f.target)<=f.radius&&visible(map,f.start,pawn)){const blocked=guard&&((f.start.x-pawn.x)*pawn.heading.x+(f.start.y-pawn.y)*pawn.heading.y)>0;if(!blocked)hp=Math.max(0,hp-f.damage);}
       }else if(f.kind==='arrow'){
         f.age+=dt;f.left-=dt;
@@ -185,7 +185,13 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{},level=1,boss=false}
         if(e.timer<=0){
           const x=pawn.x-e.x,y=pawn.y-e.y;
           const blocked=guard && x*pawn.heading.x+y*pawn.heading.y<=0;
-          if(e.kind==='yellowGnome'){effects.push({kind:'enemyShot',x:e.x,y:e.y,start:{x:e.x,y:e.y},target:{x:pawn.x,y:pawn.y},left:.55,age:0,damage:config.damage,radius:config.radius});}
+          if(e.kind==='yellowGnome'){
+            if(gap(e,pawn)<=config.reach && visible(map,e,pawn)){
+              const start={x:e.x+e.facing*.4,y:e.y},target={x:pawn.x,y:pawn.y};
+              const duration=Math.max(.12,gap(start,target)/8);
+              effects.push({kind:'enemyShot',...start,start,target,left:duration,duration,age:0,damage:config.damage,radius:config.radius});
+            }
+          }
           else if(!blocked&&gap(e,pawn)<=config.reach+config.tolerance&&x*e.dx+y*e.dy>=0&&visible(map,e,pawn))
             hp=Math.max(0,hp-config.damage);
           e.phase='recover';e.timer=config.rest;e.clock=0;

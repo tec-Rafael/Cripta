@@ -283,7 +283,11 @@ function createScene(canvas, images, reducedMotion) {
           } else frame=Math.floor(item.clock*10)%frames;
           if(item.kind!=='gnome')frame=item.phase==='recover'?Math.min(11,9+Math.floor(item.clock/config.rest*3)):item.phase==='strike'?Math.min(8,Math.floor(item.clock/(config.windup+config.impact)*9)):Math.floor(item.clock*10)%frames;
           frame=Math.min(frames-1,frame);
-          ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
+          ctx.scale(item.facing,1);
+          if(item.kind==='yellowGnome'){
+            // Keep the actor centered; omit the projectile already baked into the GIF.
+            ctx.drawImage(sheet,frame*size,0,120,size,-58,-size/2-27,120,size);
+          }else ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/config.hp,3);
         }else if(item.kind==='enemyShot'){
