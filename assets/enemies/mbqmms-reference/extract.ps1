@@ -12,12 +12,22 @@ function Cut-Outlined($source,$rect){
  for($y=0;$y -lt $h;$y++){for($x=0;$x -lt $w;$x++){
   if($script:bgColors.Contains($crop.GetPixel($x,$y).ToArgb())){$crop.SetPixel($x,$y,[Drawing.Color]::FromArgb(0,0,0,0))}
  }}
- # The promotional board has a horizontal outline at world y=64..67.
- # Discard only its pixels outside the character silhouette below it.
+ # Remove the panel's horizontal outline only where it lies outside the fur.
  if($rect.Width -eq 140){
+  $mask=$crop.Clone()
   for($y=23;$y -le 28;$y++){for($x=0;$x -lt $w;$x++){
-   if($crop.GetPixel($x,34).A -eq 0){$crop.SetPixel($x,$y,[Drawing.Color]::Transparent)}
+   $pixel=$mask.GetPixel($x,$y)
+   if($pixel.A -eq 0 -or $pixel.R -gt 65){continue}
+   $nearFur=$false
+   for($dy=-2;$dy -le 2 -and -not $nearFur;$dy++){for($dx=-2;$dx -le 2;$dx++){
+    $nx=$x+$dx;$ny=$y+$dy
+    if($nx -lt 0 -or $nx -ge $w -or $ny -lt 0 -or $ny -ge $h){continue}
+    $c=$mask.GetPixel($nx,$ny)
+    if($c.A -gt 0 -and $c.R -gt 70 -and $c.R -gt $c.G -and $c.G -gt $c.B){$nearFur=$true;break}
+   }}
+   if(-not $nearFur){$crop.SetPixel($x,$y,[Drawing.Color]::Transparent)}
   }}
+  $mask.Dispose()
  }
  # Retain only the main connected character/badge, discarding board-edge fragments.
  $seen=[bool[,]]::new($w,$h);$largest=@()
@@ -72,4 +82,5 @@ for($action=0;$action -lt 3;$action++){
  Write-Output ($names[$action]+' : '+$count+' quadros originais, 192x192')
 }
 $gif.Dispose()
+
 
