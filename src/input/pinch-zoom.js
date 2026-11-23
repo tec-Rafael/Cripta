@@ -3,6 +3,13 @@ function enablePinchZoom(canvas, cancelActions) {
   const touches = new Map();
   let initialDistance=0, initialZoom=1, pinching=false;
   canvas.viewZoom=1;
+  // Prevent page-level pinch from scaling HUD/menu elements, including Safari gestures.
+  document.addEventListener('touchmove',event=>{
+    if(event.touches.length>1)event.preventDefault();
+  },{passive:false});
+  for(const type of ['gesturestart','gesturechange'])document.addEventListener(type,event=>{
+    event.preventDefault();
+  },{passive:false});
   const distance=()=>{const [a,b]=[...touches.values()];return Math.hypot(a.x-b.x,a.y-b.y);};
   function block(event){event.preventDefault();event.stopImmediatePropagation();}
   canvas.addEventListener('pointerdown',event=>{
@@ -17,7 +24,7 @@ function enablePinchZoom(canvas, cancelActions) {
     if(!touches.has(event.pointerId))return;
     touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
     if(!pinching)return;
-    if(touches.size>=2)canvas.viewZoom=Math.max(.65,Math.min(2.5,initialZoom*distance()/initialDistance));
+    if(touches.size>=2)canvas.viewZoom=Math.max(1,Math.min(2.5,initialZoom*distance()/initialDistance));
     block(event);
   },true);
   function end(event){
