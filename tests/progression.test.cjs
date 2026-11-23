@@ -122,7 +122,7 @@ test('death resets coins and unprotected XP but preserves home inventory', () =>
  const boss=createEncounter(map,pawn,'knight',()=>{},{level:5,boss:true});
  return {low:a.enemies.every(e=>e.kind==='gnome'),yellow:b.enemies.some(e=>e.kind==='yellowGnome'),hp:b.stats.hp,damage:b.stats.damage,boss:boss.enemies.map(e=>e.kind),count:b.enemies.length};
  })()`,context);
- assert(result.low);assert(result.yellow);assert.equal(result.hp,12);assert.equal(result.damage,6);assert.deepEqual(plain(result.boss),['bear','gnome','gnome','yellowGnome']);assert(result.count>=6&&result.count<=8);
+ assert(result.low);assert(result.yellow);assert.equal(result.hp,15);assert.equal(result.damage,7);assert.deepEqual(plain(result.boss),['bear','gnome','gnome','yellowGnome']);assert(result.count>=6&&result.count<=8);
  });
 
 test('ranged impact respects radius and knight shield; class upgrades preserve missing health',()=>{
@@ -139,5 +139,19 @@ test('ranged impact respects radius and knight shield; class upgrades preserve m
  e.effects.push(shot());pawn.y=3;e.update(.02);const missed=e.hp;
  e.levelUp(3);return {guarded,hit,missed,upgraded:e.hp,max:e.stats.hp};
  })()`,context);
- assert.deepEqual(plain(result),{guarded:10,hit:7,missed:7,upgraded:9,max:12});
+ assert.deepEqual(plain(result),{guarded:12,hit:9,missed:9,upgraded:12,max:15});
+});
+
+test('lancer pierces all aligned enemies within two cells, not beside or beyond',()=>{
+ const context=vm.createContext({Math,Date,canStand:()=>true,connectedEdge:()=>true});
+ vm.runInContext(fs.readFileSync(path.join(root,'src/world/encounter.js'),'utf8'),context);
+ const result=vm.runInContext(`(()=>{
+ encounterRoutes=()=>({graph:new Map(),point:()=>({x:12,y:12})});
+ const map={spawn:{x:1,y:1},house:{x:1,y:1},tower:{x:20,y:20},stairs:[]};
+ const pawn={x:2,y:2,heading:{x:1,y:0}};
+ const e=createEncounter(map,pawn,'lancer',()=>{});
+ for(const [x,y] of [[3,2],[3.8,2],[4.3,2],[3,3]])e.enemies.push({x,y,hp:20,kind:'gnome',config:hammerGnome,phase:'recover',timer:1,clock:0});
+ e.attack(e.enemies[0]);e.update(.08);return e.enemies.map(enemy=>enemy.hp);
+ })()`,context);
+ assert.deepEqual(plain(result),[15,15,20,20]);
 });

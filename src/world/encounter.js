@@ -1,11 +1,11 @@
 const combatClasses = {
-  knight: {hp:10, damage:5, range:1, interval:.4, impact:.18},
-  lancer: {hp:16, damage:5, range:2, interval:.45, impact:.07},
+  knight: {hp:12, damage:6, range:1, interval:.4, impact:.18},
+  lancer: {hp:14, damage:5, range:2, interval:.45, impact:.07},
   monk: {hp:9, damage:7, range:4, interval:1.3, impact:.65},
-  archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
+  archer: {hp:14, damage:4, range:6, interval:.7, impact:.44},
 };
-const hammerGnome = {xp:30, hp:9, damage:2, sight:8, reach:.9, speed:2, windup:.25, impact:.1, tolerance:.2, rest:.6};
-const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:45,hp:8,damage:3,sight:10,reach:3,speed:1.8,windup:.55,impact:.1,tolerance:0,rest:.7,radius:.6},bear:{xp:250,hp:112,damage:6,sight:12,reach:1.5,speed:1.2,patrolSpeed:.65,windup:.4,impact:.07,tolerance:.25,rest:.45}};
+const hammerGnome = {xp:30, hp:9, damage:4, sight:8, reach:.9, speed:2, windup:.25, impact:.1, tolerance:.2, rest:.6};
+const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:45,hp:8,damage:3,sight:10,reach:4,speed:1.8,windup:.55,impact:.1,tolerance:0,rest:.7,radius:.6},bear:{xp:250,hp:90,damage:8,sight:12,reach:1.5,speed:1.2,patrolSpeed:.65,windup:.4,impact:.07,tolerance:.25,rest:.45}};
 function scaledClass(id,level){const base=combatClasses[id];return {...base,hp:Math.round(base.hp*(1+.12*(level-1))),damage:Math.round(base.damage*(1+.08*(level-1)))};}
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -127,11 +127,11 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{},level=1,boss=false}
     }
     const hits=enemies.filter(e=>{
       const x=e.x-pawn.x,y=e.y-pawn.y;
-      if(gap(e,pawn)>stats.range+.2||!visible(map,pawn,e))return false;
+      if(gap(e,pawn)>stats.range+(id==='lancer'?0:.2)||!visible(map,pawn,e))return false;
       if(id==='monk')return mark&&gap(e,mark)<.5;
       return x*dx+y*dy>=0 && Math.abs(x*dy-y*dx)<(id==='knight'?.7:.36);
     }).sort((a,b)=>gap(a,pawn)-gap(b,pawn));
-    for(const e of id==='lancer'?hits.slice(0,1):hits)e.hp-=stats.damage;
+    for(const e of hits)e.hp-=stats.damage;
   }
   function update(dt){
     if(hp<=0){
@@ -189,7 +189,7 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{},level=1,boss=false}
           if(e.kind==='yellowGnome'){
             if(gap(e,pawn)<=config.reach && visible(map,e,pawn)){
               const start={x:e.x+e.facing*.4,y:e.y},target={x:pawn.x,y:pawn.y};
-              const duration=Math.max(.12,gap(start,target)/8);
+              const duration=Math.max(.12,gap(start,target)/12);
               effects.push({kind:'enemyShot',...start,start,target,left:duration,duration,age:0,damage:config.damage,radius:config.radius});
             }
           }
