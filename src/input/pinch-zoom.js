@@ -3,7 +3,7 @@ function enablePinchZoom(canvas, cancelActions) {
   const touches = new Map();
   let initialDistance=0, initialZoom=1, pinching=false;
   canvas.viewZoom=1;
-  const clampZoom=value=>Math.max(.25,Math.min(1,value));
+  const clampZoom=value=>Math.max(.5,Math.min(1,value));
   // Wheel and pinch control the same camera scale, never the page or HUD.
   canvas.addEventListener('wheel',event=>{
     if(document.querySelector('dialog[open]'))return;
@@ -32,7 +32,7 @@ function enablePinchZoom(canvas, cancelActions) {
     if(!touches.has(event.pointerId))return;
     touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
     if(!pinching)return;
-    if(touches.size>=2)canvas.viewZoom=clampZoom(initialZoom*Math.pow(distance()/initialDistance,4));
+    if(touches.size>=2)canvas.viewZoom=clampZoom(initialZoom*Math.pow(distance()/initialDistance,2));
     block(event);
   },true);
   function end(event){
