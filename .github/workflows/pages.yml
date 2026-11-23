@@ -2,35 +2,49 @@ name: Publicar Cripta
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    steps:
+      - name: Obter o código
+        uses: actions/checkout@v4
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Preparar os arquivos do jogo
+        run: |
+          mkdir -p public
+          cp index.html public/
+          cp -R src styles assets public/
+
+      - name: Enviar artefacto do GitHub Pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          name: github-pages
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - name: Preparar os arquivos do jogo
-        run: |
-          mkdir public
-          cp index.html public/
-          cp -R src styles assets public/
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-      - name: Publicar
+      - name: Publicar no GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
