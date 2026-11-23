@@ -54,7 +54,7 @@ function createAdventure(pawn, changeWorld) {
         enter(MapGenerator.generate(), true);
       }, () => {});
     } else {
-      ui.show('Deseja iniciar a aventura?', false, () => {
+      ui.showMap(() => {
         ui.show('Escolha seu personagem', true, startAdventure, () => {});
       }, () => {});
     }
