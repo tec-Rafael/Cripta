@@ -24,7 +24,7 @@ function enablePinchZoom(canvas, cancelActions) {
     if(!touches.has(event.pointerId))return;
     touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
     if(!pinching)return;
-    if(touches.size>=2)canvas.viewZoom=Math.max(1,Math.min(2.5,initialZoom*distance()/initialDistance));
+    if(touches.size>=2)canvas.viewZoom=Math.max(.5,Math.min(1,initialZoom*initialDistance/Math.max(1,distance())));
     block(event);
   },true);
   function end(event){
