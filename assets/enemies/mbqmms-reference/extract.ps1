@@ -15,7 +15,7 @@ function Cut-Outlined($source,$rect){
  # Remove the panel's horizontal outline only where it lies outside the fur.
  if($rect.Width -eq 140 -or $rect.Width -eq 210){
   $mask=$crop.Clone()
-  for($y=(63-$rect.Y);$y -le (68-$rect.Y);$y++){for($x=0;$x -lt $w;$x++){
+  for($y=(63-$rect.Y);$y -le (80-$rect.Y);$y++){for($x=0;$x -lt $w;$x++){
    $pixel=$mask.GetPixel($x,$y)
    if($pixel.A -eq 0 -or $pixel.R -gt 65){continue}
    $nearFur=$false
