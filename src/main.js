@@ -88,6 +88,7 @@ function syncBattle(){
     bar.style.setProperty('--health',e.hp/e.stats.hp*100+'%');
     el('life').querySelector('b').textContent=e.hp+' / '+e.stats.hp;
     el('remaining').querySelector('b').textContent=e.enemies.length;
+    el('remaining').querySelector('img').src=e.enemies.some(enemy=>enemy.kind==='bear')?'assets/enemies/mbqmms-reference/Badge.png':'assets/gnome/reference-extract/Badge.png';
   }
 }
 function canFight(){return map?.encounter&&!document.querySelector('dialog[open]');}
@@ -163,6 +164,8 @@ canvas.addEventListener('pointerup',event=>{
 el('guard').onpointerdown=e=>{if(canFight()&&map.encounter.id==='knight'){el('guard').setPointerCapture(e.pointerId);map.encounter.setGuard(true);}};
 function releaseGuard(){map?.encounter?.setGuard(false);}
 el('guard').onlostpointercapture=releaseGuard;
+el('guard').onpointerup=releaseGuard;
+el('guard').onpointercancel=releaseGuard;
 window.addEventListener('blur',releaseGuard);
 window.addEventListener('keydown',e=>{
   if(!canFight()||e.ctrlKey||e.altKey||e.metaKey)return;
@@ -182,7 +185,7 @@ function changeWorld(next) {
   map = next;
   map.dry = map.land.map((row,y) => row.map((cell,x) => cell && !map.pools[y][x]));
   pawn.spawn(map);
-  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{onDefeat:enemy=>progression.add(enemy.xp)}):null;
+  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{level:progression.state.level,boss:progression.state.level>=5&&progression.checkpoint<5,onDefeat:enemy=>{if(enemy.bossLevel){progression.defeatBoss(enemy.bossLevel);notifyBattle('Urso derrotado! Marco do nível 5 salvo. Próxima região desbloqueada — em breve.');}progression.add(enemy.xp);map.encounter?.levelUp(progression.state.level);}}):null;
   homeConstruction.attach(map);
   homeInventory.attach(map);
   el('battle-notice').hidden=true;syncBattle();
@@ -214,7 +217,8 @@ el('confirm-construction').onclick=()=>{
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
 function clearCoinsOnDeath(){
-  // Death affects coins only; persistent XP, level and home resources are retained.
+  // Restore the last defeated boss checkpoint; keep home resources.
+  progression.die();
   wallet=0;
   el('wallet').textContent=wallet;
   try{localStorage.setItem('cripta.coins','0');}catch{}

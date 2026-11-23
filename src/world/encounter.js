@@ -5,6 +5,8 @@ const combatClasses = {
   archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
 };
 const hammerGnome = {xp:20, hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
+const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:30,hp:10,damage:5,sight:10,reach:3,speed:2.2,windup:.45,impact:.1,tolerance:0,rest:.35,radius:.6},bear:{xp:100,hp:100,damage:6,sight:12,reach:1.5,speed:2,windup:.6,impact:.15,tolerance:.25,rest:.8}};
+function scaledClass(id,level){const base=combatClasses[id];return {...base,hp:Math.round(base.hp*(1+.12*(level-1))),damage:Math.round(base.damage*(1+.08*(level-1)))};}
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
 function visible(map,a,b) {
@@ -79,16 +81,18 @@ function encounterRoutes(map) {
   return {key,point,graph,nextStep,nearest};
 }
 
-function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
-  const routes=encounterRoutes(map), stats=combatClasses[id], enemies=[], coins=[], effects=[];
+function createEncounter(map,pawn,id,reward,{onDefeat=()=>{},level=1,boss=false}={}){
+  const routes=encounterRoutes(map), stats=scaledClass(id,level), enemies=[], coins=[], effects=[];
   const sites=[...routes.graph.keys()].map(routes.point).filter(p=>gap(p,map.spawn)>8 &&
     [map.house,map.tower].every(b=>Math.hypot(p.x-b.x-1,p.y-b.y-.72)>2) &&
     canStand(map,p,p.x,p.y) &&
     !map.stairs.some(s=>s.x===Math.floor(p.x)&&s.y===Math.floor(p.y)));
-  const count=encounterSize.min+Math.floor(Math.random()*(encounterSize.max-encounterSize.min+1));
+  const count=boss?1:3+Math.min(level,20)+Math.floor(Math.random()*3);
   while(enemies.length<count && sites.length){
     const p=sites.splice(Math.floor(Math.random()*sites.length),1)[0];
-    enemies.push({...p,kind:'gnome',hp:hammerGnome.hp,phase:'patrol',timer:0,facing:1,clock:0});
+    const kind=boss?'bear':level>=3&&(enemies.length===0||Math.random()<.35)?'yellowGnome':'gnome';
+    const base=enemyTypes[kind],config={...base,hp:Math.round(base.hp*(1+.10*(level-1))),damage:Math.round(base.damage*(1+.06*(level-1)))};
+    enemies.push({...p,kind,config,hp:config.hp,phase:'patrol',timer:0,facing:1,clock:0});
   }
   let hp=stats.hp, cooldown=0, swing=null, guard=false;
   let deathTime=0;
@@ -145,7 +149,10 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
     }
     for(let i=effects.length-1;i>=0;i--){
       const f=effects[i];
-      if(f.kind==='arrow'){
+      if(f.kind==='enemyShot'){
+        f.age+=dt;f.left-=dt;const t=Math.min(1,f.age/(f.duration||.55));f.x=f.start.x+(f.target.x-f.start.x)*t;f.y=f.start.y+(f.target.y-f.start.y)*t;
+        if(f.left<=0&&gap(pawn,f.target)<=f.radius&&visible(map,f.start,pawn)){const blocked=guard&&((f.start.x-pawn.x)*pawn.heading.x+(f.start.y-pawn.y)*pawn.heading.y)>0;if(!blocked)hp=Math.max(0,hp-f.damage);}
+      }else if(f.kind==='arrow'){
         f.age+=dt;f.left-=dt;
         const t=Math.min(1,f.age/.65),target=f.target;
         f.x=f.start.x+(target.x-f.start.x)*t;
@@ -157,7 +164,7 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
       if(f.left<=0)effects.splice(i,1);
     }
     for(let i=enemies.length-1;i>=0;i--){
-      const e=enemies[i];
+      const e=enemies[i], config=e.config;
       if(e.hp<=0){
         effects.push({kind:'dust',x:e.x,y:e.y,left:.8,duration:.8});
         const landings=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:e.x+dx*.75,y:e.y+dy*.75}))
@@ -165,12 +172,12 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
         const landing=landings[Math.floor(Math.random()*landings.length)]||{x:e.x,y:e.y};
         coins.push({kind:'coin',...landing,fromX:e.x,fromY:e.y,bornAt:Date.now(),age:0});
         enemies.splice(i,1);
-        onDefeat({kind:e.kind,xp:hammerGnome.xp});continue;
+        onDefeat({kind:e.kind,xp:config.xp,bossLevel:e.kind==='bear'?5:null});continue;
       }
       e.clock+=dt;e.timer-=dt;e.moving=false;
       if(e.phase==='strike'){
         // Track during anticipation, then commit to the final hammer swing.
-        if(e.clock-dt < hammerGnome.windup){
+        if(e.clock-dt < config.windup){
           const distance=gap(e,pawn);
           if(distance>0){e.dx=(pawn.x-e.x)/distance;e.dy=(pawn.y-e.y)/distance;}
           e.facing=Math.sign(e.dx)||e.facing;
@@ -178,20 +185,27 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
         if(e.timer<=0){
           const x=pawn.x-e.x,y=pawn.y-e.y;
           const blocked=guard && x*pawn.heading.x+y*pawn.heading.y<=0;
-          if(!blocked&&gap(e,pawn)<=hammerGnome.reach+hammerGnome.tolerance&&x*e.dx+y*e.dy>=0&&visible(map,e,pawn))
-            hp=Math.max(0,hp-hammerGnome.damage);
-          e.phase='recover';e.timer=hammerGnome.rest;e.clock=0;
+          if(e.kind==='yellowGnome'){
+            if(gap(e,pawn)<=config.reach && visible(map,e,pawn)){
+              const start={x:e.x+e.facing*.4,y:e.y},target={x:pawn.x,y:pawn.y};
+              const duration=Math.max(.12,gap(start,target)/8);
+              effects.push({kind:'enemyShot',...start,start,target,left:duration,duration,age:0,damage:config.damage,radius:config.radius});
+            }
+          }
+          else if(!blocked&&gap(e,pawn)<=config.reach+config.tolerance&&x*e.dx+y*e.dy>=0&&visible(map,e,pawn))
+            hp=Math.max(0,hp-config.damage);
+          e.phase='recover';e.timer=config.rest;e.clock=0;
         }
         continue;
       }
       if(e.phase==='recover'&&e.timer>0)continue;
       const dist=gap(e,pawn);
       // Once alerted, track the player throughout the detection radius even behind obstacles.
-      const sees=dist<=hammerGnome.sight&&(e.alerted||visible(map,e,pawn));
+      const sees=dist<=config.sight&&(e.alerted||visible(map,e,pawn));
       if(sees)e.alerted=true;
-      if(sees&&dist<=hammerGnome.reach&&visible(map,e,pawn)){
+      if(sees&&dist<=config.reach&&visible(map,e,pawn)){
         e.dx=(pawn.x-e.x)/(dist||1);e.dy=(pawn.y-e.y)/(dist||1);
-        e.facing=Math.sign(e.dx)||e.facing;e.phase='strike';e.timer=hammerGnome.windup+hammerGnome.impact;e.clock=0;e.waypoint=null;continue;
+        e.facing=Math.sign(e.dx)||e.facing;e.phase='strike';e.timer=config.windup+config.impact;e.clock=0;e.waypoint=null;continue;
       }
       if(sees)e.goal=routes.nearest(pawn);
       const current=routes.key(e.x,e.y);
@@ -208,7 +222,7 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
           sees&&current===e.goal?{x:pawn.x,y:pawn.y}:routes.point(step);
         if(step===current&&!sees)e.goal=null;
       }
-      const d=gap(e,e.waypoint), travel=Math.min(d,dt*(e.phase==='chase'?hammerGnome.speed:1));
+      const d=gap(e,e.waypoint), travel=Math.min(d,dt*(e.phase==='chase'?config.speed:1));
       const x=e.x+(e.waypoint.x-e.x)*travel/(d||1),y=e.y+(e.waypoint.y-e.y)*travel/(d||1);
       if(canStand(map,e,x,y)){
         e.moving=travel>0;e.facing=Math.sign(x-e.x)||e.facing;e.x=x;e.y=y;
@@ -226,5 +240,5 @@ function createEncounter(map,pawn,id,reward,{onDefeat=()=>{}}={}){
     }
   }
   return {enemies,coins,effects,attack,update,stats,id,get deathTime(){return deathTime;},get hp(){return hp;},get swing(){return swing;},
-    get guarding(){return guard;},setGuard(value){guard=id==='knight'&&value&&!swing;}};
+    levelUp(level){const next=scaledClass(id,level),gain=next.hp-stats.hp;Object.assign(stats,next);if(hp>0)hp=Math.min(stats.hp,hp+Math.max(0,gain));},get guarding(){return guard;},setGuard(value){guard=id==='knight'&&value&&!swing;}};
 }

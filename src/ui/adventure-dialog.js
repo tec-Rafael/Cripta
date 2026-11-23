@@ -23,6 +23,11 @@ function createAdventureDialog() {
   const title = dialog.querySelector('h1');
   const choices = dialog.querySelector('.character-options');
   const actions = dialog.querySelector('.dialog-actions');
+  const route=document.createElement('div');
+  route.className='adventure-map-route';route.hidden=true;
+  route.innerHTML='<svg viewBox="0 0 600 320" preserveAspectRatio="none" aria-hidden="true"><path d="M 85 230 C 160 230 155 95 260 95 S 445 100 480 45"/></svg><button type="button" class="adventure-map-emblem" aria-label="Selecionar aventura"><img src="assets/enemies/mbqmms-reference/Badge.png" alt=""></button>';
+  dialog.querySelector('.adventure-panel').append(route);
+  route.querySelector('button').onclick=()=>confirm?.();
   let confirm = null;
   let cancel = null;
   let returnFocus = null;
@@ -51,6 +56,7 @@ function createAdventureDialog() {
     choices.append(button);
   }
   function show(message, selecting, onConfirm, onCancel) {
+    route.hidden=true;dialog.classList.remove('map-view');
     title.textContent = message;
     choices.hidden = !selecting;
     actions.hidden = selecting;
@@ -63,5 +69,12 @@ function createAdventureDialog() {
     }
     dialog.focus({preventScroll:true});
   }
-  return {show, close, get open() { return dialog.open; }};
+  const future=document.createElement('button');future.type='button';future.className='future-region';future.disabled=true;future.textContent='Região 2 · Em breve';route.append(future);
+  function showMap(onConfirm,onCancel){
+    future.hidden=progression.checkpoint<5;
+    show('Mapa de Aventura',false,onConfirm,onCancel);
+    actions.hidden=true;choices.hidden=true;route.hidden=false;
+    dialog.classList.add('map-view');
+  }
+  return {show, showMap, close, get open() { return dialog.open; }};
 }

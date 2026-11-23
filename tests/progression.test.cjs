@@ -86,7 +86,7 @@ test('HUD keeps the same XP and level when switching between adventure and home'
 
   assert.equal(el('experience').querySelector('span').textContent,'20 / 150 XP');
 });
-test('death resets only coins and preserves XP, level and home inventory after reload', () => {
+test('death resets coins and unprotected XP but preserves home inventory', () => {
   const saved=new Map([['cripta.coins','80'],['cripta.home.inventory.v1','{"wood":10,"gold":5}']]);
   const storage={getItem:key=>saved.get(key),setItem:(key,value)=>saved.set(key,value)};
   const label={textContent:'80'};
@@ -100,5 +100,44 @@ test('death resets only coins and preserves XP, level and home inventory after r
   assert.equal(saved.get('cripta.coins'),'0');
   assert.equal(label.textContent,0);
   assert.equal(saved.get('cripta.home.inventory.v1'),'{"wood":10,"gold":5}');
-  assert.deepEqual(plain(vm.runInContext('createProgression().state',context)),{level:3,xp:20,required:200,totalXP:270});
+  assert.deepEqual(plain(vm.runInContext('createProgression().state',context)),{level:1,xp:0,required:100,totalXP:0});
+});
+
+ test('boss checkpoint survives reload and subsequent deaths',()=>{
+  const {create}=setup();const p=create();p.add(700);p.die();assert.equal(p.state.level,1);
+  p.add(700);p.defeatBoss(5);p.add(100);const reloaded=create();assert.equal(reloaded.checkpoint,5);
+  reloaded.die();assert.equal(reloaded.state.level,5);assert.equal(reloaded.state.xp,0);
+  reloaded.defeatBoss(15);assert.equal(reloaded.checkpoint,5);
+  reloaded.defeatBoss(10);reloaded.die();assert.equal(reloaded.state.level,10);
+ });
+ test('encounters scale by level, introduce yellow enemies at three and spawn one boss',()=>{
+ const context=vm.createContext({Math,Date,canStand:()=>true});
+ vm.runInContext(fs.readFileSync(path.join(root,'src/world/encounter.js'),'utf8'),context);
+ const result=vm.runInContext(`(()=>{
+ encounterRoutes=()=>({graph:new Map(Array.from({length:20},(_,i)=>[i,[]])),point:i=>({x:12+i,y:12})});
+ const map={spawn:{x:1,y:1},house:{x:1,y:1},tower:{x:45,y:45},stairs:[]};
+ const pawn={x:1,y:1};
+ const a=createEncounter(map,pawn,'knight',()=>{},{level:1});
+ const b=createEncounter(map,pawn,'knight',()=>{},{level:3});
+ const boss=createEncounter(map,pawn,'knight',()=>{},{level:5,boss:true});
+ return {low:a.enemies.every(e=>e.kind==='gnome'),yellow:b.enemies.some(e=>e.kind==='yellowGnome'),hp:b.stats.hp,damage:b.stats.damage,boss:boss.enemies.map(e=>e.kind),count:b.enemies.length};
+ })()`,context);
+ assert(result.low);assert(result.yellow);assert.equal(result.hp,12);assert.equal(result.damage,5);assert.deepEqual(plain(result.boss),['bear']);assert(result.count>=6&&result.count<=8);
+ });
+
+test('ranged impact respects radius and knight shield; class upgrades preserve missing health',()=>{
+ const context=vm.createContext({Math,Date,canStand:()=>true,connectedEdge:()=>true});
+ vm.runInContext(fs.readFileSync(path.join(root,'src/world/encounter.js'),'utf8'),context);
+ const result=vm.runInContext(`(()=>{
+ encounterRoutes=()=>({graph:new Map(),point:()=>({x:12,y:12})});
+ const map={spawn:{x:1,y:1},house:{x:1,y:1},tower:{x:20,y:20},stairs:[]};
+ const pawn={x:2,y:2,heading:{x:1,y:0}};
+ const e=createEncounter(map,pawn,'knight',()=>{});
+ const shot=()=>({kind:'enemyShot',x:4,y:2,start:{x:4,y:2},target:{x:2,y:2},left:.01,age:0,damage:3,radius:.6});
+ e.setGuard(true);e.effects.push(shot());e.update(.02);const guarded=e.hp;
+ e.setGuard(false);e.effects.push(shot());e.update(.02);const hit=e.hp;
+ e.effects.push(shot());pawn.y=3;e.update(.02);const missed=e.hp;
+ e.levelUp(3);return {guarded,hit,missed,upgraded:e.hp,max:e.stats.hp};
+ })()`,context);
+ assert.deepEqual(plain(result),{guarded:10,hit:7,missed:7,upgraded:9,max:12});
 });
