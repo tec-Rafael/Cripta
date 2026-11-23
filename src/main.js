@@ -45,13 +45,16 @@ try {
   }
 } catch {}
 const progression = createProgression();
+let forceBossTest=false;
 // One-time local XP grant requested for the level-five boss test.
 try {
-  const testKey='cripta.local.boss-test.level5.2026-11-23.v1';
+  const testKey='cripta.local.boss-test.level5.2026-11-23.v2';
   const localGame=location.protocol==='file:' ||
     ['http:','https:'].includes(location.protocol)&&['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname);
   if(localGame&&!localStorage.getItem(testKey)){
+    progression.die();
     progression.add(Math.max(0,700-progression.state.totalXP));
+    forceBossTest=true;
     localStorage.setItem(testKey,'done');
   }
 } catch {}
@@ -195,7 +198,8 @@ function changeWorld(next) {
   map = next;
   map.dry = map.land.map((row,y) => row.map((cell,x) => cell && !map.pools[y][x]));
   pawn.spawn(map);
-  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{level:progression.state.level,boss:progression.state.level>=5&&progression.checkpoint<5,onDefeat:enemy=>{if(enemy.bossLevel){progression.defeatBoss(enemy.bossLevel);}progression.add(enemy.xp);map.encounter?.levelUp(progression.state.level);}}):null;
+  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{level:progression.state.level,boss:forceBossTest||(progression.state.level>=5&&progression.checkpoint<5),onDefeat:enemy=>{if(enemy.bossLevel){progression.defeatBoss(enemy.bossLevel);}progression.add(enemy.xp);map.encounter?.levelUp(progression.state.level);}}):null;
+  if(map.encounter)forceBossTest=false;
   homeConstruction.attach(map);
   homeInventory.attach(map);
   el('battle-notice').hidden=true;syncBattle();
