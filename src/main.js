@@ -98,6 +98,9 @@ function attackSelected(){
 }
 let attackPointer=null;
 let hoverPointer=null;
+enablePinchZoom(canvas,()=>{
+  pawn.pause();homeInventory.stop();attackPointer=null;hoverPointer=null;
+});
 canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable','building-unavailable');});
 canvas.isPositioningBuilding=()=>Boolean(attackPointer?.placingTouch);
 canvas.addEventListener('pointerdown',event=>{
