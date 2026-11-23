@@ -1,6 +1,6 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #47aba9; }
-body { font-family: system-ui, sans-serif; color: #214d50; }
+body { font-family: system-ui, sans-serif; color: #214d50; touch-action:pan-x pan-y; }
 main { position: relative; width: 100%; height: 100%; height: 100dvh; display: grid; place-items: center; }
 canvas { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
 canvas { touch-action: none; user-select: none; min-width: 0; min-height: 0; }
@@ -151,20 +151,15 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   .dialog-cancel img { width: 44px; height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) { .character-choice { transition: none; } }
-.vitals { position:absolute;top:100%;left:16%;width:80%;color:#fff4ce;font:700 15px/1.2 Georgia,serif;text-shadow:0 1px 3px #162833; }
-#life { position:relative;text-align:center;line-height:18px; }
-#life .health-bar { position:absolute;inset:0;background:url('../assets/ui/health-base.png') center/100% 100%;image-rendering:pixelated; }
-#life { height:36px;line-height:32px; }
-#life .health-bar i { position:absolute;left:6.667%;top:21.569%;height:47.059%;width:calc(var(--health,100%) * .86666);background:url('../assets/ui/health-fill.png') center/100% 100%; }
-#home-level { display:block;width:160px;max-width:100%;height:32px;text-align:center;line-height:32px;background:url('../assets/ui/ribbon-red.png') center/100% 100%;image-rendering:pixelated; }
-#home-level[hidden] { display:none; }
-#life b { position:relative; }
+.vitals { display:block;position:absolute;top:100%;left:0;width:100%;color:#fff4ce;font:700 15px/1.2 Georgia,serif;text-shadow:0 1px 3px #162833; }
 #resources,#battle-buttons { position:absolute;display:flex;align-items:center;gap:.4rem; }
 #resources { top:max(12px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));flex-direction:column;align-items:flex-end;color:#fff5cf;background:transparent;padding:4px 8px;font:bold 16px Georgia,serif;text-shadow:0 2px 3px #213c44; }
 #resources button,#battle-buttons button { color:#fff5cf;background:#214453aa;border:1px solid #ffedbf88;border-radius:50%;cursor:pointer;touch-action:none; }
 #settings { font-size:20px;width:34px;height:34px; }
 #resources span { display:flex;align-items:center; }
 #resources img { width:34px;height:34px;image-rendering:pixelated; }
+#resources #remaining { gap:5px; }
+#resources #remaining img { width:55.545px;height:58.19px;object-fit:contain; }
 #resources #settings { order:-1;background:transparent;border:0;padding:0;width:42px;height:42px; }
 #resources #settings img { width:42px;height:42px; }
 #battle-buttons { right:16px;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 86px); }
@@ -368,3 +363,51 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 
 #house-options .house-preview { width:100%;height:192px;max-width:280px;object-fit:contain; }
 @media(max-width:540px){#house-options .house-preview {height:168px;} }
+
+/* Full-width sword below every character banner; level uses its pommel. */
+#player-level { display:none; }
+.stat-panel { position:relative;width:100%;height:80px;min-width:0; }
+.sword-art { z-index:0;position:absolute;inset:0;pointer-events:none;background:url('../assets/ui/sword-panel/sword-complete.png') center/100% 100% no-repeat;image-rendering:pixelated; }
+#life,#experience { z-index:1;position:absolute;left:24%;right:17%;width:auto;height:19px;min-width:0;margin:0;text-align:center; }
+#life { top:17px; }
+#life[hidden] { display:none; }
+#experience { top:44px;font:700 11px/19px Georgia,serif;color:#fff4ce;text-shadow:0 1px 2px #162833; }
+#vitals[data-world="home"] .stat-panel { height:56px; }
+#vitals[data-world="home"] #experience { top:19px; }
+#life b,#experience span { position:absolute;inset:0;display:block;margin:0;font:bold 11px/19px Georgia,serif;color:#493c2c;text-shadow:0 1px #fff3d6;z-index:2; }
+/* Original SmallBar frame, sliced into fixed caps and a continuous middle. */
+#experience .xp-track,#life .health-bar {
+ position:relative;height:19px;min-width:28px;image-rendering:pixelated;
+ background:url('../assets/ui/xp-bar/left.png') left top/12px 19px no-repeat,
+ url('../assets/ui/xp-bar/right.png') right top/12px 19px no-repeat,
+ url('../assets/ui/xp-bar/middle.png') center top/calc(100% - 24px) 19px no-repeat;
+}
+#experience .xp-well,#life .health-well { position:absolute;left:8px;right:8px;top:8px;height:3px;overflow:hidden; }
+#experience i,#life .health-bar i { display:block;height:3px;width:var(--xp,0%);max-width:100%;background:url('../assets/ui/xp-bar/fill-green.png') left top/1px 3px repeat-x;transition:width .25s ease-out;image-rendering:pixelated; }
+#life .health-bar i { width:var(--health,100%);background-image:url('../assets/ui/sword-panel/fill-red.png'); }
+#life b,#experience span { color:#fff4ce;text-shadow:0 1px 2px #162833,1px 0 #162833; }
+@media (prefers-reduced-motion:reduce) { #experience i,#life .health-bar i { transition:none; } }
+
+/* Home sword folds away to reveal the current level. */
+#home-level-toggle { display:none; }
+#vitals[data-world="home"] #home-level-toggle {
+ display:block;position:absolute;inset:0;width:100%;height:100%;z-index:4;
+ padding:0;border:0;background:transparent;pointer-events:auto;touch-action:manipulation;
+ cursor:url('../assets/ui/cursor-02.png') 9 1,pointer;color:#fff4ce;font:bold 20px/1.2 Georgia,serif;text-shadow:0 2px 2px #162833;
+}
+#home-level-toggle:focus-visible { outline:2px solid #fff4ce;outline-offset:3px; }
+#home-level-label {
+ display:grid;place-items:center;width:82%;max-width:300px;min-height:44px;margin:auto;padding:6px 32px;
+ background:url('../assets/ui/ribbon-red.png') center/100% 100% no-repeat;
+ image-rendering:pixelated;color:#fff4ce;text-shadow:0 2px #784b42;
+ opacity:0;transform:scale(.8);transition:opacity .18s ease,transform .18s ease;
+}
+#vitals[data-world="home"] .sword-art,#vitals[data-world="home"] #experience {
+ transform-origin:center;transition:transform .28s ease,opacity .22s ease;
+}
+#vitals[data-world="home"][data-show-level="true"] .sword-art,
+#vitals[data-world="home"][data-show-level="true"] #experience { transform:scale(.15);opacity:0; }
+#vitals[data-world="home"][data-show-level="true"] #home-level-label { opacity:1;transform:scale(1);transition-delay:.18s; }
+@media(prefers-reduced-motion:reduce) {
+ #vitals[data-world="home"] .sword-art,#vitals[data-world="home"] #experience,#home-level-label { transition:none; }
+}

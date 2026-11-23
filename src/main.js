@@ -44,6 +44,7 @@ try {
     localStorage.setItem(creditKey,'100');
   }
 } catch {}
+const progression = createProgression();
 const homeInventory = createHomeInventory(canvas, pawn);
 function collectCoin(){
   wallet++;el('wallet').textContent=wallet;
@@ -53,9 +54,32 @@ function notifyBattle(text){
   clearTimeout(noticeTimer);el('battle-notice').textContent=text;el('battle-notice').hidden=false;
   noticeTimer=setTimeout(()=>{el('battle-notice').hidden=true;},3500);
 }
+el('home-level-toggle').addEventListener('click',()=>{
+  if(map?.encounter)return;
+  const button=el('home-level-toggle');
+  const expanded=button.getAttribute('aria-expanded')!=='true';
+  button.setAttribute('aria-expanded',String(expanded));
+  button.setAttribute('aria-label',expanded?'Mostrar experiência':'Mostrar nível atual');
+  el('vitals').setAttribute('data-show-level',String(expanded));
+});
 function syncBattle(){
   const e=map.encounter;
-  el('home-level').hidden=!!e;el('life').hidden=!e;
+  el('life').hidden=!e;
+  el('vitals').setAttribute('data-world',e?'adventure':'home');
+  const progress=progression.state;
+  el('home-level-label').textContent='Nível '+progress.level;
+  if(e){
+    el('vitals').setAttribute('data-show-level','false');
+    el('home-level-toggle').setAttribute('aria-expanded','false');
+    el('home-level-toggle').setAttribute('aria-label','Mostrar nível atual');
+  }
+  el('player-level').textContent=progress.level;
+  el('player-level').setAttribute('aria-label','Nível '+progress.level);
+  const xp=el('experience');
+  xp.setAttribute('aria-valuemax',progress.required);xp.setAttribute('aria-valuenow',progress.xp);
+  xp.setAttribute('aria-valuetext',progress.xp+' de '+progress.required+' XP. Nível '+progress.level);
+  xp.style.setProperty('--xp',progress.xp/progress.required*100+'%');
+  xp.querySelector('span').textContent=progress.xp+' / '+progress.required+' XP';
   el('remaining').hidden=!e;el('battle-buttons').hidden=e?.id!=='knight';
   el('guard').hidden=e?.id!=='knight';el('wallet').textContent=wallet;
   if(e){
@@ -74,6 +98,9 @@ function attackSelected(){
 }
 let attackPointer=null;
 let hoverPointer=null;
+enablePinchZoom(canvas,()=>{
+  pawn.pause();homeInventory.stop();attackPointer=null;hoverPointer=null;
+});
 canvas.addEventListener('pointerleave',()=>{hoverPointer=null;canvas.classList.remove('building-clickable','building-unavailable');});
 canvas.isPositioningBuilding=()=>Boolean(attackPointer?.placingTouch);
 canvas.addEventListener('pointerdown',event=>{
@@ -155,7 +182,7 @@ function changeWorld(next) {
   map = next;
   map.dry = map.land.map((row,y) => row.map((cell,x) => cell && !map.pools[y][x]));
   pawn.spawn(map);
-  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin):null;
+  map.encounter=map.name==='Aventura'?createEncounter(map,pawn,pawn.character,collectCoin,{onDefeat:enemy=>progression.add(enemy.xp)}):null;
   homeConstruction.attach(map);
   homeInventory.attach(map);
   el('battle-notice').hidden=true;syncBattle();
@@ -186,9 +213,14 @@ el('confirm-construction').onclick=()=>{
 };
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
-el('retry').onclick=()=>{
+function clearCoinsOnDeath(){
+  // Death affects coins only; persistent XP, level and home resources are retained.
   wallet=0;
+  el('wallet').textContent=wallet;
   try{localStorage.setItem('cripta.coins','0');}catch{}
+}
+el('retry').onclick=()=>{
+  clearCoinsOnDeath();
   el('game-over').close();
   adventure.start();
 };
@@ -205,6 +237,7 @@ function render(time) {
     if(map.encounter){
       const e=map.encounter, hp=e.hp, count=e.enemies.length;
       e.update(dt);
+      if(hp>0 && e.hp===0)clearCoinsOnDeath();
       if(hp!==e.hp||count!==e.enemies.length)syncBattle();
       if(!e.hp && e.deathTime>=.8){
         pawn.pause();

@@ -2,10 +2,6 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
-    pawnIdleShovel:'../tools/pawn-shovel/Pawn_Idle Shovel.png',
-    pawnRunShovel:'../tools/pawn-shovel/Pawn_Run Shovel.png',
-    pawnDig:'../tools/pawn-shovel/Pawn_Interact Shovel.png',
-    shovel:'../tools/shovel-icon.png',
     fenceHorizontal:'../fences/fence-v4-horizontal.png',
     fenceVertical:'../fences/fence-v4-vertical.png',
     fencePost:'../fences/fence-v4-post.png',
@@ -19,9 +15,10 @@ async function loadImages() {
     wood:'Terrain/Resources/Wood/Wood Resource/Wood Resource.png',
     dust:'Particle FX/Dust_01.png',
     coin:'../ui/gold-coin.png',
-    gnomeIdle:'../gnome/Idle.png',
-    gnomeRun:'../gnome/Run.png',
-    gnomeStrike:'../gnome/Strike.png',
+    gnomePortrait:'../gnome/reference-extract/Badge.png',
+    gnomeIdle:'../gnome/reference-extract/Idle.png',
+    gnomeRun:'../gnome/reference-extract/Run.png',
+    gnomeStrike:'../gnome/reference-extract/Strike-Combat.png',
     knightAttack:'Units/Blue Units/Warrior/Warrior_Attack1.png',
     knightGuard:'Units/Blue Units/Warrior/Warrior_Guard.png',
     lancerAttack:'Units/Blue Units/Lancer/Lancer_Right_Attack.png',

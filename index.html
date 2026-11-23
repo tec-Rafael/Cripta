@@ -6,10 +6,12 @@
   <meta name="theme-color" content="#47aba9">
   <title>Cripta · Cenários</title>
   <link rel="stylesheet" href="styles/game.css">
+  <script src="src/ui/fullscreen.js" defer></script>
   <script src="src/world/buildings.js" defer></script>
   <script src="src/world/map-generator.js" defer></script>
   <script src="src/world/collisions.js" defer></script>
   <script src="src/input/controls.js" defer></script>
+  <script src="src/input/pinch-zoom.js" defer></script>
   <script src="src/actors/pawn-animation.js" defer></script>
   <script src="src/actors/pawn.js" defer></script>
   <script src="src/actors/sheep.js" defer></script>
@@ -20,6 +22,7 @@
   <script src="src/world/encounter.js" defer></script>
   <script src="src/world/home-inventory.js" defer></script>
   <script src="src/ui/home-construction.js" defer></script>
+  <script src="src/player/progression.js" defer></script>
   <script src="src/main.js" defer></script>
 </head>
 <body>
@@ -28,11 +31,19 @@
     <div id="loading" role="status">Preparando o cenário…</div>
     <div id="character-banner" role="status" hidden>
       <img alt=""><span></span>
-      <div class="vitals"><small id="home-level">Nível 1</small><div id="life" hidden><div class="health-bar" role="progressbar" aria-label="Vida" aria-valuemin="0"><i></i></div><b></b></div></div>
+      <div id="vitals" class="vitals" data-world="home">
+        <div id="player-level" aria-label="Nível 1">1</div>
+        <div class="stat-panel">
+          <div class="sword-art" aria-hidden="true"></div>
+          <button id="home-level-toggle" type="button" aria-label="Mostrar nível atual" aria-expanded="false"><span id="home-level-label">Nível 1</span></button>
+          <div id="life" hidden><div class="health-bar" role="progressbar" aria-label="Vida" aria-valuemin="0"><div class="health-well"><i></i></div></div><b></b></div>
+          <div id="experience" role="progressbar" aria-label="Experiência para o próximo nível" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="xp-track"><div class="xp-well"><i></i></div></div><span>0 / 100 XP</span></div>
+        </div>
+      </div>
     </div>
     <aside id="resources" aria-label="Recursos">
       <span title="Moedas"><img src="assets/ui/gold-coin.png" alt="Moedas de ouro"><b id="wallet">0</b></span>
-      <span id="remaining" title="Inimigos restantes" hidden><img src="assets/ui/swords.png" alt="Inimigos restantes"><b>0</b></span>
+      <span id="remaining" title="Gnomos restantes" hidden><img src="assets/gnome/reference-extract/Badge.png" alt="Gnomos restantes" draggable="false"><b>0</b></span>
       <button id="settings" aria-label="Configurações"><img src="assets/ui/settings-gear.png" alt=""></button>
     <button id="cancel-construction" class="icon-button" type="button" aria-label="Cancelar construção e recuperar recursos" hidden><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt=""></button>
     <button id="confirm-construction" class="icon-button" type="button" aria-label="Construir no terreno selecionado" hidden><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_01.png" alt=""></button>
@@ -67,7 +78,7 @@
         </ul>
         <p><b>Casas e torre:</b> aproxime-se e clique ou toque no prédio para interagir.</p>
         <h3>Coleta no Lar</h3>
-        <p>Equipe o machado para cortar árvores ou a picareta para minerar ouro. Aproxime-se a até um quadrado e segure J no computador ou pressione e segure qualquer ponto do cenário no celular. No celular, a ferramenta atinge o recurso compatível mais próximo; use o joystick para se mover enquanto estiver perto dele. Árvores e ouro exigem cinco golpes; prédios construídos exigem dez machadadas e soltam um terço da madeira usada no chão para coletar, sem devolver moedas ou minério. Equipe a pá (tecla 5) e use três movimentos no toco para removê-lo permanentemente e liberar o terreno. O progresso fica salvo. Passe sobre o item que cair para coletá-lo.</p>
+        <p>Equipe o machado para cortar árvores ou a picareta para minerar ouro. Aproxime-se a até um quadrado e segure J no computador ou pressione e segure qualquer ponto do cenário no celular. No celular, a ferramenta atinge o recurso compatível mais próximo; use o joystick para se mover enquanto estiver perto dele. Árvores e ouro exigem cinco golpes; prédios construídos exigem dez machadadas e soltam um terço da madeira usada no chão para coletar, sem devolver moedas ou minério. O progresso fica salvo. Passe sobre o item que cair para coletá-lo.</p>
       </section>
       <button class="preferences-close icon-button" aria-label="Voltar ao jogo"><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt=""></button></section>
     </form></dialog>

@@ -12,6 +12,7 @@ function fenceTouchesMountain(map, from, to) {
 function createScene(canvas, images, reducedMotion) {
   const SIZE = MapGenerator.size;
   const TILE = 64;
+  const buildingOpacity = new WeakMap();
   const MARGIN = 64;
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
@@ -85,8 +86,8 @@ function createScene(canvas, images, reducedMotion) {
     lastCameraTime=time;
     if(cameraMap!==map){placementCamera=null;returnCamera=null;cameraMap=map;}
     const tick = reducedMotion.matches ? 0 : Math.floor(time / 100);
-    // Keep sprites legible on phones; pan across the world instead of shrinking it.
-    const zoom = Math.max(.95, Math.min(1.45, canvas.clientHeight / 710));
+    // Camera zoom changes the visible world span; HTML menus remain at their native size.
+    const zoom = Math.max(.95, Math.min(1.45, canvas.clientHeight / 710)) * (canvas.viewZoom || 1);
     const w = Math.max(1, Math.round(canvas.clientWidth / zoom));
     const h = Math.max(1, Math.round(canvas.clientHeight / zoom));
     if (canvas.width !== w || canvas.height !== h) {
@@ -265,14 +266,20 @@ function createScene(canvas, images, reducedMotion) {
             ctx.strokeStyle='#ffe28a';ctx.lineWidth=2;
             ctx.beginPath();ctx.ellipse(0,0,19,8,0,0,Math.PI*2);ctx.stroke();
           }
-          const attacking=item.phase==='strike'||(item.phase==='recover'&&item.clock<.08);
+          const attacking=item.phase==='strike'||item.phase==='recover';
           const sheet=images[attacking?'gnomeStrike':item.moving?'gnomeRun':'gnomeIdle'];
           const size=sheet.height, frames=sheet.width/size;
-          // Reserve the final frames for the faster downswing and show contact on impact.
-          const progress=item.phase==='recover'?1:item.clock<hammerGnome.windup
-            ? .6*item.clock/hammerGnome.windup
-            : .6+.4*(item.clock-hammerGnome.windup)/hammerGnome.impact;
-          const frame=attacking?Math.min(frames-1,Math.floor(progress*frames)):Math.floor(item.clock*9)%frames;
+          // One extracted swing: anticipation 0..2, downswing 3..4, recovery 5..6.
+          // Contact is frame 4, held at the exact moment encounter applies damage.
+          let frame;
+          if(item.phase==='recover') {
+            frame=item.clock<.06?4:5+Math.min(1,Math.floor((item.clock-.06)/Math.max(.01,hammerGnome.rest-.06)*2));
+          } else if(item.phase==='strike') {
+            frame=item.clock<hammerGnome.windup
+              ? Math.min(2,Math.floor(item.clock/hammerGnome.windup*3))
+              : 3+Math.min(1,Math.floor((item.clock-hammerGnome.windup)/hammerGnome.impact*2));
+          } else frame=Math.floor(item.clock*10)%frames;
+          frame=Math.min(frames-1,frame);
           ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
@@ -307,11 +314,20 @@ function createScene(canvas, images, reducedMotion) {
         drawSprite(item.walking ? 'sheepMove' : 'sheep',(tick+item.phase)%(item.walking ? 4 : 6),128,128,-48,-32,96,96);
         ctx.restore();
       }
-      if (item.kind === 'tower') ctx.drawImage(images.tower,x,y-192,128,256);
-      if (item.kind === 'house') {
-        const model=getBuildingModel(item.model);
-        const sprite=item.color?'building'+(item.model||'House1')+item.color:map.name==='Lar'?'houseBlack':'house';
-        ctx.drawImage(images[sprite],x,y-(model.height-TILE),model.width,model.height);
+      if (item.kind === 'tower' || item.kind === 'house') {
+        const model=item.kind==='tower'?{width:128,height:256}:getBuildingModel(item.model);
+        const sprite=item.kind==='tower'?'tower':item.color?'building'+(item.model||'House1')+item.color:map.name==='Lar'?'houseBlack':'house';
+        const pawnX=MARGIN+pawn.x*TILE,pawnY=MARGIN+pawn.depth(map)*TILE;
+        const top=y-(model.height-TILE),bottom=y+TILE;
+        const covered=level(pawn)===level(item)&&base(pawn)<base(item)&&
+          pawnX+22>x+10&&pawnX-22<x+model.width-10&&pawnY>top&&pawnY-70<bottom;
+        const target=covered?.4:1;
+        const previous=buildingOpacity.get(item)??1;
+        const opacity=reducedMotion.matches?target:previous+(target-previous)*(1-Math.exp(-cameraDt/90));
+        buildingOpacity.set(item,opacity);
+        ctx.save();ctx.globalAlpha=opacity;
+        ctx.drawImage(images[sprite],x,top,model.width,model.height);
+        ctx.restore();
       }
       if (item.kind === 'gold' && !item.felled) {
         const variant = item.variant % 2 === 0 ? 6 : 5;

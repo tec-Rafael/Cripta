@@ -1,7 +1,7 @@
-// Solid outline includes the roof so the worker cannot stand underneath it.
+// Only the ground-level base is solid; roofs can occlude actors walking behind.
 function houseFootprint(item){
   const model=getBuildingModel(item.model);
-  return {left:item.x,right:item.x+model.width/64,top:item.y-(model.height/64-2.2),bottom:item.y+.68};
+  return {left:item.x+.2,right:item.x+model.width/64-.2,top:item.y+.04,bottom:item.y+.68};
 }
 
 /* Positions use fractions of a map cell. The feet determine the occupied cell. */
