@@ -5,7 +5,7 @@ const combatClasses = {
   archer: {hp:14, damage:3, range:6, interval:.7, impact:.44},
 };
 const hammerGnome = {xp:30, hp:12, damage:3, sight:8, reach:.9, speed:2.5, windup:.2, impact:.1, tolerance:.2, rest:.35};
-const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:45,hp:10,damage:4,sight:10,reach:3,speed:2.2,windup:.45,impact:.1,tolerance:0,rest:.35,radius:.6},bear:{xp:250,hp:160,damage:6,sight:12,reach:1.5,speed:1.3,windup:.7,impact:.09,tolerance:.25,rest:.9}};
+const enemyTypes={gnome:hammerGnome,yellowGnome:{xp:45,hp:10,damage:4,sight:10,reach:3,speed:2.2,windup:.45,impact:.1,tolerance:0,rest:.35,radius:.6},bear:{xp:250,hp:112,damage:6,sight:12,reach:1.5,speed:2,windup:.7,impact:.09,tolerance:.25,rest:.9}};
 function scaledClass(id,level){const base=combatClasses[id];return {...base,hp:Math.round(base.hp*(1+.12*(level-1))),damage:Math.round(base.damage*(1+.08*(level-1)))};}
 const encounterSize = {min:4,max:6};
 const gap = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
