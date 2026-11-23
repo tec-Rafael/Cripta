@@ -41,29 +41,6 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #joystick { display: none; }
 @media (hover: none) and (pointer: coarse) { #joystick { display: block; } }
 
-#sprint {
-  display: none;
-  position: absolute;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: max(16px, env(safe-area-inset-bottom));
-  width: clamp(60px, 12vmin, 86px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 2px solid #fff7d78c;
-  color: #ffffe1dd;
-  background: #174d5440;
-  touch-action: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-#sprint.active { background: #fff7d750; border-color: #fff7d7; }
-#sprint svg { pointer-events: none; }
-@media (hover: none) and (pointer: coarse) {
-  #sprint { display: grid; place-items: center; }
-}
-
-
-
 #adventure-dialog {
   width: min(760px, 96vw);
   max-height: 96dvh;
@@ -162,7 +139,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #resources #remaining img { width:55.545px;height:58.19px;object-fit:contain; }
 #resources #settings { order:-1;background:transparent;border:0;padding:0;width:42px;height:42px; }
 #resources #settings img { width:42px;height:42px; }
-#battle-buttons { right:16px;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 86px); }
+#battle-buttons { right:16px;bottom:max(16px,env(safe-area-inset-bottom)); }
 #battle-buttons button { width:48px;height:48px;font-size:24px;user-select:none; }
 #battle-buttons[hidden],#remaining[hidden],#life[hidden] { display:none; }
 #battle-notice { position:absolute;top:23%;justify-self:center;max-width:86%;padding:10px 18px;border-radius:6px;background:#243d46eb;color:#fff4ca;text-align:center;pointer-events:none; }

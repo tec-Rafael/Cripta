@@ -27,7 +27,7 @@
 </head>
 <body>
   <main>
-    <canvas id="world" width="1088" height="1088" aria-label="Cenário de 50 por 50 casas. Use WASD ou o controle de toque para explorar. Segure Shift ou toque no botão para ativar ou desativar a corrida."></canvas>
+    <canvas id="world" width="1088" height="1088" aria-label="Cenário de 50 por 50 casas. Use WASD ou o controle de toque para explorar. O personagem corre automaticamente ao se mover."></canvas>
     <div id="loading" role="status">Preparando o cenário…</div>
     <div id="character-banner" role="status" hidden>
       <img alt=""><span></span>
@@ -68,7 +68,6 @@
         <h3>No computador</h3>
         <ul>
           <li><b>WASD:</b> mover nas quatro direções.</li>
-          <li><b>Segurar Shift:</b> correr.</li>
           <li><b>J:</b> atacar. Para arqueiro e monge, clique no inimigo para escolher o alvo e atacar.</li>
           <li><b>Segurar Espaço ou o botão de escudo:</b> bloquear com o cavaleiro.</li>
           <li><b>1 a 8 ou clique no inventário:</b> selecionar um item no Lar.</li>
@@ -76,7 +75,6 @@
         <h3>No celular</h3>
         <ul>
           <li><b>Joystick ou arrastar no cenário:</b> mover.</li>
-          <li><b>Botão de corrida:</b> ativar ou desativar a corrida.</li>
           <li><b>Toque no inimigo:</b> atacar.</li>
           <li><b>Seta do inventário:</b> abrir ou recolher; toque no item para equipar.</li>
         </ul>
@@ -115,12 +113,7 @@
       <span aria-hidden="true" class="west">◂</span><span aria-hidden="true" class="east">▸</span>
       <i aria-hidden="true"></i>
     </div>
-    <button id="sprint" type="button" aria-label="Ativar corrida" aria-pressed="false">
-      <svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="21" cy="6" r="3" fill="currentColor" stroke="none"/>
-        <path d="m8 15 4-5 6 1 4 6 5-1 M18 11l-5 9 6 3-2 6 M13 20l-4 5H3"/>
-      </svg>
-    </button>
+
     <p class="sr-only" id="announcement" aria-live="polite"></p>
     <dialog id="adventure-dialog" tabindex="-1" aria-labelledby="adventure-title">
       <h1 id="adventure-title"></h1>

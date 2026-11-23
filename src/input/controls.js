@@ -12,26 +12,16 @@ function createControls(canvas) {
     knob.style.transform = '';
   }
   function stop() {
-    shifts.clear();
     keys.clear();
     release();
   }
-  const shifts = new Set();
-  const sprint = document.querySelector('#sprint');
-  let sprintEnabled = false;
-  sprint.addEventListener('click', () => {
-    sprintEnabled = !sprintEnabled;
-    sprint.classList.toggle('active', sprintEnabled);
-    sprint.setAttribute('aria-pressed', String(sprintEnabled));
-  });
   window.addEventListener('keydown', event => {
     if (document.querySelector('dialog[open]')) return;
-    if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') shifts.add(event.code);
     if (!movementKeys.includes(event.code) || event.ctrlKey || event.metaKey || event.altKey) return;
     event.preventDefault();
     keys.add(event.code);
   });
-  window.addEventListener('keyup', event => { keys.delete(event.code); shifts.delete(event.code); });
+  window.addEventListener('keyup', event => { keys.delete(event.code); });
   window.addEventListener('blur', stop);
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
 
@@ -65,6 +55,5 @@ function createControls(canvas) {
   return {
     stop,
     get direction() { if(canvas.isPositioningBuilding?.())return [0,0];return touch?.direction ?? vectors[Array.from(keys).pop()] ?? [0,0]; },
-    get sprinting() { return shifts.size > 0 || sprintEnabled; },
   };
 }
