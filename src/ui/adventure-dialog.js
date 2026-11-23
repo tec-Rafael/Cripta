@@ -69,7 +69,9 @@ function createAdventureDialog() {
     }
     dialog.focus({preventScroll:true});
   }
+  const future=document.createElement('button');future.type='button';future.className='future-region';future.disabled=true;future.textContent='Região 2 · Em breve';route.append(future);
   function showMap(onConfirm,onCancel){
+    future.hidden=progression.checkpoint<5;
     show('Mapa de Aventura',false,onConfirm,onCancel);
     actions.hidden=true;choices.hidden=true;route.hidden=false;
     dialog.classList.add('map-view');

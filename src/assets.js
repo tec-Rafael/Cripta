@@ -2,6 +2,8 @@ async function loadImages() {
   const ASSETS = 'assets/tiny-swords/';
   const images = {};
   const sources = {
+    yellowIdle:'../enemies/rzcefm-reference/Idle.png',yellowRun:'../enemies/rzcefm-reference/Run.png',yellowStrike:'../enemies/rzcefm-reference/Strike.png',
+    bearIdle:'../enemies/mbqmms-reference/Idle.png',bearRun:'../enemies/mbqmms-reference/Run.png',bearStrike:'../enemies/mbqmms-reference/Strike.png',
     fenceHorizontal:'../fences/fence-v4-horizontal.png',
     fenceVertical:'../fences/fence-v4-vertical.png',
     fencePost:'../fences/fence-v4-post.png',

@@ -256,7 +256,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #guard[hidden] { display:none; }
 
 @media (hover:none) and (pointer:coarse), (max-width:600px) {
-  #guard { display:none; }
+  #guard { display:grid; }
 }
 #controls-toggle { margin:14px 0;padding:9px 24px;border:2px solid #537a78;border-radius:6px;background:#397e87;color:#fff6d8;font:inherit; }
 #controls-toggle:hover,#controls-toggle:focus-visible { background:#286573; }
@@ -437,3 +437,5 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
  .adventure-map-emblem img { width:108px;height:108px; }
 }
 @media(prefers-reduced-motion:reduce){.adventure-map-emblem{transition:none;}}
+
+.future-region {position:absolute;right:5%;top:8%;border:2px dashed #8e7952;background:#e6d6a0;color:#756044;padding:14px;font:600 16px Georgia;}.future-region[hidden]{display:none;}

@@ -261,13 +261,15 @@ function createScene(canvas, images, reducedMotion) {
         const col=Math.floor(item.x),row=Math.floor(item.y);
         const lift=mountainHeight(map,col,row,item.x-col);
         ctx.save();ctx.translate(MARGIN+item.x*TILE,MARGIN+(item.y-lift)*TILE);
-        if(item.kind==='gnome'){
+        if(['gnome','yellowGnome','bear'].includes(item.kind)){
+          const config=item.config||hammerGnome;
           if(encounter.selected===item){
             ctx.strokeStyle='#ffe28a';ctx.lineWidth=2;
             ctx.beginPath();ctx.ellipse(0,0,19,8,0,0,Math.PI*2);ctx.stroke();
           }
           const attacking=item.phase==='strike'||item.phase==='recover';
-          const sheet=images[attacking?'gnomeStrike':item.moving?'gnomeRun':'gnomeIdle'];
+          const prefix=item.kind==='bear'?'bear':item.kind==='yellowGnome'?'yellow':'gnome';
+          const sheet=images[prefix+(attacking?'Strike':item.moving?'Run':'Idle')];
           const size=sheet.height, frames=sheet.width/size;
           // One extracted swing: anticipation 0..2, downswing 3..4, recovery 5..6.
           // Contact is frame 4, held at the exact moment encounter applies damage.
@@ -279,10 +281,13 @@ function createScene(canvas, images, reducedMotion) {
               ? Math.min(2,Math.floor(item.clock/hammerGnome.windup*3))
               : 3+Math.min(1,Math.floor((item.clock-hammerGnome.windup)/hammerGnome.impact*2));
           } else frame=Math.floor(item.clock*10)%frames;
+          if(item.kind!=='gnome')frame=item.phase==='recover'?Math.min(11,9+Math.floor(item.clock/config.rest*3)):item.phase==='strike'?Math.min(8,Math.floor(item.clock/(config.windup+config.impact)*9)):Math.floor(item.clock*10)%frames;
           frame=Math.min(frames-1,frame);
           ctx.scale(item.facing,1);ctx.drawImage(sheet,frame*size,0,size,size,-size/2,-size/2-27,size,size);
           ctx.fillStyle='#321e23';ctx.fillRect(-17,-62,34,5);
-          ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/hammerGnome.hp,3);
+          ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/config.hp,3);
+        }else if(item.kind==='enemyShot'){
+          ctx.fillStyle='#615b43';ctx.strokeStyle='#26343d';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-12,6,0,Math.PI*2);ctx.fill();ctx.stroke();
         }else if(item.kind==='goldDrop'||item.kind==='wood'){
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
           ctx.scale(item.pop??1,item.pop??1);
