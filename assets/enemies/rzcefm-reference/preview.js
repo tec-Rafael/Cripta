@@ -4,7 +4,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   const status = document.querySelector('#status');
   const button = document.querySelector('#pause');
   const tools = document.querySelectorAll('[data-tool]');
-  let selected = 'Idle';
+  let selected = 'Strike';
+  const shot={range:3,radius:.35};
+  for(const [id,key] of [['shot-range','range'],['shot-radius','radius']]){
+    const input=document.getElementById(id);
+    input.oninput=()=>{shot[key]=Number(input.value);document.getElementById(key+'-value').textContent=input.value;};
+  }
   const zoomControl = document.querySelector('#zoom');
   let zoom = 3;
   zoomControl.onchange = () => { zoom = Number(zoomControl.value); };
@@ -30,7 +35,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       const tool = ['Idle', 'Run', 'Strike'][Number(event.key) - 1];
       if (tool) { event.preventDefault(); select(tool); }
     });
-    select('Idle');
+    select('Strike');
     const map = MapGenerator.generateHome();
     map.dry = map.land.map((row, y) => row.map((cell, x) => cell && !map.pools[y][x]));
     // Use a flat clearing so both sprites stand on exactly the same ground plane.
@@ -55,6 +60,17 @@ window.addEventListener('DOMContentLoaded', async () => {
         const direction = selected === 'Run' && progress >= .5 ? -1 : 1;
         const distance = progress < .5 ? -2 + progress * 8 : 6 - progress * 8;
         const actorX = margin + (this.x + (selected === 'Run' ? distance * .65 : 0)) * tile;
+        if(selected==='Strike'){
+          const targetX=actorX+shot.range*tile;
+          const phase=elapsed%1200, impact=phase>=1100;
+          ctx.save();
+          ctx.strokeStyle=impact?'#ff7657':'#ffe4a0';ctx.fillStyle=impact?'#ef734866':'#ffe4a022';ctx.lineWidth=2;
+          ctx.setLineDash([6,7]);ctx.beginPath();ctx.moveTo(actorX,ground);ctx.lineTo(targetX,ground);ctx.stroke();ctx.setLineDash([]);
+          ctx.beginPath();ctx.ellipse(targetX,ground,shot.radius*tile,shot.radius*tile,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+          ctx.textAlign='center';ctx.font='bold 13px Georgia';ctx.fillStyle='#fff2d0';ctx.strokeStyle='#193e40';ctx.lineWidth=3;
+          const caption=impact?'Impacto':shot.range+' quadrados';ctx.strokeText(caption,targetX,ground+shot.radius*tile+20);ctx.fillText(caption,targetX,ground+shot.radius*tile+20);
+          ctx.restore();
+        }
         const image = toolSheets[selected];
         const size = image.height;
         const frame = Math.floor(elapsed / 100) % (image.width / size);
