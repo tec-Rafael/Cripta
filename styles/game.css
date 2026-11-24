@@ -396,7 +396,9 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 }
 #adventure-dialog.map-view .adventure-panel { border:0;padding:0;min-height:340px;position:static; }
 #adventure-dialog.map-view #adventure-title { width:90%;margin:0 auto;min-height:80px; }
-#adventure-dialog.map-view .dialog-cancel { display:block;right:0;top:0; }
+#adventure-dialog.map-view .dialog-cancel { display:block;right:4px;top:4px; }
+#adventure-dialog.map-view .dialog-cancel:hover,
+#adventure-dialog.map-view .dialog-cancel:focus-visible { transform:none;filter:brightness(1.15); }
 #adventure-dialog.map-view .dialog-cancel img { width:44px;height:44px; }
 .adventure-map-route { position:relative;height:340px;isolation:isolate; }
 .adventure-map-route[hidden] { display:none; }
@@ -415,7 +417,6 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 }
 @media(prefers-reduced-motion:reduce){.adventure-map-emblem{transition:none;}}
 
-.future-region {position:absolute;right:5%;top:8%;border:2px dashed #8e7952;background:#e6d6a0;color:#756044;padding:14px;font:600 16px Georgia;}.future-region[hidden]{display:none;}
 
 #resources #remaining {display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
 #resources #remaining span{gap:5px;min-width:78px;justify-content:flex-end;}
