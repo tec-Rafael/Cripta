@@ -170,16 +170,16 @@ function createScene(canvas, images, reducedMotion) {
     const encounter=map.encounter;
     const fighters=encounter?[...encounter.coins.map(coin=>({...coin,...resourceDropMotion(coin,Date.now())})),...encounter.enemies,...encounter.effects]:
       [...(map.homeInventory?.drops || []).map(drop=>({...drop,...resourceDropMotion(drop,Date.now()),kind:drop.kind || 'wood'})),...(map.homeEffects || [])];
-    const actors = [...map.decorations, ...map.sheep, ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
+    const actors = [...map.decorations, ...map.sheep, ...(map.npcs || []), ...fighters, ...(encounter?.hp===0?[]:[pawn])].filter(item =>
       item.x+(item.kind==='house'?getBuildingModel(item.model).width/TILE:0) >= view.left && item.x < view.right && item.y >= view.top && item.y < view.bottom);
     // Gold occludes actors only behind its footprint (.55 center - .24 depth).
     const work=map.construction?.job;
     if(work?.site&&['walking','building'].includes(work.phase))
       actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site,model:work.model});
     // Use the feet for depth on every frame, including all demolition swings.
-    const base = item => item === pawn || fighters.includes(item) ? item.y :
+    const base = item => item === pawn || item.kind === 'npc' || fighters.includes(item) ? item.y :
       item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.68, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
-    const level = item => item === pawn || fighters.includes(item)
+    const level = item => item === pawn || item.kind === 'npc' || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
     actors.sort((a,b) => Math.floor(base(a)) - Math.floor(base(b)) ||
@@ -255,6 +255,7 @@ function createScene(canvas, images, reducedMotion) {
         if(clear(px,front))ctx.drawImage(images.fencePost,px-8,front-31,16,31);
     }
     function drawActor(item) {
+      if(item.kind==='npc'){drawHomeNpc(ctx,images,map,item,MARGIN,TILE);return;}
       if(item.kind==='worksiteFence'){drawWorksiteFence(item.site,item.model);return;}
       if (item === pawn) { pawn.draw(ctx, images, map, MARGIN, TILE); return; }
       if(fighters.includes(item)){

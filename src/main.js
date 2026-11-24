@@ -254,6 +254,7 @@ function render(time) {
     homeInventory.update(dt);
     if(map.encounter?.hp!==0)pawn.update(map, dt);
     moveSheep(map, pawn, dt);
+    updateHomeNpcs(map, pawn, dt);
     if(map.encounter){
       const e=map.encounter, hp=e.hp, count=e.enemies.length;
       e.update(dt);
