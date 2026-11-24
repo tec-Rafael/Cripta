@@ -306,7 +306,7 @@ function createScene(canvas, images, reducedMotion) {
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
           ctx.scale(item.pop??1,item.pop??1);
           if(item.kind==='goldDrop')ctx.drawImage(images.goldDrop,-12,-18,24,24);
-          else if(item.kind==='stoneDrop')ctx.drawImage(images.rock,-16,-22,32,32);
+          else if(item.kind==='stoneDrop')ctx.drawImage(images.stoneDrop,-12,-18,24,24);
           else ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);

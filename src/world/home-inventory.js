@@ -93,7 +93,7 @@ function createHomeInventory(canvas, pawn, {storageKey='cripta.home.inventory.v1
       const image = button.querySelector('img');
       image.hidden = index >= tools.length && !count;
       image.classList.toggle('gold-item', resource === 'gold' && count > 0);
-      if (count) image.src = resource === 'gold' ? 'assets/ui/gold-small.png' : resource === 'stone' ? 'assets/tiny-swords/Terrain/Decorations/Rocks/Rock1.png' : resourcePath + 'Wood/Wood Resource/Wood Resource.png';
+      if (count) image.src = resource === 'gold' ? 'assets/ui/gold-small.png' : resource === 'stone' ? 'assets/ui/stone-drop.png' : resourcePath + 'Wood/Wood Resource/Wood Resource.png';
       button.querySelector('b').textContent = count || '';
     }
   }

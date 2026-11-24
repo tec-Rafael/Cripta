@@ -154,7 +154,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function costMarkup(cost){return `<div class="construction-cost construction-ribbon" aria-label="${cost.coins} moedas, ${cost.wood} madeiras e ${cost.gold} minérios e ${cost.stone} pedras">
     <span><img src="assets/ui/gold-coin.png" alt="Moedas">${cost.coins}</span>
     <span><img src="assets/tiny-swords/Terrain/Resources/Wood/Wood Resource/Wood Resource.png" alt="Madeira">${cost.wood}</span>
-    <span><img src="assets/ui/gold-small.png" alt="Minério de ouro">${cost.gold}</span><span><img src="assets/tiny-swords/Terrain/Decorations/Rocks/Rock1.png" alt="Pedra">${cost.stone}</span></div>`;}
+    <span><img src="assets/ui/gold-small.png" alt="Minério de ouro">${cost.gold}</span><span><img src="assets/ui/stone-drop.png" alt="Pedra">${cost.stone}</span></div>`;}
   function renderModels(){
     choosingColor=false;options.replaceChildren();dialog.querySelector('.construction-cloth').scrollTop=0;title.textContent='Construção';
     for(const [id,model] of Object.entries(buildingModels)){
