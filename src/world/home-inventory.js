@@ -9,6 +9,18 @@ function harvestYield(node){
 function resourceDropMotion(drop, now) {
   const still={x:drop.x,y:drop.y,hop:0,tilt:0,pop:1,settled:true};
   if(!Number.isFinite(drop.fromX)||!Number.isFinite(drop.fromY)||!Number.isFinite(drop.bornAt))return still;
+  if(drop.kind==='stoneDrop'){
+    const elapsed=now-drop.bornAt-(drop.delay||0);
+    if(elapsed<0)return {x:drop.fromX,y:drop.fromY,hop:0,tilt:0,pop:0,settled:false};
+    const t=Math.min(1,elapsed/900);
+    if(t>=1)return still;
+    const flight=Math.min(1,t/.78),travel=flight*flight*(3-2*flight);
+    const bounce=Math.max(0,(t-.78)/.22);
+    return {x:drop.fromX+(drop.x-drop.fromX)*travel,y:drop.fromY+(drop.y-drop.fromY)*travel,
+      hop:t<.78?Math.sin(flight*Math.PI)**2*20:Math.sin(bounce*Math.PI)**2*3,
+      tilt:Math.sin(flight*Math.PI)*.12*Math.sign(drop.x-drop.fromX||1),
+      pop:Math.min(1,.35+flight*3),settled:false};
+  }
   const t=Math.max(0,Math.min(1,(now-drop.bornAt-(drop.delay||0))/800));
   if(t>=1)return still;
   const launch=Math.min(1,t/.68),travel=1-(1-launch)**2;
@@ -285,9 +297,19 @@ function createHomeInventory(canvas, pawn, {storageKey='cripta.home.inventory.v1
             target.felled = true;
             const base = trunk(target);
             const amount=harvestYield(target);
-            for(let i=0;i<amount;i++)state.drops.push({id:id+':'+record.cutAt+':'+i, ...landing,
+            for(let i=0;i<amount;i++){
+              let point=landing;
+              if(target.kind==='rock'){
+                const dx=landing.x-base.x,dy=landing.y-base.y,length=Math.hypot(dx,dy)||1;
+                const offset=(i-(amount-1)/2)*.2;
+                const candidate={x:landing.x-dy/length*offset,y:landing.y+dx/length*offset};
+                if(map.heights[Math.floor(candidate.y)]?.[Math.floor(candidate.x)]===(target.hill||0)&&
+                  canStand(map,candidate,candidate.x,candidate.y)&&visible(map,base,candidate))point=candidate;
+              }
+              state.drops.push({id:id+':'+record.cutAt+':'+i, ...point,
               kind:target.kind === 'gold' ? 'goldDrop' : target.kind === 'rock' ? 'stoneDrop' : 'wood',
-              fromX:base.x,fromY:base.y, hill:target.hill || 0, bornAt:record.cutAt,delay:i*100});
+              fromX:base.x,fromY:base.y, hill:target.hill || 0, bornAt:record.cutAt,delay:i*(target.kind==='rock'?75:100)});
+            }
             map.homeEffects.push({kind:'dust', ...base, left:.8, duration:.8});
             target = null;
           }

@@ -34,3 +34,17 @@ test('stone is required, spent and refunded; old saves start with zero stone',()
  s.api.refund({wood:0,gold:0,stone:5});assert.equal(s.api.spend(cost),true);assert.equal(s.api.resources.stone,0);
  s.api.refund(cost);assert.equal(s.api.resources.stone,5);assert.equal(s.api.resources.wood,10);
 });
+test('stone drops stay hidden before launch and land without a jump',()=>{
+ const {c}=setup('rock',4);
+ const drop={kind:'stoneDrop',x:3,y:2,fromX:2,fromY:2,bornAt:1000,delay:150};
+ assert.equal(c.resourceDropMotion(drop,1100).pop,0);
+ const before=c.resourceDropMotion(drop,2049),after=c.resourceDropMotion(drop,2050);
+ assert.ok(Math.hypot(before.x-after.x,before.y-after.y)<.001);
+ assert.ok(before.hop<.001);assert.equal(after.settled,true);
+});
+test('generated maps have varied mineable rocks and no small ground stones',()=>{
+ const c=vm.createContext({});vm.runInContext(fs.readFileSync('src/world/map-generator.js','utf8'),c);
+ const rocks=vm.runInContext("MapGenerator.generateHome().decorations.filter(item=>item.kind==='rock')",c);
+ assert.ok(rocks.length>0);assert.ok(rocks.every(rock=>rock.variant>=3));
+ assert.equal(new Set(rocks.map(rock=>rock.variant)).size,2);
+});

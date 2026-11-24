@@ -229,7 +229,7 @@ const MapGenerator = (() => {
     for (const item of scenery) {
       if (item.kind === 'rock' && (item.x*17+item.y*31)%5 === 0) item.kind = 'gold';
     }
-    return { land, wet, raised, heights, layers, pools, paths, surface, stairs, decorations:scenery, sheep, spawn, house, tower, theme };
+    return { land, wet, raised, heights, layers, pools, paths, surface, stairs, decorations:scenery.filter(item=>item.kind!=='rock'||item.variant>=3), sheep, spawn, house, tower, theme };
   }
   function generateHome() {
     // A stable seed keeps the same landscape, house and tower after a reload.

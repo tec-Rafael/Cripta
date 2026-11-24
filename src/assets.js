@@ -43,6 +43,8 @@ async function loadImages() {
     tree: 'Terrain/Resources/Wood/Trees/Tree1.png',
     bush: 'Terrain/Decorations/Bushes/Bushe1.png',
     rock: 'Terrain/Decorations/Rocks/Rock1.png',
+    rockCluster: 'Terrain/Decorations/Rocks/Rock2.png',
+    rockChunk: 'Terrain/Decorations/Rocks/Rock4.png',
     waterRock: 'Terrain/Decorations/Rocks in the Water/Water Rocks_01.png',
     sheep: 'Terrain/Resources/Meat/Sheep/Sheep_Idle.png',
     sheepMove: 'Terrain/Resources/Meat/Sheep/Sheep_Move.png',

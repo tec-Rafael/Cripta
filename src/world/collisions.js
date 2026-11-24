@@ -2,7 +2,7 @@ function rockScale(node){return [0,.8,1,1.25,1.25][node.variant||1]||.8;}
 // Ground contact of the deposit, independent of its tall upper silhouette.
 function rockFootprint(item){
   const scale=rockScale(item),large=item.variant>=3;
-  return {x:item.x+.5,y:item.y+(large?.24:.55),rx:large?.54:.24*scale,ry:large?.23:.16*scale};
+  return {x:item.x+.5,y:item.y+(large?.43:.55),rx:large?.43:.24*scale,ry:large?.19:.16*scale};
 }
 // Only the ground-level base is solid; roofs can occlude actors walking behind.
 function houseFootprint(item){

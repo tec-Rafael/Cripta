@@ -357,7 +357,7 @@ function createScene(canvas, images, reducedMotion) {
           x+32-width/2,y+35-height,width,height);
       }
       if (item.kind === 'rock' && !item.felled) {
-        if(item.variant>=3)ctx.drawImage(images.stoneDepositLarge,x-12,y-53,88,88);
+        if(item.variant>=3)ctx.drawImage(item.variant===3?images.rockCluster:images.rockChunk,x-8,y-28,80,80);
         else {const size=64*rockScale(item);ctx.drawImage(images.rock,x+32-size/2,y+35-size*.55,size,size);}
       }
       if (item.kind === 'waterRock') drawSprite('waterRock',(tick+item.phase)%16,64,64,x,y,64,64);
