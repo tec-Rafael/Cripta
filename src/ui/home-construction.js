@@ -191,8 +191,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
       buildings=buildings.filter(item=>item!==house);
       map.decorations=map.decorations.filter(item=>item!==house);
       map.homeEffects.push({kind:'dust',x:house.x+getBuildingModel(house.model).width/128,y:house.y+.72,left:.8,duration:.8});
-      const recovered=Math.floor(getBuildingModel(house.model).cost.wood/3);
-      inventory.dropWood(house,recovered);
+      inventory.dropSalvage(house,demolitionReturns(house.model));
       save();
       return true;
     },

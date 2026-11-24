@@ -331,14 +331,14 @@ function createHomeInventory(canvas, pawn, {storageKey='cripta.home.inventory.v1
           map.heights[Math.floor(pawn.y)]?.[Math.floor(pawn.x)] !== (drop.hill || 0) || !visible(map,pawn,drop)) return true;
       const kind = drop.kind === 'goldDrop' ? 'gold' : drop.kind === 'stoneDrop' ? 'stone' : 'wood';
       if (!state.order.includes(kind)) state.order.push(kind);
-      state[kind]++;
+      state[kind]+=Number.isSafeInteger(drop.amount)&&drop.amount>0?drop.amount:1;
       return false;
     });
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
   const api = {attach, update, stop,
-    dropWood(node,amount){
-      if(!map||!Number.isSafeInteger(amount)||amount<=0)return;
+    dropSalvage(node,materials){
+      if(!map)return;
       const base=trunk(node),level=node.hill||0,bornAt=Date.now();
       const candidates=[];
       for(const radius of [.75,1.1,1.5])for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
@@ -352,9 +352,17 @@ function createHomeInventory(canvas, pawn, {storageKey='cripta.home.inventory.v1
         Math.hypot(b.x-pawn.x,b.y-pawn.y)-Math.hypot(a.x-pawn.x,a.y-pawn.y));
       const chosen=[];
       for(const point of candidates)if(chosen.every(other=>Math.hypot(point.x-other.x,point.y-other.y)>.4))chosen.push(point);
-      for(let i=0;i<amount;i++){
-        const point=chosen[i%chosen.length]||{x:pawn.x,y:pawn.y};
-        state.drops.push({id:'house-wood:'+node.x+','+node.y+':'+bornAt+':'+i,...point,kind:'wood',hill:level,bornAt,fromX:base.x,fromY:base.y,delay:i*70});
+      let visualIndex=0;
+      for(const material of ['wood','stone']){
+        const amount=materials[material];
+        if(!Number.isSafeInteger(amount)||amount<=0)continue;
+        const count=Math.min(3,amount),each=Math.floor(amount/count),remainder=amount%count;
+        for(let i=0;i<count;i++,visualIndex++){
+          const point=chosen[visualIndex%chosen.length]||{x:pawn.x,y:pawn.y};
+          state.drops.push({id:'house-'+material+':'+node.x+','+node.y+':'+bornAt+':'+i,...point,
+            kind:material==='stone'?'stoneDrop':'wood',amount:each+(i<remainder?1:0),
+            hill:level,bornAt,fromX:base.x,fromY:base.y,delay:visualIndex*70});
+        }
       }
       save();
     },

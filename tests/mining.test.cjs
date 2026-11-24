@@ -48,3 +48,26 @@ test('generated maps have varied mineable rocks and no small ground stones',()=>
  assert.ok(rocks.length>0);assert.ok(rocks.every(rock=>rock.variant>=3));
  assert.equal(new Set(rocks.map(rock=>rock.variant)).size,2);
 });
+test('demolition caps each material at three drops and preserves full amounts across reload and collection',()=>{
+ const s=setup('rock',4),house={kind:'house',model:'Castle',x:3,y:3};
+ const materials=s.c.demolitionReturns('Castle');
+ assert.equal(materials.wood,26);assert.equal(materials.stone,13);
+ s.api.dropSalvage(house,materials);
+ assert.equal(s.api.drops.length,6);
+ for(const [kind,total] of [['wood',26],['stoneDrop',13]]){
+  const drops=s.api.drops.filter(drop=>drop.kind===kind);assert.equal(drops.length,3);
+  assert.equal(drops.reduce((sum,drop)=>sum+drop.amount,0),total);
+ }
+ const saved=JSON.parse(s.data.get('cripta.home.inventory.v1'));
+ const restored=setup('rock',4,saved);restored.tick(3000);
+ for(const drop of [...restored.api.drops]){Object.assign(restored.pawn,drop);restored.api.update(.05);}
+ assert.equal(restored.api.drops.length,0);
+ assert.equal(restored.api.resources.wood,36);assert.equal(restored.api.resources.stone,13);assert.equal(restored.api.resources.gold,5);
+ restored.api.update(.05);assert.equal(restored.api.resources.wood,36);
+});
+test('small demolition returns produce only the required number of visible items',()=>{
+ const s=setup('rock',4);const amounts=s.c.demolitionReturns('House1');
+ s.api.dropSalvage({kind:'house',model:'House1',x:3,y:3},amounts);
+ assert.equal(amounts.wood,3);assert.equal(amounts.stone,1);
+ assert.equal(s.api.drops.length,4);
+});

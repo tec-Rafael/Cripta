@@ -10,3 +10,8 @@ const buildingModels = {
 };
 function getBuildingModel(id){return buildingModels[id]||buildingModels.House1;}
 function buildingEntrance(site,model){return {x:site.x+getBuildingModel(model).width/128,y:site.y+1.5};}
+
+function demolitionReturns(model){
+  const cost=getBuildingModel(model).cost;
+  return {wood:Math.floor(cost.wood/3),stone:Math.floor((cost.stone||0)/3)};
+}
