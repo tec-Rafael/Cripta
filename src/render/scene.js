@@ -302,10 +302,11 @@ function createScene(canvas, images, reducedMotion) {
           ctx.fillStyle='#df7157';ctx.fillRect(-16,-61,32*item.hp/config.hp,3);
         }else if(item.kind==='enemyShot'){
           ctx.fillStyle='#615b43';ctx.strokeStyle='#26343d';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-12,6,0,Math.PI*2);ctx.fill();ctx.stroke();
-        }else if(item.kind==='goldDrop'||item.kind==='wood'){
+        }else if(item.kind==='goldDrop'||item.kind==='stoneDrop'||item.kind==='wood'){
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
           ctx.scale(item.pop??1,item.pop??1);
           if(item.kind==='goldDrop')ctx.drawImage(images.goldDrop,-12,-18,24,24);
+          else if(item.kind==='stoneDrop')ctx.drawImage(images.rock,-16,-22,32,32);
           else ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
@@ -355,7 +356,7 @@ function createScene(canvas, images, reducedMotion) {
         ctx.drawImage(images['goldStone'+variant],crop.x,crop.y,crop.width,crop.height,
           x+32-width/2,y+35-height,width,height);
       }
-      if (item.kind === 'rock') ctx.drawImage(images.rock,x,y,64,64);
+      if (item.kind === 'rock' && !item.felled) {const size=64*rockScale(item);ctx.drawImage(images.rock,x+32-size/2,y+35-size*.55,size,size);}
       if (item.kind === 'waterRock') drawSprite('waterRock',(tick+item.phase)%16,64,64,x,y,64,64);
     }
     const construction=map.construction;

@@ -257,7 +257,7 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #house-options { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 18px; }
 .house-plan h3 { margin:0;font-size:18px; }
 .house-preview { width:128px;height:192px;object-fit:contain;image-rendering:pixelated; }
-.construction-cost { display:flex;justify-content:center;gap:10px;align-items:center;margin:-10px -8px 10px; }
+.construction-cost { display:flex;flex-wrap:wrap;justify-content:center;gap:10px;align-items:center;margin:-10px -8px 10px; }
 .construction-cost span { display:flex;align-items:center;gap:3px; }
 .construction-cost img { width:30px;height:30px;object-fit:contain; }
 .wood-action { padding:9px 18px;background:#754a32;color:#fff4d5;border:2px solid #ab8050;border-radius:4px;font:inherit; }

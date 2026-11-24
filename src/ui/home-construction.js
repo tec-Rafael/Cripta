@@ -24,7 +24,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
   function refresh(){
     const resources=inventory.resources,cost=getBuildingModel(selectedModel).cost;
     for(const button of options.querySelectorAll('.build-house')) {
-      button.disabled=wallet.coins<cost.coins || resources.wood<cost.wood || resources.gold<cost.gold;
+      button.disabled=wallet.coins<cost.coins || resources.wood<cost.wood || resources.gold<cost.gold || resources.stone<cost.stone;
     }
     status.textContent='';
   }
@@ -34,7 +34,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
     const saved=JSON.parse(localStorage.getItem(jobKey));
     if(saved&&colors[saved.color]){
       const site=saved.site;
-      job={model:buildingModels[saved.model]?saved.model:'House1',color:saved.color,phase:'placing',elapsed:Number.isFinite(saved.elapsed)?Math.max(0,Math.min(15,saved.elapsed)):0};
+      job={paidStone:Number.isSafeInteger(saved.paidStone)?saved.paidStone:0,model:buildingModels[saved.model]?saved.model:'House1',color:saved.color,phase:'placing',elapsed:Number.isFinite(saved.elapsed)?Math.max(0,Math.min(15,saved.elapsed)):0};
       if(site&&Number.isInteger(site.x)&&Number.isInteger(site.y)&&site.x>=2&&site.x<=46&&site.y>=3&&site.y<=46)
         Object.assign(job,{site:{x:site.x,y:site.y},phase:'walking'});
     }
@@ -99,10 +99,10 @@ function createHomeConstruction(inventory, pawn, wallet) {
     if(!map||job)return;
     refresh();
     const cost=getBuildingModel(selectedModel).cost;
-    if(wallet.coins<cost.coins||inventory.resources.wood<cost.wood||inventory.resources.gold<cost.gold)return;
+    if(wallet.coins<cost.coins||inventory.resources.wood<cost.wood||inventory.resources.gold<cost.gold||inventory.resources.stone<cost.stone)return;
     if(!inventory.spend(cost))return;
     wallet.spend(cost.coins);
-    job={model:selectedModel,color,phase:'placing',elapsed:0};hover=null;saveJob();
+    job={paidStone:cost.stone,model:selectedModel,color,phase:'placing',elapsed:0};hover=null;saveJob();
     routes=encounterRoutes(map);inventory.stop();pawn.pause();dialog.close();
     const site={x:Math.max(2,Math.min(46,Math.floor(pawn.x)+2)),y:Math.max(3,Math.min(46,Math.floor(pawn.y)))};
     hover={...site,valid:freeSite(site)&&Boolean(routeTo(site))};
@@ -151,10 +151,10 @@ function createHomeConstruction(inventory, pawn, wallet) {
       }
     }
   }
-  function costMarkup(cost){return `<div class="construction-cost construction-ribbon" aria-label="${cost.coins} moedas, ${cost.wood} madeiras e ${cost.gold} minérios">
+  function costMarkup(cost){return `<div class="construction-cost construction-ribbon" aria-label="${cost.coins} moedas, ${cost.wood} madeiras e ${cost.gold} minérios e ${cost.stone} pedras">
     <span><img src="assets/ui/gold-coin.png" alt="Moedas">${cost.coins}</span>
     <span><img src="assets/tiny-swords/Terrain/Resources/Wood/Wood Resource/Wood Resource.png" alt="Madeira">${cost.wood}</span>
-    <span><img src="assets/ui/gold-small.png" alt="Minério de ouro">${cost.gold}</span></div>`;}
+    <span><img src="assets/ui/gold-small.png" alt="Minério de ouro">${cost.gold}</span><span><img src="assets/tiny-swords/Terrain/Decorations/Rocks/Rock1.png" alt="Pedra">${cost.stone}</span></div>`;}
   function renderModels(){
     choosingColor=false;options.replaceChildren();dialog.querySelector('.construction-cloth').scrollTop=0;title.textContent='Construção';
     for(const [id,model] of Object.entries(buildingModels)){
@@ -179,7 +179,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
     update,aim,select,freeSite,
     cancel(){
       if(!job)return;
-      const cost=getBuildingModel(job.model).cost;
+      const cost={...getBuildingModel(job.model).cost,stone:job.paidStone||0};
       job=null;hover=null;routes=null;lastPosition=null;
       pawn.follow(null);pawn.pause();inventory.stop();
       inventory.refund(cost);wallet.refund(cost.coins);saveJob();

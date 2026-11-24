@@ -1,3 +1,4 @@
+function rockScale(node){return [0,.8,1,1.25,1.25][node.variant||1]||.8;}
 // Only the ground-level base is solid; roofs can occlude actors walking behind.
 function houseFootprint(item){
   const model=getBuildingModel(item.model);
@@ -82,7 +83,7 @@ function canStand(map, player, px, py) {
     if (item.kind !== 'tree' && item.kind !== 'rock' && item.kind !== 'gold') return false;
     const tree = item.kind === 'tree';
     const base = tree ? (item.variant <= 2 ? .92 : .71) : .55;
-    const halfWidth = tree ? [.17,.15,.11,.09][item.variant-1] : item.kind === 'gold' ? (item.variant % 2 === 0 ? .55 : .45) : .28;
+    const halfWidth = tree ? [.17,.15,.11,.09][item.variant-1] : item.kind === 'gold' ? (item.variant % 2 === 0 ? .55 : .45) : .28*rockScale(item);
     return Math.abs(px - item.x - .5) < halfWidth + feet.x &&
            Math.abs(py - item.y - base) < (tree ? .07 : item.kind === 'gold' ? .24 : .20) + feet.y;
   });
