@@ -27,16 +27,17 @@ function npcSpawn(map, house) {
   return null;
 }
 
-// A bounded cardinal search picks only reachable destinations around the resident's home.
-function npcChooseRoute(map, npc) {
+// Explore the reachable map in small batches to keep movement and input responsive.
+function* npcChooseRoute(map, npc) {
   const start={x:Math.floor(npc.x)+.5,y:Math.floor(npc.y)+.5};
   if(!npcStepClear(map,npc,start))return [];
   const queue=[{...start,parent:-1}],seen=new Set([start.x+','+start.y]);
-  for(let i=0;i<queue.length&&queue.length<225;i++) {
+  for(let i=0;i<queue.length;i++) {
+    if(i>0&&i%32===0)yield;
     const current=queue[i];
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
       const next={x:current.x+dx,y:current.y+dy,parent:i},key=next.x+','+next.y;
-      if(seen.has(key)||Math.hypot(next.x-npc.origin.x,next.y-npc.origin.y)>7)continue;
+      if(seen.has(key)||!map.surface[Math.floor(next.y)]?.[Math.floor(next.x)])continue;
       seen.add(key);
       if(npcStepClear(map,current,next))queue.push(next);
     }
@@ -53,7 +54,7 @@ function npcChooseRoute(map, npc) {
 
 function updateHomeNpcs(map, player, dt) {
   if(map.name!=='Lar'){map.npcs=[];return;}
-  const houses=map.decorations.filter(item=>item.kind==='house'&&!item.removed&&homeNpcRoles[item.model||'House1']);
+  const houses=map.decorations.filter(item=>item.kind==='house'&&(item.color||'Black')!=='Black'&&!item.removed&&homeNpcRoles[item.model||'House1']);
   map.npcs=(map.npcs||[]).filter(npc=>houses.includes(npc.home));
   for(const house of houses) {
     if(map.npcs.some(npc=>npc.home===house))continue;
@@ -62,6 +63,7 @@ function updateHomeNpcs(map, player, dt) {
     map.npcs.push({kind:'npc',home:house,role:homeNpcRoles[house.model||'House1'],color:house.color||'Black',...point,origin:point,
       facing:1,motion:'idle',elapsed:0,wait:1+Math.random()*4,route:[],speed:1.2,greet:0});
   }
+  let plannedThisFrame=false;
   for(const npc of map.npcs) {
     npc.elapsed+=dt;npc.greet=Math.max(0,npc.greet-dt);
     if(Math.hypot(player.x-npc.x,player.y-npc.y)<1.3&&npc.greet===0){
@@ -69,7 +71,13 @@ function updateHomeNpcs(map, player, dt) {
     }
     npc.motion='idle';
     if(npc.wait>0){npc.wait-=dt;continue;}
-    if(!npc.route.length){npc.route=npcChooseRoute(map,npc);npc.speed=Math.random()<.3?2.5:1.2;
+    if(!npc.route.length){
+      if(plannedThisFrame)continue;
+      plannedThisFrame=true;
+      npc.plan??=npcChooseRoute(map,npc);
+      const result=npc.plan.next();
+      if(!result.done)continue;
+      npc.plan=null;npc.route=result.value;npc.speed=Math.random()<.3?2.5:1.2;
       if(!npc.route.length){npc.wait=2;continue;}
     }
     const target=npc.route[0],dx=target.x-npc.x,dy=target.y-npc.y;
