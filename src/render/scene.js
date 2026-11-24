@@ -178,7 +178,7 @@ function createScene(canvas, images, reducedMotion) {
       actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site,model:work.model});
     // Use the feet for depth on every frame, including all demolition swings.
     const base = item => item === pawn || item.kind === 'npc' || fighters.includes(item) ? item.y :
-      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.68, tower:.57, sheep:.33, bush:.05, gold:.31, worksiteFence:.25}[item.kind] ?? .55);
+      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.68, tower:.57, sheep:.33, bush:.05, gold:.31, rock:item.variant>=3?.31:.55, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || item.kind === 'npc' || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
@@ -356,7 +356,10 @@ function createScene(canvas, images, reducedMotion) {
         ctx.drawImage(images['goldStone'+variant],crop.x,crop.y,crop.width,crop.height,
           x+32-width/2,y+35-height,width,height);
       }
-      if (item.kind === 'rock' && !item.felled) {const size=64*rockScale(item);ctx.drawImage(images.rock,x+32-size/2,y+35-size*.55,size,size);}
+      if (item.kind === 'rock' && !item.felled) {
+        if(item.variant>=3)ctx.drawImage(images.stoneDepositLarge,x-12,y-53,88,88);
+        else {const size=64*rockScale(item);ctx.drawImage(images.rock,x+32-size/2,y+35-size*.55,size,size);}
+      }
       if (item.kind === 'waterRock') drawSprite('waterRock',(tick+item.phase)%16,64,64,x,y,64,64);
     }
     const construction=map.construction;

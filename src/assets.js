@@ -14,6 +14,7 @@ async function loadImages() {
     goldStone6:'Terrain/Resources/Gold/Gold Stones/Gold Stone 6.png',
     goldDrop:'../ui/gold-small.png',
     stoneDrop:'../ui/stone-drop.png',
+    stoneDepositLarge:'../ui/stone-deposit-large.png',
     pawnChop:'Units/Black Units/Pawn/Pawn_Interact Axe.png',
     wood:'Terrain/Resources/Wood/Wood Resource/Wood Resource.png',
     dust:'Particle FX/Dust_01.png',
