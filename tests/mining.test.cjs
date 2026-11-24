@@ -5,8 +5,9 @@ function setup(kind,variant,saved={wood:10,gold:5}){
  const slots=element(),toggle=element(),panel=element();panel.querySelector=s=>s.includes('slots')?slots:toggle;
  let now=10000;
  const c=vm.createContext({console,Date:class extends Date{static now(){return now;}},localStorage:{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)},document:{querySelector:s=>s==='#home-inventory'?panel:null,createElement:element,addEventListener(){}},window:{addEventListener:(t,f)=>handlers[t]=f},canStand:()=>true,visible:()=>true});
- for(const file of ['world/buildings','world/home-inventory'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8'),c);
- const pawn={x:2.5,y:3.2,heading:{x:0,y:-1},facing:1,pause(){},face(){}};
+ for(const file of ['world/buildings','world/collisions','world/home-inventory'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8'),c);
+ c.canStand=()=>true;
+ const pawn={x:2.5,y:kind==='rock'&&variant>=3?3:3.2,heading:{x:0,y:-1},facing:1,pause(){},face(){}};
  const map={name:'Lar',surface:Array.from({length:10},()=>Array(10).fill(true)),heights:Array.from({length:10},()=>Array(10).fill(0)),paths:Array.from({length:10},()=>Array(10).fill(false)),stairs:[],decorations:[{kind,variant,x:2,y:2}],sheep:[]};
  const api=c.createHomeInventory({addEventListener(){}},pawn);api.attach(map);slots.children[3].click();
  return {c,api,map,pawn,data,handlers,tick(ms){now+=ms;}};

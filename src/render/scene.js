@@ -178,7 +178,7 @@ function createScene(canvas, images, reducedMotion) {
       actors.push({kind:'worksiteFence',x:work.site.x,y:work.site.y+1,hill:0,site:work.site,model:work.model});
     // Use the feet for depth on every frame, including all demolition swings.
     const base = item => item === pawn || item.kind === 'npc' || fighters.includes(item) ? item.y :
-      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.68, tower:.57, sheep:.33, bush:.05, gold:.31, rock:item.variant>=3?.31:.55, worksiteFence:.25}[item.kind] ?? .55);
+      item.y + ({tree:item.variant <= 2 ? .92 : .71, house:.68, tower:.57, sheep:.33, bush:.05, gold:.31, rock:rockFootprint(item).y-item.y-rockFootprint(item).ry, worksiteFence:.25}[item.kind] ?? .55);
     const level = item => item === pawn || item.kind === 'npc' || fighters.includes(item)
       ? map.heights[Math.floor(item.y)]?.[Math.floor(item.x)] || 0
       : item.hill || 0;
@@ -306,7 +306,7 @@ function createScene(canvas, images, reducedMotion) {
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);
           ctx.scale(item.pop??1,item.pop??1);
           if(item.kind==='goldDrop')ctx.drawImage(images.goldDrop,-12,-18,24,24);
-          else if(item.kind==='stoneDrop')ctx.drawImage(images.stoneDrop,-12,-18,24,24);
+          else if(item.kind==='stoneDrop')ctx.drawImage(images.stoneDrop,-24,-32,48,48);
           else ctx.drawImage(images.wood,-24,-32,48,48);
         }else if(item.kind==='coin'){
           ctx.translate(0,-(item.hop||0));ctx.rotate(item.tilt||0);

@@ -70,6 +70,7 @@ function createHomeInventory(canvas, pawn, {storageKey='cripta.home.inventory.v1
   }
   function treeId(tree) { return tree.resourceId || (['gold','rock'].includes(tree.kind) ? tree.kind+':' : '') + tree.x + ',' + tree.y; }
   function trunk(tree) {
+    if(tree.kind==='rock'){const base=rockFootprint(tree);return {x:base.x,y:base.y};}
     if(tree.kind==='house')return {x:tree.x+getBuildingModel(tree.model).width/128,y:tree.y+.72};
     return {x: tree.x + .5, y: tree.y + (['gold','rock'].includes(tree.kind) ? .55 : tree.variant <= 2 ? .92 : .71)};
   }
@@ -93,7 +94,7 @@ function createHomeInventory(canvas, pawn, {storageKey='cripta.home.inventory.v1
       const image = button.querySelector('img');
       image.hidden = index >= tools.length && !count;
       image.classList.toggle('gold-item', resource === 'gold' && count > 0);
-      if (count) image.src = resource === 'gold' ? 'assets/ui/gold-small.png' : resource === 'stone' ? 'assets/ui/stone-drop.png' : resourcePath + 'Wood/Wood Resource/Wood Resource.png';
+      if (count) image.src = resource === 'gold' ? 'assets/ui/gold-small.png' : resource === 'stone' ? 'assets/tiny-swords/Terrain/Decorations/Rocks/Rock1.png' : resourcePath + 'Wood/Wood Resource/Wood Resource.png';
       button.querySelector('b').textContent = count || '';
     }
   }

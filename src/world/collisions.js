@@ -1,4 +1,9 @@
 function rockScale(node){return [0,.8,1,1.25,1.25][node.variant||1]||.8;}
+// Ground contact of the deposit, independent of its tall upper silhouette.
+function rockFootprint(item){
+  const scale=rockScale(item),large=item.variant>=3;
+  return {x:item.x+.5,y:item.y+(large?.24:.55),rx:large?.54:.24*scale,ry:large?.23:.16*scale};
+}
 // Only the ground-level base is solid; roofs can occlude actors walking behind.
 function houseFootprint(item){
   const model=getBuildingModel(item.model);
@@ -80,6 +85,10 @@ function canStand(map, player, px, py) {
     if (item.kind === 'tower')
       return px + feet.x > item.x + .34 && px - feet.x < item.x + 1.69 &&
              py + feet.y > item.y + .06 && py - feet.y < item.y + .57;
+    if(item.kind==='rock'){
+      const base=rockFootprint(item);
+      return ((px-base.x)/(base.rx+feet.x))**2+((py-base.y)/(base.ry+feet.y))**2<1;
+    }
     if (item.kind !== 'tree' && item.kind !== 'rock' && item.kind !== 'gold') return false;
     const tree = item.kind === 'tree';
     const base = tree ? (item.variant <= 2 ? .92 : .71) : .55;
