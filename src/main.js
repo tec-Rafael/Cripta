@@ -44,6 +44,17 @@ try {
     localStorage.setItem(creditKey,'100');
   }
 } catch {}
+// One-time local coin grant for the resident and building tests.
+try {
+  const creditKey='cripta.local.coins.2026-11-24.npc-test-v1';
+  const localGame=location.protocol==='file:' ||
+    ['http:','https:'].includes(location.protocol)&&['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname);
+  if(localGame&&!localStorage.getItem(creditKey)){
+    wallet+=1000;
+    localStorage.setItem('cripta.coins',String(wallet));
+    localStorage.setItem(creditKey,'1000');
+  }
+} catch {}
 const progression = createProgression();
 let forceBossTest=false;
 // One-time local XP grant requested for the level-five boss test.
