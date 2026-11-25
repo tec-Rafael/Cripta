@@ -1,0 +1,50 @@
+﻿{
+    "frameDurationMs":  100,
+    "transparent":  true,
+    "sprites":  [
+                    {
+                        "y":  37,
+                        "width":  158,
+                        "name":  "boat-empty",
+                        "height":  128,
+                        "x":  303
+                    },
+                    {
+                        "y":  32,
+                        "width":  170,
+                        "name":  "boat-shark-rowing",
+                        "height":  140,
+                        "x":  470
+                    },
+                    {
+                        "y":  239,
+                        "width":  94,
+                        "name":  "seahorse-empty",
+                        "height":  102,
+                        "x":  315
+                    },
+                    {
+                        "y":  244,
+                        "width":  108,
+                        "name":  "seahorse-shark-rider",
+                        "height":  116,
+                        "x":  440
+                    },
+                    {
+                        "y":  182,
+                        "width":  119,
+                        "name":  "seahorse-teal-rider",
+                        "height":  94,
+                        "x":  506
+                    },
+                    {
+                        "y":  266,
+                        "width":  99,
+                        "name":  "seahorse-yellow-rider",
+                        "height":  108,
+                        "x":  550
+                    }
+                ],
+    "source":  "https://img.itch.zone/aW1nLzI2NTY0MTIxLmdpZg==/original/3Bn0Bs.gif",
+    "frameCount":  24
+}
