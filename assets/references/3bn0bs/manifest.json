@@ -1,0 +1,58 @@
+{
+  "frameHeight": 453,
+  "regions": [
+    {
+      "height": 140,
+      "y": 30,
+      "name": "boat-empty",
+      "width": 170,
+      "x": 296
+    },
+    {
+      "height": 140,
+      "y": 30,
+      "name": "boat-rowing",
+      "width": 175,
+      "x": 470
+    },
+    {
+      "height": 180,
+      "y": 185,
+      "name": "swimming-group",
+      "width": 340,
+      "x": 310
+    }
+  ],
+  "atlasColumns": 6,
+  "frameCount": 24,
+  "durationMs": [
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100
+  ],
+  "note": "Original promotional background retained. Swimming subjects overlap; preserved as a group. No game mechanics changed.",
+  "transparent": false,
+  "source": "https://img.itch.zone/aW1nLzI2NTY0MTIxLmdpZg==/original/3Bn0Bs.gif",
+  "frameWidth": 920
+}
