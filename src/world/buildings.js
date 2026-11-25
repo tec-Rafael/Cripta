@@ -1,7 +1,7 @@
 const buildingModels = {
   House1:{name:'Casa simples',width:128,height:192,cost:{coins:20,wood:10,gold:5,stone:5}},
   House2:{name:'Casa com varanda',width:128,height:192,cost:{coins:30,wood:15,gold:8,stone:8}},
-  House3:{name:'Casa grande',width:128,height:192,cost:{coins:40,wood:20,gold:10,stone:10}},
+  House3:{name:'Armazém',width:128,height:192,cost:{coins:40,wood:20,gold:10,stone:10}},
   Tower:{name:'Torre',width:128,height:256,cost:{coins:50,wood:25,gold:15,stone:15}},
   Barracks:{name:'Quartel',width:192,height:256,cost:{coins:70,wood:35,gold:20,stone:20}},
   Archery:{name:'Campo de arqueiros',width:192,height:256,cost:{coins:65,wood:30,gold:20,stone:20}},

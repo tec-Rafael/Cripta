@@ -1,0 +1,20 @@
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+test('warehouses enforce exact transfers, persist independent stocks and survive carried inventory loss',()=>{
+ const data=new Map(),localStorage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
+ const c=vm.createContext({localStorage});vm.runInContext(fs.readFileSync('src/ui/warehouse.js','utf8'),c);
+ const warehouse=c.createWarehouseStorage(),a={x:3,y:4},b={x:8,y:9};
+ const bag={wood:100,stone:50,gold:40};let coins=100;
+ const inventory={get resources(){return {...bag};},spend(cost){if(Object.keys(cost).some(k=>bag[k]<cost[k]))return false;for(const k in cost)bag[k]-=cost[k];return true;},refund(cost){for(const k in cost)bag[k]+=cost[k];}};
+ const wallet={get coins(){return coins;},change(n){coins+=n;}};
+ const move=(house,kind,direction,n)=>warehouse.transfer(house,kind,direction,n,inventory,wallet);
+ assert.equal(move(a,'wood','deposit',20),true);assert.equal(bag.wood,80);
+ assert.equal(move(a,'wood','deposit',1),false);assert.equal(move(a,'wood','withdraw',21),false);
+ assert.equal(move(a,'coins','deposit',15),true);assert.equal(coins,85);
+ assert.equal(move(b,'stone','deposit',8),true);assert.equal(warehouse.get(a).stone,0);
+ for(const k in bag)bag[k]=0;coins=0;
+ const restored=c.createWarehouseStorage();assert.equal(restored.get(a).wood,20);assert.equal(restored.get(a).coins,15);assert.equal(restored.get(b).stone,8);
+ assert.equal(restored.hasItems(a),true);
+ assert.equal(restored.transfer(a,'wood','withdraw',20,inventory,wallet),true);assert.equal(bag.wood,20);
+ assert.equal(restored.transfer(a,'coins','withdraw',15,inventory,wallet),true);assert.equal(coins,15);assert.equal(restored.hasItems(a),false);
+ assert.equal(restored.transfer(a,'wood','deposit',-1,inventory,wallet),false);
+});

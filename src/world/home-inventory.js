@@ -337,6 +337,8 @@ function createHomeInventory(canvas, pawn, {storageKey='cripta.home.inventory.v1
     if (before !== state.drops.length) { save(); drawSlots(); }
   }
   const api = {attach, update, stop,
+    clearCarried(){stop();state.wood=0;state.gold=0;state.stone=0;save();drawSlots();},
+
     dropSalvage(node,materials){
       if(!map)return;
       const base=trunk(node),level=node.hill||0,bornAt=Date.now();

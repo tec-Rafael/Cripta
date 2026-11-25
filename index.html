@@ -24,6 +24,8 @@
   <script src="src/world/home-inventory.js" defer></script>
   <script src="src/ui/home-construction.js" defer></script>
   <script src="src/player/progression.js" defer></script>
+  <link rel="stylesheet" href="styles/warehouse.css">
+  <script src="src/ui/warehouse.js" defer></script>
   <script src="src/main.js" defer></script>
 </head>
 <body>
@@ -134,5 +136,12 @@
       </section>
     </dialog>
   </main>
+<dialog id="warehouse-dialog" aria-labelledby="wh-title"><section class="table"><div class="frame" aria-hidden="true"><i class="tl"></i><i class="top"></i><i class="tr"></i><i class="left"></i><i class="right"></i><i class="bl"></i><i class="bottom"></i><i class="br"></i></div>
+<button id="wh-close" class="close" aria-label="Fechar armazém"><img src="assets/tiny-swords/UI Elements/UI Elements/Icons/Icon_09.png" alt=""></button>
+<h1 class="ribbon" id="wh-title">Armazém</h1><p class="capacity">20 unidades por espaço</p><div id="wh-slots" class="slots" aria-label="Materiais armazenados"></div>
+<section class="parchment" aria-labelledby="wh-material"><h2 id="wh-material"></h2><p id="wh-balance"></p><div class="quantity" role="group" aria-label="Quantidade para transferir"><button id="wh-less" class="blue" aria-label="Diminuir quantidade">−</button><output id="wh-quantity" aria-label="Quantidade" aria-live="polite">1</output><button id="wh-more" class="blue" aria-label="Aumentar quantidade">+</button></div><div class="actions"><button class="blue" data-direction="withdraw">Retirar</button><button class="blue" data-direction="deposit">Guardar</button></div><p id="wh-status" role="status" aria-live="polite">Selecione um material para transferir.</p></section>
+<h2 class="inventory-title">Seu inventário</h2><div id="wh-bag" class="bag"></div>
+
+</section></dialog>
 </body>
 </html>

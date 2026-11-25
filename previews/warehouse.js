@@ -21,10 +21,9 @@ for(const button of document.querySelectorAll('[data-direction]'))button.onclick
  render(`${n} ${materials[selected].name.toLowerCase()} ${button.dataset.direction==='deposit'?'guardado(s)':'retirado(s)'}.`);
 };
 function death(){demo.die();render('Morte simulada: inventário zerado. Os dois armazéns conservaram seus materiais.');}
-$('death').onclick=$('panel-death').onclick=death;
+
 $('reset').onclick=()=>{demo.reset();selected='wood';quantity=1;render('Teste reiniciado.');panel.showModal();};
 $('warehouse').onchange=event=>{demo.select(Number(event.target.value));render();};
-$('panel-switch').onclick=()=>{demo.select(1-demo.active);render();};
 $('less').onclick=()=>{quantity=Math.max(1,quantity-1);render();};
 $('more').onclick=()=>{quantity=Math.min(20,quantity+1);render();};
 $('open').onclick=()=>panel.showModal();$('close').onclick=()=>panel.close();

@@ -71,3 +71,8 @@ test('small demolition returns produce only the required number of visible items
  assert.equal(amounts.wood,3);assert.equal(amounts.stone,1);
  assert.equal(s.api.drops.length,4);
 });
+test('death clears carried materials while preserving resource depletion and drops',()=>{
+ const s=setup('rock',4,{wood:50,gold:30,stone:20,trees:{'rock:2,2':{hits:2,cutAt:0}}});
+ s.api.clearCarried();assert.equal(s.api.resources.wood,0);assert.equal(s.api.resources.gold,0);assert.equal(s.api.resources.stone,0);
+ const saved=JSON.parse(s.data.get('cripta.home.inventory.v1'));assert.equal(saved.trees['rock:2,2'].hits,2);
+});

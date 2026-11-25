@@ -186,6 +186,7 @@ function createHomeConstruction(inventory, pawn, wallet) {
     },
     hitHouse(house){
       if(!map||job||!buildings.includes(house))return false;
+      if(house.model==='House3'&&warehouse.hasItems(house)){notifyBattle('Esvazie o armazém antes de demolir.');return false;}
       house.demolitionHits=(house.demolitionHits||0)+1;
       if(house.demolitionHits<10){save();return false;}
       buildings=buildings.filter(item=>item!==house);

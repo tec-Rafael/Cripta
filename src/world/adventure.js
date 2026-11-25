@@ -24,7 +24,7 @@ function createAdventure(pawn, changeWorld) {
     const rect=canvas.getBoundingClientRect();
     const x=(event.clientX-rect.left)*canvas.width/rect.width;
     const y=(event.clientY-rect.top)*canvas.height/rect.height;
-    return [map.house,map.tower].filter(item=>{
+    return [map.house,map.tower,...(map.name==='Lar'?map.decorations.filter(item=>item.kind==='house'&&item.model==='House3'):[])].filter(item=>{
       const base={x:item.x+1,y:item.y+.72};
       const point=canvas.worldToScreen(base);
       const height=item.kind==='tower'?3:2;
@@ -35,12 +35,14 @@ function createAdventure(pawn, changeWorld) {
   function interact(map, canvas, event) {
     const door=clickableBuilding(map,canvas,event);
     if (!door) return false;
+    if(!adventuring&&door.model==='House3'&&homeInventory.equipped==='Axe')return false;
     pawn.pause();
     if(map.encounter?.enemies.length){
       const n=map.encounter.enemies.length;
       notifyBattle(`Derrote ${n===1?'o último inimigo':`os ${n} inimigos restantes`} para ${door.kind==='house'?'voltar ao Lar':'avançar'}.`);
       return true;
     }
+    if(!adventuring&&door.model==='House3'){homeInventory.stop();warehouse.open(door);return true;}
     if (!adventuring && door.kind === 'house') {
       homeConstruction.open(map);
     } else if (door.kind === 'house') {

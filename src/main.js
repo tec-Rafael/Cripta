@@ -241,11 +241,16 @@ el('confirm-construction').onclick=()=>{
   const site=homeConstruction.preview;
   if(site?.valid)homeConstruction.select(null,canvas,{...site});
 };
+const warehouse=createWarehouse(homeInventory,pawn,{
+  get coins(){return wallet;},
+  change(amount){wallet+=amount;el('wallet').textContent=wallet;try{localStorage.setItem('cripta.coins',String(wallet));}catch{}}
+});
 const adventure = createAdventure(pawn, changeWorld);
 el('game-over').addEventListener('cancel',event=>event.preventDefault());
 function clearCoinsOnDeath(){
   // Restore the last defeated boss checkpoint; keep home resources.
   progression.die();
+  homeInventory.clearCarried();
   wallet=0;
   el('wallet').textContent=wallet;
   try{localStorage.setItem('cripta.coins','0');}catch{}
@@ -260,7 +265,7 @@ function render(time) {
   requestAnimationFrame(render);
   if (!map || time - previousFrame < 1000 / 40) return;
   const dt = Math.min(.05, (time - previousFrame) / 1000);
-  if (!adventure.paused && !el('preferences').open && !el('game-over').open && !homeConstruction.opened) {
+  if (!adventure.paused && !el('preferences').open && !el('game-over').open && !homeConstruction.opened && !warehouse.opened) {
     homeConstruction.update(dt);
     homeInventory.update(dt);
     if(map.encounter?.hp!==0)pawn.update(map, dt);
