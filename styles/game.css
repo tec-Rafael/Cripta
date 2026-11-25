@@ -421,3 +421,16 @@ main { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
 #resources #remaining {display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
 #resources #remaining span{gap:5px;min-width:78px;justify-content:flex-end;}
 #resources #remaining[hidden],#resources #remaining span[hidden]{display:none;}
+/* Construction names reuse the blue ribbon geometry, tinting only the fabric. */
+#house-options .house-plan h3 {
+  position:relative;isolation:isolate;display:grid;place-items:center;
+  min-height:64px;margin:0 0 12px;padding:12px 34px;
+  color:#fff6d8;text-shadow:1px 2px #294b37;font-size:18px;line-height:1.2;
+  overflow-wrap:anywhere;
+}
+#house-options .house-plan h3::before {
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  border:solid transparent;border-width:10px 30px;
+  border-image:url('../assets/ui/ribbon-blue.png') 20 96 12 96 fill /10px 30px/0 stretch;
+  filter:hue-rotate(-55deg);image-rendering:pixelated;
+}
